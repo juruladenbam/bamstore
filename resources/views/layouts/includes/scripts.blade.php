@@ -15,3 +15,7 @@
 
 <!-- Page JS -->
 <script src="{{ public_path('assets/assets/js/front-page-landing.js') }}"></script>
+
+<script>
+    console.log("{{ url() }}");
+</script>
