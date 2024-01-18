@@ -5,7 +5,6 @@
   class="light-style layout-navbar-fixed layout-wide"
   dir="ltr"
   data-theme="theme-default"
-  data-assets-path="{{ asset('assets/assets/') }}"
   data-template="front-pages-no-customizer">
   <head>
     <meta
