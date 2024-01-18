@@ -1,8 +1,9 @@
 <?php
 
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\Produk\ProdukController;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+
+URL::forceScheme('https');
 
 Route::get('/', [HomeController::class, 'main'])->name('home');
 
