@@ -16,6 +16,3 @@
 <!-- Page JS -->
 <script src="{{ asset('public/assets/assets/js/front-page-landing.js') }}"></script>
 
-<script>
-    console.log("{{ url() }}");
-</script>
