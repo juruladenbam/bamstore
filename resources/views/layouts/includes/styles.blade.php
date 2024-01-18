@@ -16,7 +16,7 @@
 <!-- Core CSS -->
 <link rel="stylesheet" href="{{ asset('assets/assets/vendor/css/rtl/core.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/assets/vendor/css/rtl/theme-default.css') }}" />
-<link rel="stylesheet" href="{{ asset('assets/assets/css/demo.css') }}" />
+<link rel="stylesheet" href="{{ public_path('assets/assets/css/demo.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/assets/vendor/css/pages/front-page.css') }}" />
 <!-- Vendors CSS -->
 
