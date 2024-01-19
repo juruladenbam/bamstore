@@ -50,7 +50,7 @@
 
     <!-- Core JS -->
     @stack('prepand-script')
-    {{-- @include('layouts.includes.scripts') --}}
+    @include('layouts.includes.scripts')
     @stack('append-script')
   </body>
 </html>
