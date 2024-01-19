@@ -10,9 +10,9 @@
         }
     ],
     "env": {
-        "APP_KEY": "base64:Heekgj+Pkz4VLKNW0JdkOOEXKTOekrm47uNbztUZIDE=",
+        "APP_NAME": "BAM Store",
         "APP_ENV": "production",
-        "APP_DEBUG": "true",
+        "APP_DEBUG": "false",
         "APP_URL": "https://bamstore.vercel.app",
 
         "APP_CONFIG_CACHE": "/tmp/config.php",
@@ -24,7 +24,11 @@
 
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
-        "SESSION_DRIVER": "cookie"
+        "SESSION_DRIVER": "cookie",
+
+        "VIEW_COMPILED_PATH": "/tmp/views",
+        "SSR_TEMP_PATH": "/tmp/ssr",
+        "NODE_PATH": "node"
     },
     "outputDirectory": "public"
 }

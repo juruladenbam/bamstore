@@ -16,7 +16,7 @@ use App\Http\Controllers\Produk\ProdukController;
 |
 */
 
-URL::forceScheme('https');
+// URL::forceScheme('https');
 
 Route::get('/', [HomeController::class, 'main'])->name('home');
 
