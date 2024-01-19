@@ -10,7 +10,7 @@
         }
     ],
     "env": {
-        "APP_KEY": "base64:OS2vfp27MzKI1uQzv16+e9/1DynDpFZ1ud7GlrX7jH4=",
+        "APP_KEY": "base64:Heekgj+Pkz4VLKNW0JdkOOEXKTOekrm47uNbztUZIDE=",
         "APP_ENV": "production",
         "APP_DEBUG": "true",
         "APP_URL": "https://bamstore.vercel.app",
