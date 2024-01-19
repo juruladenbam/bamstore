@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $cars = DB::table('cars')->get();
+    print_r($cars);
+@endphp
 <div data-bs-spy="scroll" class="scrollspy-example">
     <!-- Hero: Start -->
     <section id="landingHero" class="section-py landing-hero">
