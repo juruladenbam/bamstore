@@ -13,7 +13,7 @@ class QobilahSeeder extends Seeder
      */
     public function run(): void
     {
-        Qobilah::create([
+        $datas = [
             ['name' => 'MARIYAH'],
             ['name' => 'BUSYRI'],
             ['name' => 'MUZAMMAH'],
@@ -25,6 +25,9 @@ class QobilahSeeder extends Seeder
             ['name' => 'SAIDAH'],
             ['name' => 'THOHIR AL ALY'],
             ['name' => 'NGAGLIK'],
-        ]);
+        ];
+        foreach($datas as $data){
+            Qobilah::create($data);
+        }
     }
 }

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('total_price',8,2);
             $table->string('status');
             $table->foreign('people_id')->references('id')->on('people')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('payment_method_id')->references('id')->on('metode_pembayaran')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('payment_method_id')->references('id')->on('payment_methods')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
