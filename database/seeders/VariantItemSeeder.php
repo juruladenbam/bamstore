@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\VariantItem;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -79,5 +80,9 @@ class VariantItemSeeder extends Seeder
                 'additional_price' => 5000
             ],
         ];
+
+        foreach($datas as $data){
+            VariantItem::create($data);
+        }
     }
 }
