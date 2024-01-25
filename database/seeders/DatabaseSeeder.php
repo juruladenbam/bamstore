@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call([
             QobilahSeeder::class,
+            ProductSeeder::class,
+            VariantSeeder::class,
+            VariantItemSeeder::class,
         ]);
     }
 }
