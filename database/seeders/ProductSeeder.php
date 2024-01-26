@@ -14,14 +14,14 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         $datas = [
-            [
+            [#1
                 'name' => 'Kaos Festival BAM',
                 'description' => '-',
                 'photo' => '-',
                 'cost' => '55000',
                 'profit' => '10000',
             ],
-            [
+            [#2
                 'name' => 'Sarung Batik BAM',
                 'description' => '-',
                 'photo' => '-',

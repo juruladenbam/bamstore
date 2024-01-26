@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('product_variants', function (Blueprint $table) {
             $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('variant_id');
-            $table->string('sku');
-            $table->integer('stock');
+            $table->unsignedBigInteger('variant_item_id');
+            $table->string('sku')->nullable();
+            $table->integer('stock')->default(0);
             $table->decimal('price',8,2);
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreign('variant_id')->references('id')->on('variants')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreign('variant_item_id')->references('id')->on('variant_items')->onDelete('cascade')->onUpdate('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

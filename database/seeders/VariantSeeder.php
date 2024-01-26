@@ -14,16 +14,16 @@ class VariantSeeder extends Seeder
     public function run(): void
     {
         $datas = [
-            [
+            [#1
                 'name' => 'usia',
             ],
-            [
+            [#2
                 'name' => 'colors',
             ],
-            [
+            [#3
                 'name' => 'sizes',
             ],
-            [
+            [#4
                 'name' => 'arm types',
             ],
         ];
