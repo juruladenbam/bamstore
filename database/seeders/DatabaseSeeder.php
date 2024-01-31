@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             QobilahSeeder::class,
             ProductSeeder::class,
+            ProductImageSeeder::class,
             VariantSeeder::class,
             VariantItemSeeder::class,
             ProductVariantSeeder::class,

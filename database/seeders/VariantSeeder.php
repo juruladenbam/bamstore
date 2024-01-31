@@ -15,7 +15,7 @@ class VariantSeeder extends Seeder
     {
         $datas = [
             [#1
-                'name' => 'usia',
+                'name' => 'usia kaos',
             ],
             [#2
                 'name' => 'colors',
@@ -25,6 +25,9 @@ class VariantSeeder extends Seeder
             ],
             [#4
                 'name' => 'arm types',
+            ],
+            [#5
+                'name' => 'usia sarung',
             ],
         ];
 

@@ -17,15 +17,17 @@ class ProductSeeder extends Seeder
             [#1
                 'name' => 'Kaos Festival BAM',
                 'description' => '-',
-                'photo' => '-',
+                'bg' => 'default',
+                'slug' => 'kaos-festival-bam',
                 'cost' => '55000',
                 'profit' => '10000',
             ],
             [#2
                 'name' => 'Sarung Batik BAM',
                 'description' => '-',
-                'photo' => '-',
-                'cost' => '85000',
+                'bg' => 'secondary',
+                'slug' => 'sarung-batik-bam',
+                'cost' => '65000',
                 'profit' => '15000',
             ],
         ];

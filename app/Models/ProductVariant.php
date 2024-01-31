@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductVariant extends Model
 {
-    use HasFactory;
+    use HasFactory,SoftDeletes;
 
     protected $primaryKey = null;
 
@@ -20,4 +21,12 @@ class ProductVariant extends Model
         'stock',
         'price',
     ];
+
+    public function product(){
+        return $this->belongsTo(Product::class,'product_id','id');
+    }
+
+    public function variant_item(){
+        return $this->belongsTo(VariantItem::class,'variant_item_id','id');
+    }
 }

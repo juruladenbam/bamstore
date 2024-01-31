@@ -29,6 +29,7 @@ class ProductVariantSeeder extends Seeder
                 'stock' => 0,
                 'price' => 65000,
             ],
+
             [#warna dewasa
                 'product_id' => 1,
                 'variant_item_id' => 3,
@@ -43,6 +44,7 @@ class ProductVariantSeeder extends Seeder
                 'stock' => 0,
                 'price' => 75000,
             ],
+
             [#warna anak
                 'product_id' => 1,
                 'variant_item_id' => 3,
@@ -57,6 +59,7 @@ class ProductVariantSeeder extends Seeder
                 'stock' => 0,
                 'price' => 65000,
             ],
+
             [#xs dewasa
                 'product_id' => 1,
                 'variant_item_id' => 5,
@@ -186,6 +189,21 @@ class ProductVariantSeeder extends Seeder
                 'price' => 75000,
             ],
 
+            #sarung
+            [#usia dewasa
+                'product_id' => 2,
+                'variant_item_id' => 14,
+                'sku' => null,
+                'stock' => 0,
+                'price' => 100000,
+            ],
+            [#usia anak
+                'product_id' => 2,
+                'variant_item_id' => 15,
+                'sku' => null,
+                'stock' => 0,
+                'price' => 85000,
+            ],
         ];
 
         foreach($datas as $data){

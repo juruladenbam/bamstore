@@ -2,70 +2,35 @@
 
 namespace App\Http\Controllers\Produk;
 
-use App\Http\Controllers\Controller;
+use App\Models\Product;
+use App\Models\Variant;
 use Illuminate\Http\Request;
+use App\Models\ProductVariant;
+use App\Http\Controllers\Controller;
 
 class ProdukController extends Controller
 {
-    private $gambar;
-    private $data;
-    public function __construct()
-    {
-        $this->gambar = [
-            [
-                'id_gambar' => '1',
-                'id_data' => '1',
-                'gambar' => 'bamstore kaos.jpg',
-            ],
-            [
-                'id_gambar' => '2',
-                'id_data' => '1',
-                'gambar' => 'bamstore desain kaos.jpg',
-            ],
-            [
-                'id_gambar' => '3',
-                'id_data' => '1',
-                'gambar' => 'bamstore size chart kaos.jpg',
-            ],
-            [
-                'id_gambar' => '4',
-                'id_data' => '2',
-                'gambar' => 'bamstore sarung.jpg',
-            ],
-        ];
-        $this->data = [
-            [
-                'id' => '1',
-                'nama' => 'Kaos',
-                'bg' => 'default',
-                'harga' => 75000
-            ],
-            [
-                'id' => '2',
-                'nama' => 'Sarung Batik Pekalongan',
-                'bg' => 'secondary',
-                'harga' => 90000
-            ],
-        ];
-    }
     public function main() {
-        $gambar = $this->gambar;
-        $data = $this->data;
-        return view('produk.main',compact('data','gambar'));
+        $data = ProductVariant::with(
+            'product.product_image',
+        )->whereIn('variant_item_id',[1,14])->get();
+        return view('produk.main',compact('data'));
     }
-    public function detail($id) {
-        $gambar = [];
-        $data = [];
-        foreach($this->data as $item){
-            if($item['id'] == $id){
-                array_push($data,$item);
+
+    public function detail($slug) {
+        $product = Product::with('product_images')->where('slug',$slug)->first();
+        $data['product'] = $product;
+        // $data['product_variants'] = ProductVariant::with([
+        //     'product',
+        //     'variant_item.variant',
+        // ])->where('product_id',$product->id)->get();
+        $data['variants'] = Variant::with([
+            'variant_item'=>function($q) use ($product){
+                $q->whereHas('product_variant', function($q) use ($product){
+                    $q->where('product_id',$product->id);
+                });
             }
-        }
-        foreach($this->gambar as $img){
-            if($img['id_data'] == $id){
-                array_push($gambar,$img);
-            }
-        }
-        return view('produk.detail',compact('gambar','data'));
+        ])->get();
+        return view('produk.detail',$data)->render();
     }
 }
