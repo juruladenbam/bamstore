@@ -21,6 +21,6 @@ use App\Http\Controllers\Produk\ProdukController;
 Route::get('/', [HomeController::class, 'main'])->name('home');
 
 Route::get('/produk', [ProdukController::class, 'main'])->name('produk');
-Route::get('/produk/{product:slug}', [ProdukController::class, 'detail'])->name('produk-detail');
+Route::get('/produk/{slug}', [ProdukController::class, 'detail'])->name('produk-detail');
 
 
