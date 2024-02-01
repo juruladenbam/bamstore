@@ -152,6 +152,7 @@
                 variant_item_id:variantValues,
             }).done(function(data){
                 if(data){
+                    console.log(data);
                     let price = parseInt(data.product.cost)+parseInt(data.product.profit)
                     let addon = 0;
 
