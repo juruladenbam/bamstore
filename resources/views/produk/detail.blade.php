@@ -42,6 +42,16 @@
         .button-act button{
             width: 100%;
         }
+
+        .loader {
+            width: fit-content;
+            clip-path: inset(0 1ch 0 0);
+            animation: l4 1s steps(4) infinite;
+        }
+        .loader:before {
+            content:"Rp ...";
+        }
+        @keyframes l4 {to{clip-path: inset(0 -1ch 0 0)}}
     </style>
 @endpush
 
@@ -146,7 +156,8 @@
             let priceHtml =$('.pdetail-price p')
             let product_id = $('#product_id').val()
             let url = "{{ route('produk-detail',['slug'=>$product->slug]) }}"
-            priceHtml.html('Rp ...')
+            priceHtml.html('')
+            priceHtml.attr('class','loader')
             $.get(url, {
                 product_id:product_id,
                 variant_item_id:variantValues,
@@ -162,6 +173,7 @@
 
                     let totalPrice = price+addon
 
+                    priceHtml.removeAttr('class')
                     priceHtml.html('Rp '+formatAngka(totalPrice.toString()))
                     $('input[name=price]').val(totalPrice)
                 }else{
