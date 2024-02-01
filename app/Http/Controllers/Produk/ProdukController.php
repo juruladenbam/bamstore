@@ -24,9 +24,9 @@ class ProdukController extends Controller
         $product = Product::with('product_images')->where('slug',$slug)->first();
         $data['product'] = $product;
 
-        return $request->ajax();
 
         if($request->ajax()){
+            return $request->ajax();
             $data['variants'] = VariantItem::whereIn('id',$request->variant_item_id)->get();
             return response()->json($data);
         }else{
