@@ -3,7 +3,7 @@
 @section('content')
 <div data-bs-spy="scroll" class="scrollspy-example">
     <!-- Hero: Start -->
-    <section id="landingHero" class="section-py landing-hero">
+    {{-- <section id="landingHero" class="section-py landing-hero">
       <div class="container">
         <div class="hero-text-box text-center">
           <h1 class="text-primary hero-title">Yang Sudah Pesan <strong>10</strong></h1>
@@ -18,7 +18,6 @@
                     @php
                         $orders = [1,2,3,4,5,6,7,8,9,10];
                     @endphp
-                    {{-- loop --}}
                     @foreach ($orders as $order)
                     <li class="d-flex mb-4">
                       <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
@@ -44,7 +43,6 @@
                     </li>
                     <hr>
                     @endforeach
-                  {{-- end loop --}}
                 </ul>
                 <p>
                     <a href="#">Selengkapnya...</a>
@@ -54,13 +52,13 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> --}}
     <!-- Hero: End -->
 
     <!-- Our great team: Start -->
     <section id="landingTeam" class="section-py landing-team">
       <div class="container bg-icon-right">
-        <div class="row gy-5 mt-2">
+        <div class="row gy-5 mt-2 mb-4">
           @foreach ($data as $item)
           <div class="col-lg-3 col-sm-6">
             <div class="card card-hover-border-primary mt-3 mt-lg-0 shadow-none">
@@ -85,6 +83,54 @@
           @endforeach
 
         </div>
+
+
+        <div class="hero-text-box text-center">
+            <h1 class="text-primary hero-title">Yang Sudah Pesan <strong>10</strong></h1>
+            <div class="mb-4">
+              <div class="card h-100">
+                <div class="d-flex justify-content-between py-2 px-4 border-bottom">
+                  <h6 class="mb-0 small">NAMA</h6>
+                  <h6 class="mb-0 small">PESANAN</h6>
+                </div>
+                <div class="card-body">
+                  <ul class="p-0 m-0">
+                      @php
+                          $orders = [1,2,3,4,5,6,7,8,9,10];
+                      @endphp
+                      @foreach ($orders as $order)
+                      <li class="d-flex mb-4">
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                          <div class="me-2">
+                            <h6 class="mb-0">Nama</h6>
+                            <small>Qobilah</small>
+                          </div>
+                          <ul>
+                            <li>
+                                <div class="badge bg-label-primary rounded-pill">Kaos Dewasa XL 2x</div>
+                            </li>
+                            <li>
+                                <div class="badge bg-label-primary rounded-pill">Kaos Anak L 1x</div>
+                            </li>
+                            <li>
+                                <div class="badge bg-label-primary rounded-pill">Sarung Dewasa</div>
+                            </li>
+                            <li>
+                                <div class="badge bg-label-primary rounded-pill">Sarung Anak</div>
+                            </li>
+                          </ul>
+                        </div>
+                      </li>
+                      <hr>
+                      @endforeach
+                  </ul>
+                  <p>
+                      <a href="#">Selengkapnya...</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
       </div>
     </section>
     <!-- Our great team: End -->
