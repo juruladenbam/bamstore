@@ -50,7 +50,7 @@
             href="#"
             class="btn btn-primary px-2 px-sm-4 px-lg-2 px-xl-4"
             ><span class="tf-icons mdi mdi-shopping me-md-1"></span
-            ><span class="d-none d-md-block">Keranjang (0)</span></a
+            ><span class="d-none d-md-block">Keranjang (<span id="countCart">0</span>)</span></a
           >
         </li>
         <!-- navbar button: End -->

@@ -15,7 +15,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Landing Page - Front Pages | Materialize - Material Design HTML Admin Template</title>
+    <title>BAM Store</title>
 
     <meta name="description" content="" />
 
@@ -34,6 +34,7 @@
     <script src="{{ asset('assets/assets/vendor/js/dropdown-hover.js') }}"></script>
     <script src="{{ asset('assets/assets/vendor/js/mega-dropdown.js') }}"></script>
 
+    <input type="hidden" name="id_guest" value="">
     <!-- Navbar: Start -->
     @include('layouts.includes.navbar')
     <!-- Navbar: End -->
