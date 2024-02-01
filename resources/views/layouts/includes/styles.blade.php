@@ -22,6 +22,7 @@
 
 <link rel="stylesheet" href="{{ asset('assets/assets/vendor/libs/nouislider/nouislider.css') }}" />
 <link rel="stylesheet" href="{{ asset('assets/assets/vendor/libs/swiper/swiper.css') }}" />
+<link rel="stylesheet" href="{{ asset('assets/assets/vendor/libs/sweetalert2/sweetalert2.css') }}" />
 
 <!-- Page CSS -->
 
