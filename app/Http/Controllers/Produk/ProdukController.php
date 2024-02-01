@@ -25,8 +25,7 @@ class ProdukController extends Controller
         $data['product'] = $product;
 
 
-        if($request->ajax()){
-            return $request->ajax();
+        if($request->variant_item_id){
             $data['variants'] = VariantItem::whereIn('id',$request->variant_item_id)->get();
             return response()->json($data);
         }else{
