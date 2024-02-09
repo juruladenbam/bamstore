@@ -70,21 +70,26 @@ class VariantItemSeeder extends Seeder
                 'additional_price' => 5000
             ],
             [#12
+                'variant_id' => 3,
+                'value' => 'xxxxl',
+                'additional_price' => 5000
+            ],
+            [#13
                 'variant_id' => 4,
                 'value' => 'pendek',
                 'additional_price' => 0
             ],
-            [#13
+            [#14
                 'variant_id' => 4,
                 'value' => 'panjang',
                 'additional_price' => 5000
             ],
-            [#14
+            [#15
                 'variant_id' => 5,
                 'value' => 'dewasa',
                 'additional_price' => 20000
             ],
-            [#15
+            [#16
                 'variant_id' => 5,
                 'value' => 'anak',
                 'additional_price' => 0

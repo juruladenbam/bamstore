@@ -124,7 +124,7 @@
                 </div>
                 <div class="pdetail-description">
                     <h5>Deskripsi</h5>
-                    <p></p>
+                    <p>Cari apa... 🫡</p>
                 </div>
             </div>
 
@@ -153,6 +153,10 @@
                 variantValues.push($(this).val());
             });
 
+            //buat sku
+            let sku = variantValues.join('');
+            console.log(sku);
+
             let priceHtml =$('.pdetail-price p')
             let product_id = $('#product_id').val()
             let url = "{{ route('produk-detail',['slug'=>$product->slug]) }}"
@@ -163,7 +167,6 @@
                 variant_item_id:variantValues,
             }).done(function(data){
                 if(data){
-                    console.log(data);
                     let price = parseInt(data.product.cost)+parseInt(data.product.profit)
                     let addon = 0;
 
@@ -197,5 +200,25 @@
                 });
             });
         });
+
+        function addToCart(params){
+            let product_id = $('#product_id').val()
+            $.get(url, {
+                product_id:product_id,
+                variant_item_id:variantValues,
+                price:$('input[name=price]')
+            }).done(function(data){
+
+            }).fail(function(xhr, status, error){
+                $(this).removeAttr('checked')
+                Swal.fire ({
+                    icon: "error",
+                    title: "Terjadi Kesalahan",
+                    text: "Sistem Error",
+                    showConfirmButton: false,
+                    timer: 2500,
+                });
+            });
+        }
     </script>
 @endpush

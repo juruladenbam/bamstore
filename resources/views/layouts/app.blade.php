@@ -34,7 +34,15 @@
     <script src="{{ asset('assets/assets/vendor/js/dropdown-hover.js') }}"></script>
     <script src="{{ asset('assets/assets/vendor/js/mega-dropdown.js') }}"></script>
 
-    <input type="hidden" name="id_guest" value="">
+    @php
+        $guest = session()->get('guest');
+        $guest_id = '';
+        foreach ($guest as $value) {
+            $guest_id = $value['guest_id'];
+        }
+    @endphp
+
+    <input type="hidden" name="id_guest" value="{{ $guest_id }}">
     <!-- Navbar: Start -->
     @include('layouts.includes.navbar')
     <!-- Navbar: End -->

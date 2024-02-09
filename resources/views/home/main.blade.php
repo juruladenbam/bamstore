@@ -60,7 +60,7 @@
       <div class="container bg-icon-right">
         <div class="row gy-5 mt-2 mb-4">
           @foreach ($data as $item)
-          <div class="col-lg-3 col-sm-6">
+          <div class="col-lg-3 col-sm-6 col-6">
             <div class="card card-hover-border-primary mt-3 mt-lg-0 shadow-none">
               <div class="bg-label-{{ $item->product->bg }} position-relative team-image-box">
                 <img
@@ -87,8 +87,8 @@
 
         <div class="hero-text-box text-center">
             <h1 class="text-primary hero-title">Yang Sudah Pesan <strong>10</strong></h1>
-            <div class="mb-4">
-              <div class="card h-100">
+            <div class="mb-4 d-flex justify-content-center">
+              <div class="card h-100 col-12 col-sm-12 col-md-12 col-xl-6 col-lg-6 col-xl-6">
                 <div class="d-flex justify-content-between py-2 px-4 border-bottom">
                   <h6 class="mb-0 small">NAMA</h6>
                   <h6 class="mb-0 small">PESANAN</h6>

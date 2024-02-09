@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Home\HomeController;
 use App\Http\Controllers\Produk\ProdukController;
 
@@ -15,7 +16,14 @@ use App\Http\Controllers\Produk\ProdukController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
+Route::get('/clear', function() {
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('config:cache');
+    Artisan::call('view:clear');
+    Artisan::call('route:clear');
+    return "Cleared!";
+});
 // URL::forceScheme('https');
 Route::group(['middleware' => 'guest'], function(){
     Route::get('/', [HomeController::class, 'main'])->name('home');

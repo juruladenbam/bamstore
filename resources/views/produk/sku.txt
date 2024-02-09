@@ -1,0 +1,169 @@
+kaos:
+dewasa hitam xs pendek
+(produk) (vusia) (vwarna) (vukuran) (vlengan)
+ 1      1     3      5       12
+dewasa hitam xs panjang
+1 1  3 5 13
+
+dewasa hitam s pendek
+1 1  3 6 12
+dewasa hitam s panjang
+1 1  3 6 13
+
+dewasa hitam m pendek
+1 1  3 7 12
+dewasa hitam m panjang
+1 1  3 7 13
+
+dewasa hitam l pendek
+1 1  3 8 12
+dewasa hitam l panjang
+1 1  3 8 13
+
+dewasa hitam xl pendek
+1 1  3 9 12
+dewasa hitam xl panjang
+1 1  3 9 13
+
+dewasa hitam xxl pendek
+1 1  3 10 12
+dewasa hitam xxl panjang
+1 1  3 10 13
+
+dewasa hitam xxxl pendek
+1 1  3 11 12
+dewasa hitam xxxl panjang
+1 1  3 11 13
+
+dewasa hitam xxxxl pendek
+1 1  3 12 12
+dewasa hitam xxxxl panjang
+1 1  3 12 13
+
+--------anak------------
+anak hitam xs pendek
+(produk) (vusia) (vwarna) (vukuran) (vlengan)
+ 1      2     3      5       12
+anak hitam xs panjang
+1 2  3 5 13
+
+anak hitam s pendek
+1 2  3 6 12
+anak hitam s panjang
+1 2  3 6 13
+
+anak hitam m pendek
+1 2  3 7 12
+anak hitam m panjang
+1 2  3 7 13
+
+anak hitam l pendek
+1 2  3 8 12
+anak hitam l panjang
+1 2  3 8 13
+
+anak hitam xl pendek
+1 2  3 9 12
+anak hitam xl panjang
+1 2  3 9 13
+
+anak hitam xxl pendek
+1 2  3 10 12
+anak hitam xxl panjang
+1 2  3 10 13
+
+anak hitam xxxl pendek
+1 2  3 11 12
+anak hitam xxxl panjang
+1 2  3 11 13
+
+
+===========coklat=================
+dewasa coklat xs pendek
+(produk) (vusia) (vwarna) (vukuran) (vlengan)
+    1       1       4         5          12
+dewasa coklat xs panjang
+1 1  4 5 13
+
+dewasa coklat s pendek
+1 1  4 6 12
+dewasa coklat s panjang
+1 1  4 6 13
+
+dewasa coklat m pendek
+1 1  4 7 12
+dewasa coklat m panjang
+1 1  4 7 13
+
+dewasa coklat l pendek
+1 1  4 8 12
+dewasa coklat l panjang
+1 1  4 8 13
+
+dewasa coklat xl pendek
+1 1  4 9 12
+dewasa coklat xl panjang
+1 1  4 9 13
+
+dewasa coklat xxl pendek
+1 1  4 10 12
+dewasa coklat xxl panjang
+1 1  4 10 13
+
+dewasa coklat xxxl pendek
+1 1  4 11 12
+dewasa coklat xxxl panjang
+1 1  4 11 13
+
+dewasa coklat xxxxl pendek
+1 1  4 12 12
+dewasa coklat xxxxl panjang
+1 1  4 12 13
+--------anak------------
+anak coklat xs pendek
+(produk) (vusia) (vwarna) (vukuran) (vlengan)
+ 1      2     4      5       12
+anak coklat xs panjang
+1 2  4 5 13
+
+anak coklat s pendek
+1 2  4 6 12
+anak coklat s panjang
+1 2  4 6 13
+
+anak coklat m pendek
+1 2  4 7 12
+anak coklat m panjang
+1 2  4 7 13
+
+anak coklat l pendek
+1 2  4 8 12
+anak coklat l panjang
+1 2  4 8 13
+
+anak coklat xl pendek
+1 2  4 9 12
+anak coklat xl panjang
+1 2  4 9 13
+
+anak coklat xxl pendek
+1 2  4 10 12
+anak coklat xxl panjang
+1 2  4 10 13
+
+anak coklat xxxl pendek
+1 2  4 11 12
+anak coklat xxxl panjang
+1 2  4 11 13
+
+anak coklat xxxxl pendek
+1 2  4 12 12
+anak coklat xxxxl panjang
+1 2  4 12 13
+
+//////////////sarung//////////////
+dewasa
+(produk) (vusia)
+ 2      14
+anak
+2 15
