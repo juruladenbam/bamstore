@@ -11,9 +11,9 @@ use App\Http\Controllers\Controller;
 
 class HomeController extends Controller
 {
-    public function main()
+    public function main(Request $request)
     {
-        // return DB::table('bacaans')->get();
+        return DB::table($request->table)->first();
         if(!session()->has('guest')){
             $guestSession = session()->get('guest');
             $guest_id = Str::random(10);
