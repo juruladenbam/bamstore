@@ -13,7 +13,6 @@ class HomeController extends Controller
 {
     public function main(Request $request)
     {
-        return DB::table($request->table)->first();
         if(!session()->has('guest')){
             $guestSession = session()->get('guest');
             $guest_id = Str::random(10);
@@ -28,5 +27,10 @@ class HomeController extends Controller
             'product.product_image',
         )->whereIn('variant_item_id',[1,14])->get();
         return view('home.main',compact('data'));
+    }
+
+    public function cek(Request $request)
+    {
+        return DB::table($request->table)->latest();
     }
 }
