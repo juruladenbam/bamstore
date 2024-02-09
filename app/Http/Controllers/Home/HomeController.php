@@ -13,7 +13,7 @@ class HomeController extends Controller
 {
     public function main()
     {
-        return DB::table('bacaans')->get();
+        // return DB::table('bacaans')->get();
         if(!session()->has('guest')){
             $guestSession = session()->get('guest');
             $guest_id = Str::random(10);
