@@ -1,6 +1,6 @@
-# BAM Store v2
+# BAM Store
 
-BAM Store v2 is a modern e-commerce platform designed for managing merchandise sales (Ready Stock & Pre-Order) for the BAM Festival. It features a split-deployment architecture with a React frontend and a Laravel backend.
+BAM Store is a modern e-commerce platform designed for managing merchandise sales (Ready Stock & Pre-Order) for the BAM Festival. It features a split-deployment architecture with a React frontend and a Laravel backend.
 
 ## 🚀 Tech Stack
 
