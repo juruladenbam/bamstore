@@ -3,7 +3,7 @@ import { useNavigate, useParams }                                               
 import { Box, Heading, Input, Button, VStack, HStack, Text, Textarea, NativeSelect }             from '@chakra-ui/react';
 import client                                                                                    from '../../api/client';
 import { STORAGE_URL }                                                                           from '../../config';
-import type { Category, ProductVariant, ProductSku }                                             from '../../types';
+import type { Category, ProductVariant, ProductSku, Vendor }                                     from '../../types';
 import { toaster }                                                                               from '../../components/ui/toaster';
 
 const formatNumber = (num: number | string) => {
@@ -33,6 +33,7 @@ const ProductForm: React.FC = () => {
   const isEdit = !!id;
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [vendors, setVendors] = useState<Vendor[]>([]);
   const [bulkStock, setBulkStock] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<{ id: number; image_path: string }[]>([]);
@@ -42,17 +43,18 @@ const ProductForm: React.FC = () => {
     name: '',
     description: '',
     base_price: '' as string | number,
-    stock: '' as string | number, // Global stock for simple products
+    stock: '' as string | number,
     simple_sku: '', // SKU for simple products
     status: 'ready',
     category_id: '',
+    vendor_id: '',
     variants: [] as { id?: number; name: string; type: string; price_adjustment: string | number }[],
     skus: [] as { id?: number; variant_indices: number[]; price: string | number; stock: number; sku?: string }[]
   });
   const [errors, setErrors] = useState<Record<string, boolean>>({});
-
   useEffect(() => {
     client.get('/categories').then(res => setCategories(res.data));
+    client.get('/admin/vendors').then(res => setVendors(res.data));
     
     if (isEdit) {
       client.get(`/admin/products/${id}`).then(res => {
@@ -96,6 +98,7 @@ const ProductForm: React.FC = () => {
           simple_sku: simpleSku,
           status: p.status,
           category_id: p.category_id.toString(),
+          vendor_id: p.vendor_id ? p.vendor_id.toString() : '',
           variants,
           skus
         });
@@ -373,6 +376,7 @@ const ProductForm: React.FC = () => {
       const payload = {
         ...formData,
         category_id: Number(formData.category_id),
+        vendor_id: formData.vendor_id ? Number(formData.vendor_id) : null,
         base_price: parseNumber(formData.base_price.toString()),
         variants: formData.variants.map(v => ({
           ...v,
@@ -487,23 +491,39 @@ const ProductForm: React.FC = () => {
           />
         </Box>
 
-        <Box>
-          <Text mb={1}>Category <Text as="span" color="red.500">*</Text></Text>
-          <NativeSelect.Root>
-            <NativeSelect.Field 
-              value={formData.category_id} 
-              onChange={e => {
-                setFormData({...formData, category_id: e.target.value});
-                if (errors.category_id) setErrors(prev => ({...prev, category_id: false}));
-              }}
-              placeholder="Select Category"
-              borderColor={errors.category_id ? "red.500" : undefined}
-            >
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </NativeSelect.Field>
-          </NativeSelect.Root>
-        </Box>
-
+        <HStack gap={4} align="start">
+          <Box flex={1}>
+            <Text mb={1}>Category <Text as="span" color="red.500">*</Text></Text>
+            <NativeSelect.Root>
+              <NativeSelect.Field 
+                placeholder="Select Category" 
+                value={formData.category_id} 
+                onChange={e => {
+                  setFormData({...formData, category_id: e.target.value});
+                  if (errors.category_id) setErrors(prev => ({...prev, category_id: false}));
+                }}
+              >
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </NativeSelect.Field>
+            </NativeSelect.Root>
+          </Box>
+          <Box flex={1}>
+            <Text mb={1}>Vendor (Optional)</Text>
+            <NativeSelect.Root>
+              <NativeSelect.Field 
+                placeholder="Select Vendor" 
+                value={formData.vendor_id} 
+                onChange={e => setFormData({...formData, vendor_id: e.target.value})}
+              >
+                {vendors.map(v => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </NativeSelect.Field>
+            </NativeSelect.Root>
+          </Box>
+        </HStack>
         <Box>
           <Text mb={1}>Product Type</Text>
           <NativeSelect.Root>
@@ -545,7 +565,7 @@ const ProductForm: React.FC = () => {
         {productType === 'simple' && (
           <HStack gap={4} align="start">
             <Box flex={1}>
-              <Text mb={1}>Stock <Text as="span" color="red.500">*</Text></Text>
+              <Text mb={1}>{formData.status === 'pre_order' ? 'Quota' : 'Stock'} <Text as="span" color="red.500">*</Text></Text>
               <Input 
                 type="number" 
                 value={formData.stock} 
@@ -553,7 +573,7 @@ const ProductForm: React.FC = () => {
                   setFormData({...formData, stock: e.target.value});
                   if (errors.stock) setErrors(prev => ({...prev, stock: false}));
                 }} 
-                placeholder="Available Stock"
+                placeholder={formData.status === 'pre_order' ? "Available Quota" : "Available Stock"}
                 borderColor={errors.stock ? "red.500" : undefined}
               />
             </Box>
@@ -714,7 +734,7 @@ const ProductForm: React.FC = () => {
                       />
                     </Box>
                     <Box flex={1} minW="100px">
-                      <Text fontSize="xs">Stock</Text>
+                      <Text fontSize="xs">{formData.status === 'pre_order' ? 'Quota' : 'Stock'}</Text>
                       <Input type="number" value={sku.stock} onChange={e => handleSkuChange(index, 'stock', e.target.value)} />
                     </Box>
                     <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeSku(index)}>X</Button>

@@ -112,6 +112,20 @@ class CheckoutController extends Controller
                 }
             }
 
+            // Update Member Data Pool
+            $member = \App\Models\MemberDataPool::firstOrNew(
+                ['phone_number' => $validated['phone_number']],
+                [
+                    'name' => $validated['checkout_name'],
+                    'qobilah' => $validated['qobilah']
+                ]
+            );
+
+            $member->name = $validated['checkout_name'];
+            $member->qobilah = $validated['qobilah'];
+            $member->order_count += 1;
+            $member->save();
+
             DB::commit();
 
             return response()->json([

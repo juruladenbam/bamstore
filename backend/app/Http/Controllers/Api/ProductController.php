@@ -22,7 +22,7 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        $product = Product::with(['category', 'variants', 'images'])->findOrFail($id);
+        $product = Product::with(['category', 'variants', 'images', 'skus'])->findOrFail($id);
         return response()->json($product);
     }
 }

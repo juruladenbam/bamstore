@@ -67,13 +67,14 @@ const Checkout: React.FC = () => {
         ...formData,
         items: items.map(item => ({
           product_id: item.product.id,
+          sku_id: item.sku_id,
           variant_ids: item.variants.map(v => v.id),
           quantity: item.quantity,
           recipient_name: item.recipient_name === 'Myself' ? formData.checkout_name : item.recipient_name
         }))
       };
 
-      await client.post('/checkout', payload);
+      const res = await client.post('/checkout', payload);
       clearCart();
       setIsDialogOpen(false);
       toaster.create({
@@ -81,7 +82,14 @@ const Checkout: React.FC = () => {
         description: "Your order has been placed successfully!",
         type: "success",
       });
-      navigate('/');
+      navigate('/order-confirmation', { 
+        state: { 
+          orderId: res.data.order_id, 
+          totalAmount: res.data.total_amount,
+          items: items,
+          formData: formData
+        } 
+      });
     } catch (error) {
       console.error(error);
       toaster.create({
@@ -107,8 +115,7 @@ const Checkout: React.FC = () => {
         <Box borderWidth="1px" borderRadius="lg" p={4}>
           <Heading size="md" mb={4}>Cart Items</Heading>
           {items.map((item, index) => {
-            const variantsTotal = item.variants.reduce((sum, v) => sum + Number(v.price_adjustment), 0);
-            const unitPrice = Number(item.product.base_price) + variantsTotal;
+            const unitPrice = item.unit_price;
             
             return (
               <Box key={index} mb={4} p={2} bg="gray.50" borderRadius="md">
@@ -215,8 +222,7 @@ const Checkout: React.FC = () => {
                   <Text fontWeight="bold" mb={2}>Items ({items.length})</Text>
                   <VStack align="stretch" gap={2} mb={3}>
                     {items.map((item, index) => {
-                      const variantsTotal = item.variants.reduce((sum, v) => sum + Number(v.price_adjustment), 0);
-                      const unitPrice = Number(item.product.base_price) + variantsTotal;
+                      const unitPrice = item.unit_price;
                       const itemTotal = unitPrice * item.quantity;
 
                       return (

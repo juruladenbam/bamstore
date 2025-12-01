@@ -57,6 +57,8 @@ export interface CartItem {
   variants: ProductVariant[];
   quantity: number;
   recipient_name: string;
+  unit_price: number;
+  sku_id?: number;
 }
 
 export interface OrderItem {
