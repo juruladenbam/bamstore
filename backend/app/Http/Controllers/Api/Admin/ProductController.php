@@ -81,7 +81,7 @@ class ProductController extends Controller
                     }
 
                     // Generate a SKU code if not provided
-                    $skuCode = $skuData['sku'] ?? ($product->id . (empty($variantIds) ? '-DEFAULT' : '-' . implode('-', $variantIds)));
+                    $skuCode = (!empty($skuData['sku'])) ? $skuData['sku'] : ($product->id . (empty($variantIds) ? '-DEFAULT' : '-' . implode('-', $variantIds)));
 
                     $product->skus()->create([
                         'sku' => $skuCode,
@@ -208,7 +208,7 @@ class ProductController extends Controller
                     sort($variantIds); // Ensure consistent ordering
 
                     // Use provided SKU or generate one
-                    $skuCode = $skuData['sku'] ?? ($product->id . (empty($variantIds) ? '-DEFAULT' : '-' . implode('-', $variantIds)));
+                    $skuCode = (!empty($skuData['sku'])) ? $skuData['sku'] : ($product->id . (empty($variantIds) ? '-DEFAULT' : '-' . implode('-', $variantIds)));
 
                     if (isset($skuData['id'])) {
                         $product->skus()->where('id', $skuData['id'])->update([

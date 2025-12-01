@@ -150,8 +150,10 @@ This strategy uses an MVP (Minimum Viable Product) approach followed by complex 
 | **Pre-Order Management** | Frontend displays [PRE-ORDER] status. Backend manages quota (`stock_or_quota`). |
 | **Cart Modification** | Implementation of "For Myself" vs "For Others" logic in cart (`recipient_name`). |
 | **Vendor Management** | Vendor CRUD and recording of `Vendor_Payment` (DP/Installment). |
-| **Member Data Collection** | Implementation of automatic population of `Member_Data_Pool` table. |
+| **Vendor-Product Relation** | Linking Products to Vendors for COGS tracking. |
 | **Order Activity Feature** | Implementation of endpoints and frontend for Order Activity. |
+| **Order History** | Implementation of "Check My Orders" feature using Phone Number. |
+| **Member Data Collection** | Implementation of automatic population of `Member_Data_Pool` table. |
 | **Image Download** | Integration of `html2canvas` in React for downloading order details. |
 
 ## Phase 3: Optimization & Reporting

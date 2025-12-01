@@ -34,9 +34,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const total = items.reduce((sum, item) => {
-    const variantsTotal = item.variants.reduce((vSum, v) => vSum + Number(v.price_adjustment), 0);
-    const price = Number(item.product.base_price) + variantsTotal;
-    return sum + price * item.quantity;
+    return sum + item.unit_price * item.quantity;
   }, 0);
 
   return (

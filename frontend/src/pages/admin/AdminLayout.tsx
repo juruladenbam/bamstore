@@ -19,6 +19,9 @@ const AdminLayout: React.FC = () => {
             <Link to="/admin/orders">Orders</Link>
           </ChakraLink>
           <ChakraLink asChild color="gray.300" _hover={{ color: 'white' }}>
+            <Link to="/admin/vendors">Vendors</Link>
+          </ChakraLink>
+          <ChakraLink asChild color="gray.300" _hover={{ color: 'white' }}>
             <Link to="/">Back to Store</Link>
           </ChakraLink>
         </VStack>
