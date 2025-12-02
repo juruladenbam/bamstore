@@ -14,11 +14,60 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<ProductVariant[]>([]);
   const [recipientType, setRecipientType] = useState<'myself' | 'others'>('myself');
-  const [recipientNames, setRecipientNames] = useState<string[]>(['']);
+  
+  const [recipients, setRecipients] = useState<{name: string}[]>([{name: ''}]);
+  
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [errors, setErrors] = useState<{ recipientNames?: boolean[], missingVariants?: string[] }>({});
+
+  // Auto-complete state
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [activeRecipientIndex, setActiveRecipientIndex] = useState<number | null>(null);
+  const searchTimeout = React.useRef<any>(null);
+
+  const handleRecipientChange = (index: number, value: string) => {
+    const newRecipients = [...recipients];
+    newRecipients[index] = { name: value };
+    setRecipients(newRecipients);
+    
+    // Clear error if exists
+    if (errors.recipientNames?.[index]) {
+        setErrors(prev => {
+            const newNameErrors = [...(prev.recipientNames || [])];
+            newNameErrors[index] = false;
+            return { ...prev, recipientNames: newNameErrors };
+        });
+    }
+
+    // Search logic
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    
+    if (value.length > 2) {
+        searchTimeout.current = setTimeout(() => {
+            client.get(`/members/search?query=${value}`)
+                .then(res => {
+                    if (res.data && res.data.length > 0) {
+                        setSearchResults(res.data);
+                        setActiveRecipientIndex(index);
+                    } else {
+                        setActiveRecipientIndex(null);
+                    }
+                })
+                .catch(err => console.error(err));
+        }, 300);
+    } else {
+        setActiveRecipientIndex(null);
+    }
+  };
+
+  const selectRecipient = (index: number, member: any) => {
+      const newRecipients = [...recipients];
+      newRecipients[index] = { name: member.name };
+      setRecipients(newRecipients);
+      setActiveRecipientIndex(null);
+  };
 
   useEffect(() => {
     client.get(`/products/${id}`)
@@ -36,8 +85,43 @@ const ProductDetail: React.FC = () => {
     return <Container py={10}><Text>Loading...</Text></Container>;
   }
 
-  const variantsTotal = selectedVariants.reduce((sum, v) => sum + Number(v.price_adjustment), 0);
-  const currentPrice = Number(product.base_price) + variantsTotal;
+  // Helper to find matching SKU
+  const getMatchingSku = () => {
+    if (!product || !product.skus) return null;
+    
+    // If no variants defined on product, look for a default SKU (empty variant_ids)
+    if ((product.variants || []).length === 0) {
+      return product.skus.find(s => s.variant_ids.length === 0) || null;
+    }
+
+    // If we have variants, we need to match all selected variants
+    // First, check if we have selected all required types
+    const variantTypes = new Set((product.variants || []).map(v => v.type || 'General'));
+    // If user hasn't selected all types yet, we can't match a specific SKU
+    const selectedTypes = new Set(selectedVariants.map(v => v.type || 'General'));
+    if (selectedTypes.size !== variantTypes.size) return null;
+
+    const selectedIds = selectedVariants.map(v => v.id).sort((a, b) => a - b);
+    
+    return product.skus.find(s => {
+      const rawSkuIds = s.variant_ids || [];
+      const skuIds = [...rawSkuIds].sort((a, b) => Number(a) - Number(b));
+      
+      if (skuIds.length !== selectedIds.length) return false;
+      return skuIds.every((val, index) => Number(val) === Number(selectedIds[index]));
+    }) || null;
+  };
+
+  const matchingSku = getMatchingSku();
+
+  // Calculate Price
+  let currentPrice = Number(product.base_price);
+  if (matchingSku && Number(matchingSku.price) > 0) {
+    currentPrice = Number(matchingSku.price);
+  } else {
+    const variantsTotal = selectedVariants.reduce((sum, v) => sum + Number(v.price_adjustment), 0);
+    currentPrice += variantsTotal;
+  }
 
   const images = product.images && product.images.length > 0 
     ? product.images 
@@ -76,14 +160,14 @@ const ProductDetail: React.FC = () => {
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newQty = parseInt(e.target.value) || 1;
     setQuantity(newQty);
-    setRecipientNames(prev => {
-      const newNames = [...prev];
+    setRecipients(prev => {
+      const newRecipients = [...prev];
       if (newQty > prev.length) {
-        for (let i = prev.length; i < newQty; i++) newNames.push('');
+        for (let i = prev.length; i < newQty; i++) newRecipients.push({name: ''});
       } else if (newQty < prev.length) {
-        newNames.length = newQty;
+        newRecipients.length = newQty;
       }
-      return newNames;
+      return newRecipients;
     });
   };
 
@@ -111,7 +195,7 @@ const ProductDetail: React.FC = () => {
 
     // Validate Recipient Names
     if (recipientType === 'others') {
-      const nameErrors = recipientNames.map(n => !n.trim());
+      const nameErrors = recipients.map(r => !r.name.trim());
       if (nameErrors.some(e => e)) {
         newErrors.recipientNames = nameErrors;
         errorMessages.push("Please fill in all recipient names");
@@ -129,27 +213,47 @@ const ProductDetail: React.FC = () => {
       return;
     }
 
+    // Validate Stock/Quota
+    const matchingSku = getMatchingSku();
+    if (matchingSku) {
+      if (matchingSku.stock < quantity) {
+        toaster.create({
+          title: "Stock Error",
+          description: `Only ${matchingSku.stock} items available.`,
+          type: "error",
+        });
+        return;
+      }
+    } else if ((product?.variants || []).length > 0) {
+       // If we are here, it means we passed the missingTypes check (so all types are selected),
+       // but we couldn't find a matching SKU. This means the combination doesn't exist.
+       toaster.create({
+          title: "Unavailable",
+          description: "This combination of options is currently unavailable.",
+          type: "error",
+        });
+       return;
+    }
+
     if (recipientType === 'myself') {
       addToCart({
         product,
         variants: selectedVariants,
         quantity,
-        recipient_name: 'Myself'
+        recipient_name: 'Myself',
+        unit_price: currentPrice,
+        sku_id: matchingSku?.id
       });
     } else {
-      // Group by name to avoid separate lines for same person
-      const grouped: Record<string, number> = {};
-      recipientNames.forEach(name => {
-        const n = name.trim();
-        grouped[n] = (grouped[n] || 0) + 1;
-      });
-
-      Object.entries(grouped).forEach(([name, qty]) => {
+      // Add each recipient as a separate item (no grouping for now to keep details)
+      recipients.forEach(recipient => {
         addToCart({
           product,
           variants: selectedVariants,
-          quantity: qty,
-          recipient_name: name
+          quantity: 1,
+          recipient_name: recipient.name,
+          unit_price: currentPrice,
+          sku_id: matchingSku?.id
         });
       });
     }
@@ -207,6 +311,14 @@ const ProductDetail: React.FC = () => {
           <Text fontSize="2xl" fontWeight="bold" color="teal.600">
             Rp {currentPrice.toLocaleString()}
           </Text>
+          
+          {matchingSku && (
+            <Text fontSize="sm" color={matchingSku.stock > 0 ? "green.600" : "red.600"} fontWeight="medium">
+              {product.status === 'pre_order' ? 'Quota Available: ' : 'Stock: '} 
+              {matchingSku.stock}
+            </Text>
+          )}
+
           <Text>{product.description}</Text>
 
           <Box w="full">
@@ -279,26 +391,52 @@ const ProductDetail: React.FC = () => {
             </HStack>
             
             {recipientType === 'others' && (
-              <VStack gap={2} align="stretch">
-                {recipientNames.map((name, index) => (
-                  <Input 
-                    key={index}
-                    placeholder={`Recipient Name #${index + 1}`}
-                    value={name} 
-                    onChange={(e) => {
-                      const newNames = [...recipientNames];
-                      newNames[index] = e.target.value;
-                      setRecipientNames(newNames);
-                      if (errors.recipientNames?.[index]) {
-                        setErrors(prev => {
-                          const newNameErrors = [...(prev.recipientNames || [])];
-                          newNameErrors[index] = false;
-                          return { ...prev, recipientNames: newNameErrors };
-                        });
-                      }
-                    }} 
-                    borderColor={errors.recipientNames?.[index] ? "red.500" : undefined}
-                  />
+              <VStack gap={4} align="stretch">
+                {recipients.map((recipient, index) => (
+                  <Box key={index} borderWidth="1px" borderRadius="md" p={3}>
+                    <Text fontWeight="bold" mb={2}>Recipient #{index + 1}</Text>
+                    <VStack gap={2}>
+                        <Box w="full" position="relative">
+                            <Input 
+                            placeholder="Name"
+                            value={recipient.name} 
+                            onChange={(e) => handleRecipientChange(index, e.target.value)}
+                            onBlur={() => setTimeout(() => setActiveRecipientIndex(null), 200)}
+                            borderColor={errors.recipientNames?.[index] ? "red.500" : undefined}
+                            autoComplete="off"
+                            />
+                            {activeRecipientIndex === index && searchResults.length > 0 && (
+                            <Box 
+                                position="absolute" 
+                                top="100%" 
+                                left={0} 
+                                right={0} 
+                                zIndex={10} 
+                                bg="white" 
+                                borderWidth="1px" 
+                                borderRadius="md" 
+                                boxShadow="md" 
+                                maxH="200px" 
+                                overflowY="auto"
+                            >
+                                {searchResults.map((member, idx) => (
+                                <Box 
+                                    key={idx} 
+                                    p={2} 
+                                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                                    onMouseDown={() => selectRecipient(index, member)}
+                                >
+                                    <Text fontWeight="bold" fontSize="sm">{member.name}</Text>
+                                    <Text fontSize="xs" color="gray.600">
+                                        {member.phone_number ? `${member.phone_number} - ` : ''}{member.qobilah || ''}
+                                    </Text>
+                                </Box>
+                                ))}
+                            </Box>
+                            )}
+                        </Box>
+                    </VStack>
+                  </Box>
                 ))}
               </VStack>
             )}

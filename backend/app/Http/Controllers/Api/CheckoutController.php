@@ -25,6 +25,8 @@ class CheckoutController extends Controller
             'items.*.variant_ids.*' => 'exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.recipient_name' => 'required|string|max:255',
+            'items.*.recipient_phone' => 'nullable|string|max:20',
+            'items.*.recipient_qobilah' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -112,6 +114,30 @@ class CheckoutController extends Controller
                 }
             }
 
+                        // Update Member Data Pool for Payer
+            $this->updateMemberPool($validated['phone_number'], $validated['checkout_name'], $validated['qobilah']);
+
+            // Update Member Data Pool for Recipients
+            $processedRecipients = [$validated['checkout_name']]; // Track by name to avoid duplicates in this order
+
+            foreach ($validated['items'] as $item) {
+                $rName = $item['recipient_name'];
+                $rPhone = $item['recipient_phone'] ?? null;
+                $rQobilah = $item['recipient_qobilah'] ?? null;
+
+                // If recipient is the payer, we already handled it.
+                if ($rName === $validated['checkout_name']) {
+                    continue;
+                }
+
+                if (in_array($rName, $processedRecipients)) {
+                    continue;
+                }
+
+                $this->updateMemberPool($rPhone, $rName, $rQobilah);
+                $processedRecipients[] = $rName;
+            }
+
             DB::commit();
 
             return response()->json([
@@ -125,4 +151,44 @@ class CheckoutController extends Controller
             return response()->json(['message' => 'Order creation failed', 'error' => $e->getMessage()], 500);
         }
     }
+
+    private function updateMemberPool($phone, $name, $qobilah)
+    {
+        $member = null;
+
+        if ($phone) {
+            // Case 1: Phone is provided (Checkout User)
+            $member = \App\Models\MemberDataPool::where('phone_number', $phone)->first();
+
+            if (!$member) {
+                // Phone not found. Check if Name exists without a phone.
+                $existingByName = \App\Models\MemberDataPool::where('name', $name)->first();
+
+                if ($existingByName && is_null($existingByName->phone_number)) {
+                    // Found a "Name-only" record. Claim it.
+                    $member = $existingByName;
+                }
+                // Else: Name exists but has a DIFFERENT phone, OR Name doesn't exist.
+                // In both cases, we create a NEW record for this new Phone.
+            }
+        } else {
+            // Case 2: No Phone provided (Recipient User)
+            // Just find by name.
+            $member = \App\Models\MemberDataPool::where('name', $name)->first();
+        }
+
+        if (!$member) {
+            $member = new \App\Models\MemberDataPool();
+            $member->name = $name;
+        }
+
+        // Update fields
+        if ($phone) $member->phone_number = $phone;
+        if ($qobilah) $member->qobilah = $qobilah;
+
+        $member->order_count = ($member->order_count ?? 0) + 1;
+        $member->save();
+    }
+
+
 }

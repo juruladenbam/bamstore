@@ -14,11 +14,7 @@ import {
   DialogActionTrigger,
 } from '../components/ui/dialog';
 
-const QOBILAHS = [
-  "QOBILAH MARIYAH", "QOBILAH BUSYRI", "QOBILAH MUZAMMAH", "QOBILAH SULHAN",
-  "QOBILAH SHOLIHATUN", "QOBILAH NURSIYAM", "QOBILAH NI'MAH", "QOBILAH ABD MAJID",
-  "QOBILAH SAIDAH", "QOBILAH THOHIR AL ALY", "QOBILAH ABD. ROHIM (NGAGLIK)"
-];
+import { QOBILAHS } from '../constants';
 
 const Checkout: React.FC = () => {
   const { items, total, clearCart, removeFromCart } = useCart();
@@ -33,6 +29,56 @@ const Checkout: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  // Auto-complete state
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState<{field: 'name' | 'phone' | null}>({field: null});
+  const searchTimeout = React.useRef<any>(null);
+
+  const handleSearch = (value: string, field: 'name' | 'phone') => {
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+
+    if (value.length > 2) {
+      searchTimeout.current = setTimeout(() => {
+        client.get(`/members/search?query=${value}`)
+          .then(res => {
+            if (res.data && res.data.length > 0) {
+              setSearchResults(res.data);
+              setShowSuggestions({field});
+            } else {
+              setShowSuggestions({field: null});
+            }
+          })
+          .catch(err => console.error(err));
+      }, 300);
+    } else {
+      setShowSuggestions({field: null});
+    }
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({...prev, phone_number: value}));
+    if (errors.phone_number) setErrors(prev => ({...prev, phone_number: false}));
+    handleSearch(value, 'phone');
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData(prev => ({...prev, checkout_name: value}));
+    if (errors.checkout_name) setErrors(prev => ({...prev, checkout_name: false}));
+    handleSearch(value, 'name');
+  };
+
+  const selectMember = (member: any) => {
+    setFormData(prev => ({
+      ...prev,
+      checkout_name: member.name,
+      phone_number: member.phone_number || '',
+      qobilah: member.qobilah || QOBILAHS[0]
+    }));
+    setShowSuggestions({field: null});
+  };
 
   const handlePlaceOrderClick = () => {
     const newErrors: Record<string, boolean> = {};
@@ -67,13 +113,16 @@ const Checkout: React.FC = () => {
         ...formData,
         items: items.map(item => ({
           product_id: item.product.id,
+          sku_id: item.sku_id,
           variant_ids: item.variants.map(v => v.id),
           quantity: item.quantity,
-          recipient_name: item.recipient_name === 'Myself' ? formData.checkout_name : item.recipient_name
+          recipient_name: item.recipient_name === 'Myself' ? formData.checkout_name : item.recipient_name,
+          recipient_phone: (item.recipient_name === 'Myself' || item.recipient_name === formData.checkout_name) ? formData.phone_number : (item.recipient_phone || null),
+          recipient_qobilah: (item.recipient_name === 'Myself' || item.recipient_name === formData.checkout_name) ? formData.qobilah : (item.recipient_qobilah || null),
         }))
       };
 
-      await client.post('/checkout', payload);
+      const res = await client.post('/checkout', payload);
       clearCart();
       setIsDialogOpen(false);
       toaster.create({
@@ -81,7 +130,14 @@ const Checkout: React.FC = () => {
         description: "Your order has been placed successfully!",
         type: "success",
       });
-      navigate('/');
+      navigate('/order-confirmation', { 
+        state: { 
+          orderId: res.data.order_id, 
+          totalAmount: res.data.total_amount,
+          items: items,
+          formData: formData
+        } 
+      });
     } catch (error) {
       console.error(error);
       toaster.create({
@@ -107,8 +163,7 @@ const Checkout: React.FC = () => {
         <Box borderWidth="1px" borderRadius="lg" p={4}>
           <Heading size="md" mb={4}>Cart Items</Heading>
           {items.map((item, index) => {
-            const variantsTotal = item.variants.reduce((sum, v) => sum + Number(v.price_adjustment), 0);
-            const unitPrice = Number(item.product.base_price) + variantsTotal;
+            const unitPrice = item.unit_price;
             
             return (
               <Box key={index} mb={4} p={2} bg="gray.50" borderRadius="md">
@@ -131,29 +186,85 @@ const Checkout: React.FC = () => {
         <Box borderWidth="1px" borderRadius="lg" p={4}>
           <Heading size="md" mb={4}>Your Details</Heading>
           <VStack gap={4}>
-            <Box w="full">
+            <Box w="full" position="relative">
               <Text mb={1}>Name <Text as="span" color="red.500">*</Text></Text>
               <Input 
                 value={formData.checkout_name} 
-                onChange={e => {
-                  setFormData({...formData, checkout_name: e.target.value});
-                  if (errors.checkout_name) setErrors(prev => ({...prev, checkout_name: false}));
-                }} 
+                onChange={handleNameChange}
+                onBlur={() => setTimeout(() => setShowSuggestions({field: null}), 200)}
                 placeholder="Your Name"
                 borderColor={errors.checkout_name ? "red.500" : undefined}
+                autoComplete="off"
               />
+              {showSuggestions.field === 'name' && searchResults.length > 0 && (
+                <Box 
+                  position="absolute" 
+                  top="100%" 
+                  left={0} 
+                  right={0} 
+                  zIndex={10} 
+                  bg="white" 
+                  borderWidth="1px" 
+                  borderRadius="md" 
+                  boxShadow="md" 
+                  maxH="200px" 
+                  overflowY="auto"
+                >
+                  {searchResults.map((member, idx) => (
+                    <Box 
+                      key={idx} 
+                      p={2} 
+                      _hover={{ bg: "gray.100", cursor: "pointer" }}
+                      onClick={() => selectMember(member)}
+                    >
+                      <Text fontWeight="bold" fontSize="sm">{member.name}</Text>
+                      <Text fontSize="xs" color="gray.600">
+                        {member.phone_number ? `${member.phone_number} - ` : ''}{member.qobilah || ''}
+                      </Text>
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </Box>
-            <Box w="full">
+            <Box w="full" position="relative">
               <Text mb={1}>Phone Number <Text as="span" color="red.500">*</Text></Text>
               <Input 
                 value={formData.phone_number} 
-                onChange={e => {
-                  setFormData({...formData, phone_number: e.target.value});
-                  if (errors.phone_number) setErrors(prev => ({...prev, phone_number: false}));
-                }} 
+                onChange={handlePhoneChange}
+                onBlur={() => setTimeout(() => setShowSuggestions({field: null}), 200)}
                 placeholder="08..."
                 borderColor={errors.phone_number ? "red.500" : undefined}
+                autoComplete="off"
               />
+              {showSuggestions.field === 'phone' && searchResults.length > 0 && (
+                <Box 
+                  position="absolute" 
+                  top="100%" 
+                  left={0} 
+                  right={0} 
+                  zIndex={10} 
+                  bg="white" 
+                  borderWidth="1px" 
+                  borderRadius="md" 
+                  boxShadow="md" 
+                  maxH="200px" 
+                  overflowY="auto"
+                >
+                  {searchResults.map((member, idx) => (
+                    <Box 
+                      key={idx} 
+                      p={2} 
+                      _hover={{ bg: "gray.100", cursor: "pointer" }}
+                      onClick={() => selectMember(member)}
+                    >
+                      <Text fontWeight="bold" fontSize="sm">{member.phone_number || 'No Phone'}</Text>
+                      <Text fontSize="xs" color="gray.600">
+                        {member.name} - {member.qobilah || ''}
+                      </Text>
+                    </Box>
+                  ))}
+                </Box>
+              )}
             </Box>
             <Box w="full">
               <Text mb={1}>Qobilah</Text>
@@ -215,8 +326,7 @@ const Checkout: React.FC = () => {
                   <Text fontWeight="bold" mb={2}>Items ({items.length})</Text>
                   <VStack align="stretch" gap={2} mb={3}>
                     {items.map((item, index) => {
-                      const variantsTotal = item.variants.reduce((sum, v) => sum + Number(v.price_adjustment), 0);
-                      const unitPrice = Number(item.product.base_price) + variantsTotal;
+                      const unitPrice = item.unit_price;
                       const itemTotal = unitPrice * item.quantity;
 
                       return (
