@@ -21,10 +21,16 @@ Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/order-activity', [\App\Http\Controllers\Api\OrderActivityController::class, 'index']);
 Route::post('/history', [\App\Http\Controllers\Api\OrderHistoryController::class, 'index']);
+Route::get('/members/search', [\App\Http\Controllers\Api\MemberDataController::class, 'search']);
 Route::post('/checkout', [CheckoutController::class, 'store']);
 
-// Admin Routes (TODO: Add Auth Middleware later)
-Route::prefix('admin')->group(function () {
+// Admin Auth
+Route::post('/admin/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+
+// Admin Routes
+Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+    Route::post('/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
+
     Route::apiResource('products', AdminProductController::class);
     Route::apiResource('categories', AdminCategoryController::class);
     Route::apiResource('vendors', AdminVendorController::class);
@@ -33,4 +39,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
     Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
+
+    Route::get('/reports/recap', [\App\Http\Controllers\Api\Admin\VendorReportController::class, 'recap']);
+    Route::get('/reports/finance', [\App\Http\Controllers\Api\Admin\FinancialReportController::class, 'index']);
 });

@@ -16,6 +16,9 @@ import AdminOrderDetail from './pages/admin/AdminOrderDetail';
 import AdminVendorList from './pages/admin/AdminVendorList';
 import VendorForm from './pages/admin/VendorForm';
 import AdminVendorDetail from './pages/admin/AdminVendorDetail';
+import VendorReport from './pages/admin/VendorReport';
+import FinancialReport from './pages/admin/FinancialReport';
+import Login from './pages/admin/Login';
 import { Box, Flex, Heading, Link as ChakraLink, Text } from '@chakra-ui/react';
 import { Link, useLocation } from 'react-router-dom';
 import { Toaster } from './components/ui/toaster';
@@ -59,6 +62,8 @@ function App() {
           <Route path="/history" element={<OrderHistory />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
           
+          <Route path="/admin/login" element={<Login />} />
+
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminProductList />} />
@@ -74,6 +79,8 @@ function App() {
             <Route path="vendors/new" element={<VendorForm />} />
             <Route path="vendors/:id/edit" element={<VendorForm />} />
             <Route path="vendors/:id/payments" element={<AdminVendorDetail />} />
+            <Route path="reports/vendor" element={<VendorReport />} />
+            <Route path="reports/finance" element={<FinancialReport />} />
           </Route>
         </Routes>
 
