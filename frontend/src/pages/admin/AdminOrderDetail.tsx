@@ -43,7 +43,7 @@ const AdminOrderDetail: React.FC = () => {
       
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" mb={6}>
         <HStack justify="space-between" mb={4}>
-          <Heading size="lg">Order #{order.id}</Heading>
+          <Heading size="lg">Order {order.order_number || '#' + order.id}</Heading>
           <Badge size="lg" colorPalette={order.status === 'paid' ? 'green' : 'gray'}>
             {order.status.toUpperCase()}
           </Badge>

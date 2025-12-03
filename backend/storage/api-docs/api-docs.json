@@ -81,7 +81,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Category ID",
+                        "description": "Category ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -109,7 +109,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Category ID",
+                        "description": "Category ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -125,6 +125,10 @@
                                     "name": {
                                         "type": "string",
                                         "example": "Updated Electronics"
+                                    },
+                                    "slug": {
+                                        "type": "string",
+                                        "example": "updated-electronics"
                                     }
                                 },
                                 "type": "object"
@@ -153,7 +157,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Category ID",
+                        "description": "Category ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -249,7 +253,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Order ID",
+                        "description": "Order ID or Order Number",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -279,7 +283,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Order ID",
+                        "description": "Order ID or Order Number",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -650,7 +654,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Vendor ID",
+                        "description": "Vendor ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -678,7 +682,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Vendor ID",
+                        "description": "Vendor ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -692,6 +696,9 @@
                             "schema": {
                                 "properties": {
                                     "name": {
+                                        "type": "string"
+                                    },
+                                    "slug": {
                                         "type": "string"
                                     },
                                     "contact_info": {
@@ -727,7 +734,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Vendor ID",
+                        "description": "Vendor ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -982,6 +989,31 @@
                 ],
                 "summary": "Get list of categories",
                 "operationId": "b1b247b2b491b0491c3c728dc33f23f0",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation"
+                    }
+                }
+            }
+        },
+        "/categories/{category}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get category details",
+                "operationId": "f9287689f645443ba435d93df47f30ab",
+                "parameters": [
+                    {
+                        "name": "category",
+                        "in": "path",
+                        "description": "Category ID or Slug",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful operation"

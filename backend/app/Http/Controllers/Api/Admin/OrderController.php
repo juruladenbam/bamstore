@@ -59,7 +59,7 @@ class OrderController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Order ID",
+     *         description="Order ID or Order Number",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -68,9 +68,9 @@ class OrderController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(Order $order)
     {
-        return response()->json(Order::with(['items.product', 'items.variants'])->findOrFail($id));
+        return response()->json($order->load(['items.product', 'items.variants']));
     }
 
     /**
@@ -83,7 +83,7 @@ class OrderController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Order ID",
+     *         description="Order ID or Order Number",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\RequestBody(
@@ -99,10 +99,8 @@ class OrderController extends Controller
      *     )
      * )
      */
-    public function updateStatus(Request $request, string $id)
+    public function updateStatus(Request $request, Order $order)
     {
-        $order = Order::findOrFail($id);
-
         $validated = $request->validate([
             'status' => 'required|in:new,paid,processed,ready_pickup,completed,cancelled',
         ]);
