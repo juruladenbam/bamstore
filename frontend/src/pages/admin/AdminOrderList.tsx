@@ -67,7 +67,7 @@ const AdminOrderList: React.FC = () => {
         <Table.Root>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>ID</Table.ColumnHeader>
+              <Table.ColumnHeader>Order #</Table.ColumnHeader>
               <Table.ColumnHeader>Name</Table.ColumnHeader>
               <Table.ColumnHeader>Qobilah</Table.ColumnHeader>
               <Table.ColumnHeader>Total</Table.ColumnHeader>
@@ -78,7 +78,7 @@ const AdminOrderList: React.FC = () => {
           <Table.Body>
             {orders.map(order => (
               <Table.Row key={order.id}>
-                <Table.Cell>#{order.id}</Table.Cell>
+                <Table.Cell>{order.order_number || '#' + order.id}</Table.Cell>
                 <Table.Cell>{order.checkout_name}</Table.Cell>
                 <Table.Cell>{order.qobilah}</Table.Cell>
                 <Table.Cell>Rp {Number(order.total_amount).toLocaleString()}</Table.Cell>
@@ -89,7 +89,7 @@ const AdminOrderList: React.FC = () => {
                 </Table.Cell>
                 <Table.Cell>
                   <HStack>
-                    <Link to={`/admin/orders/${order.id}`}>
+                    <Link to={`/admin/orders/${order.order_number || order.id}`}>
                       <Button size="xs" variant="outline">View</Button>
                     </Link>
                     {order.status === 'new' && (

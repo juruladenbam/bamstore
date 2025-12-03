@@ -7,6 +7,7 @@ export interface Category {
 export interface Vendor {
   id: number;
   name: string;
+  slug?: string;
   contact_info?: string;
   address?: string;
 }
@@ -78,6 +79,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
+  order_number?: string;
   checkout_name: string;
   phone_number: string;
   qobilah: string;

@@ -68,7 +68,7 @@ class VendorController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Vendor ID",
+     *         description="Vendor ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -77,9 +77,9 @@ class VendorController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(Vendor $vendor)
     {
-        return response()->json(Vendor::findOrFail($id));
+        return response()->json($vendor);
     }
 
     /**
@@ -92,13 +92,14 @@ class VendorController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Vendor ID",
+     *         description="Vendor ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
      *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="slug", type="string"),
      *             @OA\Property(property="contact_info", type="string"),
      *             @OA\Property(property="address", type="string")
      *         )
@@ -109,12 +110,11 @@ class VendorController extends Controller
      *     )
      * )
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Vendor $vendor)
     {
-        $vendor = Vendor::findOrFail($id);
-
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'contact_info' => 'nullable|string|max:255',
             'address' => 'nullable|string',
         ]);
@@ -133,7 +133,7 @@ class VendorController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Vendor ID",
+     *         description="Vendor ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -142,9 +142,9 @@ class VendorController extends Controller
      *     )
      * )
      */
-    public function destroy(string $id)
+    public function destroy(Vendor $vendor)
     {
-        Vendor::findOrFail($id)->delete();
+        $vendor->delete();
         return response()->json(null, 204);
     }
 }

@@ -133,6 +133,7 @@ const Checkout: React.FC = () => {
       navigate('/order-confirmation', { 
         state: { 
           orderId: res.data.order_id, 
+          orderNumber: res.data.order_number,
           totalAmount: res.data.total_amount,
           items: items,
           formData: formData

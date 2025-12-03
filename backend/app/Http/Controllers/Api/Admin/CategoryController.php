@@ -51,16 +51,6 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
-
-        // Ensure slug is unique
-        $originalSlug = $validated['slug'];
-        $count = 1;
-        while (Category::where('slug', $validated['slug'])->exists()) {
-            $validated['slug'] = $originalSlug . '-' . $count;
-            $count++;
-        }
-
         $category = Category::create($validated);
         return response()->json($category, 201);
     }
@@ -75,7 +65,7 @@ class CategoryController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Category ID",
+     *         description="Category ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -84,9 +74,9 @@ class CategoryController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(Category $category)
     {
-        return response()->json(Category::findOrFail($id));
+        return response()->json($category);
     }
 
     /**
@@ -99,13 +89,14 @@ class CategoryController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Category ID",
+     *         description="Category ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string", example="Updated Electronics")
+     *             @OA\Property(property="name", type="string", example="Updated Electronics"),
+     *             @OA\Property(property="slug", type="string", example="updated-electronics")
      *         )
      *     ),
      *     @OA\Response(
@@ -114,25 +105,12 @@ class CategoryController extends Controller
      *     )
      * )
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Category $category)
     {
-        $category = Category::findOrFail($id);
-
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
+            'slug' => 'nullable|string|max:255',
         ]);
-
-        if (isset($validated['name'])) {
-            $validated['slug'] = Str::slug($validated['name']);
-
-            // Ensure slug is unique, excluding current category
-            $originalSlug = $validated['slug'];
-            $count = 1;
-            while (Category::where('slug', $validated['slug'])->where('id', '!=', $id)->exists()) {
-                $validated['slug'] = $originalSlug . '-' . $count;
-                $count++;
-            }
-        }
 
         $category->update($validated);
         return response()->json($category);
@@ -148,7 +126,7 @@ class CategoryController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Category ID",
+     *         description="Category ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -157,9 +135,9 @@ class CategoryController extends Controller
      *     )
      * )
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
-        Category::findOrFail($id)->delete();
+        $category->delete();
         return response()->json(null, 204);
     }
 }
