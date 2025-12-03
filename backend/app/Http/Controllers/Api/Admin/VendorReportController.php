@@ -8,6 +8,25 @@ use Illuminate\Http\Request;
 
 class VendorReportController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/admin/reports/recap",
+     *     summary="Get vendor recap report",
+     *     tags={"Admin Reports"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="vendor_id",
+     *         in="query",
+     *         description="Filter by Vendor ID",
+     *         required=false,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function recap(Request $request)
     {
         $vendorId = $request->input('vendor_id');
