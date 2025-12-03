@@ -6,6 +6,14 @@ import { STORAGE_URL }                                                          
 import { useCart }                                                                    from '../context/CartContext';
 import type { Product, ProductVariant }                                               from '../types';
 import { toaster }                                                                    from '../components/ui/toaster';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+} from "../components/ui/dialog"
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +29,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [errors, setErrors] = useState<{ recipientNames?: boolean[], missingVariants?: string[] }>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Auto-complete state
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -263,11 +272,39 @@ const ProductDetail: React.FC = () => {
       description: `${product?.name} added to your cart.`,
       type: "success",
     });
-    navigate('/checkout');
+    setIsDialogOpen(true);
   };
 
   return (
     <Container maxW="container.md" py={10}>
+      <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Added to Cart</DialogTitle>
+          </DialogHeader>
+          <DialogBody>
+            <VStack align="start" gap={2}>
+              <Text fontWeight="bold">{product.name}</Text>
+              {selectedVariants.length > 0 && (
+                <Text fontSize="sm" color="gray.600">
+                  Variants: {selectedVariants.map(v => v.name).join(', ')}
+                </Text>
+              )}
+              <Text fontSize="sm">
+                Quantity: {quantity}
+              </Text>
+              <Text fontWeight="bold" color="teal.600">
+                Total: Rp {(currentPrice * quantity).toLocaleString()}
+              </Text>
+            </VStack>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Add Another Product</Button>
+            <Button colorPalette="teal" onClick={() => navigate('/checkout')}>Continue to Checkout</Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
+
       <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={6}>
         <Box mb={6}>
           <Image 

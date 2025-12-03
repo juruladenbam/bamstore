@@ -1,5 +1,6 @@
 import { Routes, Route }                                from 'react-router-dom';
 import { CartProvider }                                 from './context/CartContext';
+import Navbar                                           from './components/Navbar';
 import ProductList                                      from './pages/ProductList';
 import ProductDetail                                    from './pages/ProductDetail';
 import Checkout                                         from './pages/Checkout';
@@ -19,8 +20,8 @@ import AdminVendorDetail                                from './pages/admin/Admi
 import VendorReport                                     from './pages/admin/VendorReport';
 import FinancialReport                                  from './pages/admin/FinancialReport';
 import Login                                            from './pages/admin/Login';
-import { Box, Flex, Heading, Link as ChakraLink, Text } from '@chakra-ui/react';
-import { Link, useLocation }                            from 'react-router-dom';
+import { Box, Text }                                    from '@chakra-ui/react';
+import { useLocation }                                  from 'react-router-dom';
 import { Toaster }                                      from './components/ui/toaster';
 
 function App() {
@@ -31,29 +32,7 @@ function App() {
     <CartProvider>
       <Toaster />
       <Box minH="100vh" bg="gray.50">
-        {!isAdmin && (
-          <Box bg="teal.600" color="white" py={4} px={8}>
-            <Flex justify="space-between" align="center" maxW="container.xl" mx="auto">
-              <Heading size="lg">
-                <Link to="/">BAM Store</Link>
-              </Heading>
-              <Flex gap={4}>
-                <ChakraLink asChild color="white">
-                  <Link to="/">Products</Link>
-                </ChakraLink>
-                <ChakraLink asChild color="white">
-                  <Link to="/checkout">Cart</Link>
-                </ChakraLink>
-                <ChakraLink asChild color="white">
-                  <Link to="/activity">Activity</Link>
-                </ChakraLink>
-                <ChakraLink asChild color="white">
-                  <Link to="/history">My Orders</Link>
-                </ChakraLink>
-              </Flex>
-            </Flex>
-          </Box>
-        )}
+        <Navbar />
         <Routes>
           <Route path="/" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
