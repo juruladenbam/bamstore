@@ -44,7 +44,7 @@ const ProductList: React.FC = () => {
                 <Heading size="md">{product.name}</Heading>
                 <Text fontWeight="bold">Rp {Number(product.base_price).toLocaleString()}</Text>
                 <Button asChild width="full" colorPalette="teal">
-                  <Link to={`/products/${product.id}`}>View Details</Link>
+                  <Link to={`/products/${product.slug || product.id}`}>View Details</Link>
                 </Button>
               </VStack>
             </Box>

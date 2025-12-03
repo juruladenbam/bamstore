@@ -41,6 +41,7 @@ export interface Product {
   category_id: number;
   vendor_id?: number;
   name: string;
+  slug?: string;
   description?: string;
   status: 'ready' | 'pre_order';
   base_price: number;

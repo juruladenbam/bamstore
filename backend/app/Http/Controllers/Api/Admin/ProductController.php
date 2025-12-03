@@ -161,7 +161,7 @@ class ProductController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Product ID",
+     *         description="Product ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -174,9 +174,9 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(Product $product)
     {
-        return response()->json(Product::with(['category', 'vendor', 'variants', 'skus', 'images'])->findOrFail($id));
+        return response()->json($product->load(['category', 'vendor', 'variants', 'skus', 'images']));
     }
 
     /**
@@ -190,7 +190,7 @@ class ProductController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Product ID",
+     *         description="Product ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\RequestBody(
@@ -229,10 +229,8 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Product $product)
     {
-        $product = Product::findOrFail($id);
-
         if ($request->has('payload')) {
             $request->merge(json_decode($request->input('payload'), true));
         }
@@ -375,7 +373,7 @@ class ProductController extends Controller
      *         name="id",
      *         in="path",
      *         required=true,
-     *         description="Product ID",
+     *         description="Product ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -388,9 +386,9 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        Product::findOrFail($id)->delete();
+        $product->delete();
         return response()->json(null, 204);
     }
 }
