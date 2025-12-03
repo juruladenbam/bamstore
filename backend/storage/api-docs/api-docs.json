@@ -435,7 +435,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Product ID",
+                        "description": "Product ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -467,7 +467,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Product ID",
+                        "description": "Product ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -554,7 +554,7 @@
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Product ID",
+                        "description": "Product ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1191,18 +1191,18 @@
                 }
             }
         },
-        "/products/{id}": {
+        "/products/{product}": {
             "get": {
                 "tags": [
                     "Products"
                 ],
                 "summary": "Get product details",
-                "operationId": "b5099368868dbe7900acd129345eb148",
+                "operationId": "c5ec5b4fb4c3790c73e9849244665f45",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "product",
                         "in": "path",
-                        "description": "Product ID",
+                        "description": "Product ID or Slug",
                         "required": true,
                         "schema": {
                             "type": "string"

@@ -27,14 +27,14 @@ class ProductController extends Controller
 
     /**
      * @OA\Get(
-     *     path="/products/{id}",
+     *     path="/products/{product}",
      *     summary="Get product details",
      *     tags={"Products"},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="product",
      *         in="path",
      *         required=true,
-     *         description="Product ID",
+     *         description="Product ID or Slug",
      *         @OA\Schema(type="string")
      *     ),
      *     @OA\Response(
@@ -47,9 +47,9 @@ class ProductController extends Controller
      *     )
      * )
      */
-    public function show(string $id)
+    public function show(Product $product)
     {
-        $product = Product::with(['category', 'variants', 'images', 'skus'])->findOrFail($id);
+        $product->load(['category', 'variants', 'images', 'skus']);
         return response()->json($product);
     }
 }
