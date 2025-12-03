@@ -9,6 +9,18 @@ use Illuminate\Http\Request;
 
 class FinancialReportController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/admin/reports/finance",
+     *     summary="Get financial report",
+     *     tags={"Admin Reports"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function index()
     {
         $paidStatuses = ['paid', 'processed', 'completed', 'ready_for_pickup', 'shipped', 'delivered'];

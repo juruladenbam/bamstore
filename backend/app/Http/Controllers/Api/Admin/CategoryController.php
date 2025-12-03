@@ -9,11 +9,42 @@ use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/admin/categories",
+     *     summary="Get list of categories (Admin)",
+     *     tags={"Admin Categories"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function index()
     {
         return response()->json(Category::all());
     }
 
+    /**
+     * @OA\Post(
+     *     path="/admin/categories",
+     *     summary="Create a new category",
+     *     tags={"Admin Categories"},
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Electronics")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Category created successfully"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -34,11 +65,55 @@ class CategoryController extends Controller
         return response()->json($category, 201);
     }
 
+    /**
+     * @OA\Get(
+     *     path="/admin/categories/{id}",
+     *     summary="Get category details",
+     *     tags={"Admin Categories"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function show(string $id)
     {
         return response()->json(Category::findOrFail($id));
     }
 
+    /**
+     * @OA\Put(
+     *     path="/admin/categories/{id}",
+     *     summary="Update a category",
+     *     tags={"Admin Categories"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Updated Electronics")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Category updated successfully"
+     *     )
+     * )
+     */
     public function update(Request $request, string $id)
     {
         $category = Category::findOrFail($id);
@@ -63,6 +138,25 @@ class CategoryController extends Controller
         return response()->json($category);
     }
 
+    /**
+     * @OA\Delete(
+     *     path="/admin/categories/{id}",
+     *     summary="Delete a category",
+     *     tags={"Admin Categories"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Category deleted"
+     *     )
+     * )
+     */
     public function destroy(string $id)
     {
         Category::findOrFail($id)->delete();

@@ -12,6 +12,48 @@ use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/checkout",
+     *     summary="Create a new order",
+     *     tags={"Checkout"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"checkout_name", "phone_number", "qobilah", "payment_method", "items"},
+     *             @OA\Property(property="checkout_name", type="string", example="John Doe"),
+     *             @OA\Property(property="phone_number", type="string", example="08123456789"),
+     *             @OA\Property(property="qobilah", type="string", example="Qobilah A"),
+     *             @OA\Property(property="payment_method", type="string", enum={"transfer", "cash"}, example="transfer"),
+     *             @OA\Property(
+     *                 property="items",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     required={"product_id", "quantity", "recipient_name"},
+     *                     @OA\Property(property="product_id", type="integer", example=1),
+     *                     @OA\Property(property="variant_ids", type="array", @OA\Items(type="integer"), example={1, 2}),
+     *                     @OA\Property(property="quantity", type="integer", example=1),
+     *                     @OA\Property(property="recipient_name", type="string", example="Jane Doe"),
+     *                     @OA\Property(property="recipient_phone", type="string", example="08987654321"),
+     *                     @OA\Property(property="recipient_qobilah", type="string", example="Qobilah B")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Order created successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Server error"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
