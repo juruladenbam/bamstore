@@ -38,23 +38,37 @@ const ProductList: React.FC = () => {
       {products.length === 0 ? (
         <Text>No products found.</Text>
       ) : (
-        <SimpleGrid columns={{ base: 1, md: 3, lg: 4 }} gap={6}>
+        <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} gap={{ base: 3, md: 6 }}>
           {products.map(product => {
             const imageUrl = product.images && product.images.length > 0 
               ? (product.images[0].image_path.startsWith('http') ? product.images[0].image_path : `${STORAGE_URL}/${product.images[0].image_path}`)
               : (product.image_url || 'https://via.placeholder.com/300');
 
             return (
-              <Box key={product.id} borderWidth="1px" borderRadius="lg" overflow="hidden" p={4}>
-                <Image src={imageUrl} alt={product.name} mb={4} height="200px" width="100%" objectFit="cover" />
-                <VStack align="start" gap={2}>
-                  <Badge colorPalette={product.status === 'ready' ? 'green' : 'blue'}>
-                    {product.status === 'ready' ? 'READY STOCK' : 'PRE-ORDER'}
+              <Box key={product.id} borderWidth="1px" borderRadius="lg" overflow="hidden" p={{ base: 2, md: 4 }}>
+                <Image 
+                  src={imageUrl} 
+                  alt={product.name} 
+                  mb={{ base: 2, md: 4 }} 
+                  height={{ base: "150px", md: "200px" }} 
+                  width="100%" 
+                  objectFit="cover" 
+                />
+                <VStack align="start" gap={{ base: 1, md: 2 }}>
+                  <Badge 
+                    colorPalette={product.status === 'ready' ? 'green' : 'blue'} 
+                    size={{ base: "sm", md: "md" }}
+                  >
+                    {product.status === 'ready' ? 'READY' : 'PRE-ORDER'}
                   </Badge>
-                  <Heading size="md">{product.name}</Heading>
-                  <Text fontWeight="bold">Rp {Number(product.base_price).toLocaleString()}</Text>
-                  <Button asChild width="full" colorPalette="teal">
-                    <Link to={`/products/${product.slug || product.id}`}>View Details</Link>
+                  <Heading size={{ base: "sm", md: "md" }} lineClamp={2} minH={{ base: "2.5em", md: "auto" }}>
+                    {product.name}
+                  </Heading>
+                  <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
+                    Rp {Number(product.base_price).toLocaleString()}
+                  </Text>
+                  <Button asChild width="full" colorPalette="teal" size={{ base: "xs", md: "md" }}>
+                    <Link to={`/products/${product.slug || product.id}`}>View</Link>
                   </Button>
                 </VStack>
               </Box>

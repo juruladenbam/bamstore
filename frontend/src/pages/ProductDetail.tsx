@@ -276,7 +276,7 @@ const ProductDetail: React.FC = () => {
   };
 
   return (
-    <Container maxW="container.md" py={10}>
+    <Container maxW="container.md" py={{ base: 4, md: 10 }} px={{ base: 0, md: 4 }}>
       <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
         <DialogContent>
           <DialogHeader>
@@ -305,14 +305,20 @@ const ProductDetail: React.FC = () => {
         </DialogContent>
       </DialogRoot>
 
-      <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={6}>
+      <Box 
+        borderWidth={{ base: 0, md: "1px" }} 
+        borderRadius={{ base: "none", md: "lg" }} 
+        overflow="hidden" 
+        p={{ base: 4, md: 6 }}
+        bg="white"
+      >
         <Box mb={6}>
           <Image 
             src={currentImageSrc} 
             alt={product.name} 
-            borderRadius="md" 
+            borderRadius={{ base: "none", md: "md" }}
             width="100%" 
-            height="400px" 
+            height={{ base: "300px", md: "400px" }} 
             objectFit="contain" 
           />
           {images.length > 1 && (
@@ -344,8 +350,8 @@ const ProductDetail: React.FC = () => {
           <Badge colorPalette={product.status === 'ready' ? 'green' : 'blue'}>
             {product.status === 'ready' ? 'READY STOCK' : 'PRE-ORDER'}
           </Badge>
-          <Heading size="xl">{product.name}</Heading>
-          <Text fontSize="2xl" fontWeight="bold" color="teal.600">
+          <Heading size={{ base: "lg", md: "xl" }}>{product.name}</Heading>
+          <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="teal.600">
             Rp {currentPrice.toLocaleString()}
           </Text>
           
