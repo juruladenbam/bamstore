@@ -13,11 +13,11 @@ const Navbar: React.FC = () => {
 
   // Calculate total items count
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
-  const isProductDetail = location.pathname.startsWith('/products/');
+  const isHome = location.pathname === '/';
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent) => {
     if ((e.type === 'keydown' && (e as React.KeyboardEvent).key === 'Enter') || e.type === 'click') {
-      navigate(`/?search=${encodeURIComponent(searchQuery)}`);
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -39,7 +39,7 @@ const Navbar: React.FC = () => {
         <Flex justify="space-between" align="center" maxW="container.xl" mx="auto" gap={4}>
           {/* Brand */}
           <Heading size={{ base: "md", md: "lg" }} whiteSpace="nowrap">
-            {isProductDetail ? (
+            {!isHome ? (
               <>
                 <ChakraLink asChild display={{ base: 'flex', md: 'none' }} color="white" _hover={{ textDecoration: 'none' }}>
                   <Link to="/">
@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
           {/* Desktop Menu */}
           <Flex gap={6} align="center" display={{ base: 'none', md: 'flex' }}>
             <ChakraLink asChild color="white" fontWeight="medium">
-              <Link to="/">Products</Link>
+              <Link to="/products">Products</Link>
             </ChakraLink>
             
             <ChakraLink asChild color="white" position="relative" fontWeight="medium">
@@ -168,14 +168,11 @@ const Navbar: React.FC = () => {
       >
         <Flex justify="space-around" align="center">
           <NavItem to="/" icon={FaHome} label="Home" isActive={location.pathname === '/'} />
-          <NavItem to="/" icon={FaBoxOpen} label="Products" isActive={location.pathname === '/products'} />
+          <NavItem to="/products" icon={FaBoxOpen} label="Products" isActive={location.pathname.startsWith('/products')} />
           <NavItem to="/activity" icon={FaClipboardList} label="Activity" isActive={location.pathname === '/activity'} />
           <NavItem to="/history" icon={FaHistory} label="My Orders" isActive={location.pathname === '/history'} />
         </Flex>
       </Box>
-      
-      {/* Spacer for Bottom Nav on Mobile to prevent content being hidden */}
-      <Box height={{ base: "60px", md: "0" }} display={{ base: 'block', md: 'none' }} />
     </>
   );
 };
