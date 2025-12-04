@@ -1,16 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Flex, Heading, Link as ChakraLink, Badge, Input, Icon, VStack, Text } from '@chakra-ui/react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { FaHome, FaBoxOpen, FaClipboardList, FaHistory, FaShoppingCart, FaSearch } from 'react-icons/fa';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const isAdmin = location.pathname.startsWith('/admin');
   const { items } = useCart();
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Calculate total items count
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent) => {
+    if ((e.type === 'keydown' && (e as React.KeyboardEvent).key === 'Enter') || e.type === 'click') {
+      navigate(`/?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   if (isAdmin) return null;
 
@@ -44,8 +52,19 @@ const Navbar: React.FC = () => {
                   size={{ base: "sm", md: "md" }}
                   _placeholder={{ color: 'gray.500' }}
                   paddingRight="2.5rem"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
                 />
-                <Box position="absolute" right="3" top="50%" transform="translateY(-50%)" color="gray.500">
+                <Box 
+                  position="absolute" 
+                  right="3" 
+                  top="50%" 
+                  transform="translateY(-50%)" 
+                  color="gray.500"
+                  cursor="pointer"
+                  onClick={handleSearch}
+                >
                     <FaSearch />
                 </Box>
              </Box>
