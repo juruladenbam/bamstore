@@ -11,11 +11,61 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/admin/products",
+     *     summary="Get list of products (Admin)",
+     *     tags={"Admin Products"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function index()
     {
         return response()->json(Product::with(['category', 'vendor', 'variants', 'skus', 'images'])->get());
     }
 
+    /**
+     * @OA\Post(
+     *     path="/admin/products",
+     *     summary="Create a new product",
+     *     tags={"Admin Products"},
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"category_id", "name", "status", "base_price"},
+     *                 @OA\Property(property="category_id", type="integer", example=1),
+     *                 @OA\Property(property="vendor_id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="New Product"),
+     *                 @OA\Property(property="description", type="string", example="Product description"),
+     *                 @OA\Property(property="status", type="string", enum={"ready", "pre_order"}, example="ready"),
+     *                 @OA\Property(property="base_price", type="number", format="float", example=10000),
+     *                 @OA\Property(property="image_url", type="string"),
+     *                 @OA\Property(property="payload", type="string", description="JSON string for complex nested data (variants, skus)"),
+     *                 @OA\Property(
+     *                     property="images[]",
+     *                     type="array",
+     *                     @OA\Items(type="string", format="binary")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Product created successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
+     */
     public function store(Request $request)
     {
         if ($request->has('payload')) {
@@ -101,15 +151,86 @@ class ProductController extends Controller
         }
     }
 
-    public function show(string $id)
+    /**
+     * @OA\Get(
+     *     path="/admin/products/{id}",
+     *     summary="Get product details (Admin)",
+     *     tags={"Admin Products"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Product ID or Slug",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Product not found"
+     *     )
+     * )
+     */
+    public function show(Product $product)
     {
-        return response()->json(Product::with(['category', 'vendor', 'variants', 'skus', 'images'])->findOrFail($id));
+        return response()->json($product->load(['category', 'vendor', 'variants', 'skus', 'images']));
     }
 
-    public function update(Request $request, string $id)
+    /**
+     * @OA\Post(
+     *     path="/admin/products/{id}",
+     *     summary="Update a product",
+     *     description="Use POST with _method=PUT or just POST for multipart/form-data update",
+     *     tags={"Admin Products"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Product ID or Slug",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="_method", type="string", example="PUT"),
+     *                 @OA\Property(property="category_id", type="integer"),
+     *                 @OA\Property(property="vendor_id", type="integer"),
+     *                 @OA\Property(property="name", type="string"),
+     *                 @OA\Property(property="description", type="string"),
+     *                 @OA\Property(property="status", type="string", enum={"ready", "pre_order"}),
+     *                 @OA\Property(property="base_price", type="number", format="float"),
+     *                 @OA\Property(property="payload", type="string", description="JSON string for complex nested data"),
+     *                 @OA\Property(
+     *                     property="images[]",
+     *                     type="array",
+     *                     @OA\Items(type="string", format="binary")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="deleted_images[]",
+     *                     type="array",
+     *                     @OA\Items(type="integer")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Product updated successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Product not found"
+     *     )
+     * )
+     */
+    public function update(Request $request, Product $product)
     {
-        $product = Product::findOrFail($id);
-
         if ($request->has('payload')) {
             $request->merge(json_decode($request->input('payload'), true));
         }
@@ -242,9 +363,32 @@ class ProductController extends Controller
         }
     }
 
-    public function destroy(string $id)
+    /**
+     * @OA\Delete(
+     *     path="/admin/products/{id}",
+     *     summary="Delete a product",
+     *     tags={"Admin Products"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Product ID or Slug",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Product deleted"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Product not found"
+     *     )
+     * )
+     */
+    public function destroy(Product $product)
     {
-        Product::findOrFail($id)->delete();
+        $product->delete();
         return response()->json(null, 204);
     }
 }

@@ -8,6 +8,28 @@ use Illuminate\Http\Request;
 
 class OrderHistoryController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/history",
+     *     summary="Get order history by phone number",
+     *     tags={"Orders"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"phone_number"},
+     *             @OA\Property(property="phone_number", type="string", example="08123456789")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $request->validate([

@@ -23,6 +23,7 @@ class ProductSeeder extends Seeder
         $product = Product::create([
             'category_id' => $category->id,
             'name' => 'Kaos Festival BAM 2026',
+            'slug' => 'kaos-festival-bam-2026',
             'description' => 'Kaos Festival BAM 2026 keren',
             'status' => 'ready',
             'base_price' => 75000,

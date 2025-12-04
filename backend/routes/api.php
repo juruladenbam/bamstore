@@ -17,7 +17,7 @@ Route::get('/user', function (Request $request) {
 
 // Storefront Public Routes
 Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/order-activity', [\App\Http\Controllers\Api\OrderActivityController::class, 'index']);
 Route::post('/history', [\App\Http\Controllers\Api\OrderHistoryController::class, 'index']);

@@ -64,7 +64,7 @@ const ProductForm: React.FC = () => {
           id: v.id,
           name: v.name,
           type: v.type || 'General',
-          price_adjustment: formatNumber(v.price_adjustment),
+          price_adjustment: formatNumber(Math.floor(Number(v.price_adjustment))),
         })) || [];
 
         // Map SKUs
@@ -74,7 +74,7 @@ const ProductForm: React.FC = () => {
           return {
             id: s.id,
             variant_indices: indices,
-            price: formatNumber(s.price),
+            price: formatNumber(Math.floor(Number(s.price))),
             stock: s.stock,
             sku: s.sku
           };
@@ -93,7 +93,7 @@ const ProductForm: React.FC = () => {
         setFormData({
           name: p.name,
           description: p.description || '',
-          base_price: formatNumber(p.base_price),
+          base_price: formatNumber(Math.floor(Number(p.base_price))),
           stock: globalStock,
           simple_sku: simpleSku,
           status: p.status,

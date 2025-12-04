@@ -83,7 +83,7 @@ const AdminProductList: React.FC = () => {
                 <Table.Cell>
                   <HStack>
                     <Button asChild size="xs" variant="outline">
-                      <Link to={`/admin/products/${product.id}/edit`}>Edit</Link>
+                      <Link to={`/admin/products/${product.slug || product.id}/edit`}>Edit</Link>
                     </Button>
                     <Button size="xs" colorPalette="red" variant="ghost" onClick={() => setDeleteId(product.id)}>
                       Delete

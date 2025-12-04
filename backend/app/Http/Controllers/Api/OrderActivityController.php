@@ -8,6 +8,24 @@ use Illuminate\Http\Request;
 
 class OrderActivityController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/order-activity",
+     *     summary="Get recent order activity",
+     *     tags={"Orders"},
+     *     @OA\Parameter(
+     *         name="search",
+     *         in="query",
+     *         description="Search by recipient name",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function index(Request $request)
     {
         $query = OrderItem::with(['product', 'variants', 'order'])

@@ -6,6 +6,14 @@ import { STORAGE_URL }                                                          
 import { useCart }                                                                    from '../context/CartContext';
 import type { Product, ProductVariant }                                               from '../types';
 import { toaster }                                                                    from '../components/ui/toaster';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+} from "../components/ui/dialog"
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +29,7 @@ const ProductDetail: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [errors, setErrors] = useState<{ recipientNames?: boolean[], missingVariants?: string[] }>({});
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   // Auto-complete state
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -263,19 +272,53 @@ const ProductDetail: React.FC = () => {
       description: `${product?.name} added to your cart.`,
       type: "success",
     });
-    navigate('/checkout');
+    setIsDialogOpen(true);
   };
 
   return (
-    <Container maxW="container.md" py={10}>
-      <Box borderWidth="1px" borderRadius="lg" overflow="hidden" p={6}>
+    <Container maxW="container.md" py={{ base: 4, md: 10 }} px={{ base: 0, md: 4 }}>
+      <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Added to Cart</DialogTitle>
+          </DialogHeader>
+          <DialogBody>
+            <VStack align="start" gap={2}>
+              <Text fontWeight="bold">{product.name}</Text>
+              {selectedVariants.length > 0 && (
+                <Text fontSize="sm" color="gray.600">
+                  Variants: {selectedVariants.map(v => v.name).join(', ')}
+                </Text>
+              )}
+              <Text fontSize="sm">
+                Quantity: {quantity}
+              </Text>
+              <Text fontWeight="bold" color="teal.600">
+                Total: Rp {(currentPrice * quantity).toLocaleString()}
+              </Text>
+            </VStack>
+          </DialogBody>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Add Another Product</Button>
+            <Button colorPalette="teal" onClick={() => navigate('/checkout')}>Continue to Checkout</Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
+
+      <Box 
+        borderWidth={{ base: 0, md: "1px" }} 
+        borderRadius={{ base: "none", md: "lg" }} 
+        overflow="hidden" 
+        p={{ base: 4, md: 6 }}
+        bg="white"
+      >
         <Box mb={6}>
           <Image 
             src={currentImageSrc} 
             alt={product.name} 
-            borderRadius="md" 
+            borderRadius={{ base: "none", md: "md" }}
             width="100%" 
-            height="400px" 
+            height={{ base: "300px", md: "400px" }} 
             objectFit="contain" 
           />
           {images.length > 1 && (
@@ -307,8 +350,8 @@ const ProductDetail: React.FC = () => {
           <Badge colorPalette={product.status === 'ready' ? 'green' : 'blue'}>
             {product.status === 'ready' ? 'READY STOCK' : 'PRE-ORDER'}
           </Badge>
-          <Heading size="xl">{product.name}</Heading>
-          <Text fontSize="2xl" fontWeight="bold" color="teal.600">
+          <Heading size={{ base: "lg", md: "xl" }}>{product.name}</Heading>
+          <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="teal.600">
             Rp {currentPrice.toLocaleString()}
           </Text>
           

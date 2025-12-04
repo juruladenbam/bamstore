@@ -7,6 +7,7 @@ export interface Category {
 export interface Vendor {
   id: number;
   name: string;
+  slug?: string;
   contact_info?: string;
   address?: string;
 }
@@ -41,6 +42,7 @@ export interface Product {
   category_id: number;
   vendor_id?: number;
   name: string;
+  slug?: string;
   description?: string;
   status: 'ready' | 'pre_order';
   base_price: number;
@@ -77,6 +79,7 @@ export interface OrderItem {
 
 export interface Order {
   id: number;
+  order_number?: string;
   checkout_name: string;
   phone_number: string;
   qobilah: string;

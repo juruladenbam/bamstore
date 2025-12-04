@@ -63,6 +63,7 @@ const AdminVendorList: React.FC = () => {
           <Table.Header>
             <Table.Row>
               <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Slug</Table.ColumnHeader>
               <Table.ColumnHeader>Contact Info</Table.ColumnHeader>
               <Table.ColumnHeader>Actions</Table.ColumnHeader>
             </Table.Row>
@@ -71,11 +72,12 @@ const AdminVendorList: React.FC = () => {
             {vendors.map(vendor => (
               <Table.Row key={vendor.id}>
                 <Table.Cell>{vendor.name}</Table.Cell>
+                <Table.Cell>{vendor.slug}</Table.Cell>
                 <Table.Cell>{vendor.contact_info}</Table.Cell>
                 <Table.Cell>
                   <HStack>
                     <Button asChild size="xs" variant="outline">
-                      <Link to={`/admin/vendors/${vendor.id}/edit`}>Edit</Link>
+                      <Link to={`/admin/vendors/${vendor.slug || vendor.id}/edit`}>Edit</Link>
                     </Button>
                     <Button asChild size="xs" variant="outline" colorPalette="blue">
                       <Link to={`/admin/vendors/${vendor.id}/payments`}>Payments</Link>

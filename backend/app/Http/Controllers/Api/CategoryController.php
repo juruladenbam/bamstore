@@ -9,10 +9,41 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/categories",
+     *     summary="Get list of categories",
+     *     tags={"Categories"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
      */
     public function index()
     {
         return response()->json(Category::all());
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/categories/{category}",
+     *     summary="Get category details",
+     *     tags={"Categories"},
+     *     @OA\Parameter(
+     *         name="category",
+     *         in="path",
+     *         required=true,
+     *         description="Category ID or Slug",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
+    public function show(Category $category)
+    {
+        return response()->json($category);
     }
 }

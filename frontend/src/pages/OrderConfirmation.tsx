@@ -7,6 +7,7 @@ import type { CartItem } from '../types';
 
 interface OrderConfirmationState {
   orderId: number;
+  orderNumber?: string;
   totalAmount: number;
   items: CartItem[];
   formData: {
@@ -33,7 +34,7 @@ const OrderConfirmation: React.FC = () => {
     );
   }
 
-  const { orderId, totalAmount, items, formData } = state;
+  const { orderId, orderNumber, totalAmount, items, formData } = state;
 
   const handleDownload = async () => {
     if (!printRef.current) return;
@@ -43,7 +44,7 @@ const OrderConfirmation: React.FC = () => {
       const image = canvas.toDataURL("image/png");
       const link = document.createElement("a");
       link.href = image;
-      link.download = `Order-${orderId}.png`;
+      link.download = `Order-${orderNumber || orderId}.png`;
       link.click();
       toaster.create({ title: "Image Downloaded", type: "success" });
     } catch (error) {
@@ -68,7 +69,7 @@ const OrderConfirmation: React.FC = () => {
           borderColor="#e2e8f0"
         >
           <VStack align="stretch" gap={4}>
-            <Heading size="md" textAlign="center" mb={2} color="#000000">BAM Store Order #{orderId}</Heading>
+            <Heading size="md" textAlign="center" mb={2} color="#000000">BAM Store Order {orderNumber || '#' + orderId}</Heading>
             
             <Box color="#000000">
               <Text fontWeight="bold">Recipient Details</Text>

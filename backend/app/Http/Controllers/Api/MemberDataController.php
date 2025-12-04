@@ -8,6 +8,24 @@ use Illuminate\Http\Request;
 
 class MemberDataController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/members/search",
+     *     summary="Search members by name or phone",
+     *     tags={"Members"},
+     *     @OA\Parameter(
+     *         name="query",
+     *         in="query",
+     *         description="Search query (min 3 chars)",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation"
+     *     )
+     * )
+     */
     public function search(Request $request)
     {
         $query = $request->input('query');
