@@ -1,6 +1,7 @@
 import { Routes, Route }                                from 'react-router-dom';
 import { CartProvider }                                 from './context/CartContext';
 import Navbar                                           from './components/Navbar';
+import Home                                             from './pages/Home';
 import ProductList                                      from './pages/ProductList';
 import ProductDetail                                    from './pages/ProductDetail';
 import Checkout                                         from './pages/Checkout';
@@ -31,10 +32,11 @@ function App() {
   return (
     <CartProvider>
       <Toaster />
-      <Box minH="100vh" bg="gray.50">
+      <Box minH="100vh" bg="gray.50" pb={{ base: "60px", md: 0 }}>
         <Navbar />
         <Routes>
-          <Route path="/" element={<ProductList />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<ProductList />} />
           <Route path="/products/:id" element={<ProductDetail />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/activity" element={<OrderActivity />} />
