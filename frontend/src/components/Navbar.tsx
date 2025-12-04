@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Flex, Heading, Link as ChakraLink, Badge, Input, Icon, VStack, Text } from '@chakra-ui/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { FaHome, FaBoxOpen, FaClipboardList, FaHistory, FaShoppingCart, FaSearch } from 'react-icons/fa';
+import { FaHome, FaBoxOpen, FaClipboardList, FaHistory, FaShoppingCart, FaSearch, FaArrowLeft } from 'react-icons/fa';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -13,6 +13,7 @@ const Navbar: React.FC = () => {
 
   // Calculate total items count
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const isProductDetail = location.pathname.startsWith('/products/');
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement> | React.MouseEvent) => {
     if ((e.type === 'keydown' && (e as React.KeyboardEvent).key === 'Enter') || e.type === 'click') {
@@ -38,7 +39,23 @@ const Navbar: React.FC = () => {
         <Flex justify="space-between" align="center" maxW="container.xl" mx="auto" gap={4}>
           {/* Brand */}
           <Heading size={{ base: "md", md: "lg" }} whiteSpace="nowrap">
-            <Link to="/">BAM Store</Link>
+            {isProductDetail ? (
+              <>
+                <ChakraLink asChild display={{ base: 'flex', md: 'none' }} color="white" _hover={{ textDecoration: 'none' }}>
+                  <Link to="/">
+                    <Flex align="center" gap={2}>
+                      <Icon><FaArrowLeft /></Icon>
+                      <Text fontSize="md">Back</Text>
+                    </Flex>
+                  </Link>
+                </ChakraLink>
+                <ChakraLink asChild display={{ base: 'none', md: 'block' }} color="white" _hover={{ textDecoration: 'none' }}>
+                  <Link to="/">BAM Store</Link>
+                </ChakraLink>
+              </>
+            ) : (
+              <Link to="/">BAM Store</Link>
+            )}
           </Heading>
 
           {/* Search Bar - Center */}
