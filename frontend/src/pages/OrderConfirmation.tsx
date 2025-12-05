@@ -26,9 +26,9 @@ const OrderConfirmation: React.FC = () => {
   if (!state) {
     return (
       <Container py={10}>
-        <Heading>Order Not Found</Heading>
+        <Heading>Pesanan Tidak Ditemukan</Heading>
         <Button asChild mt={4} colorPalette="teal">
-          <Link to="/">Back to Home</Link>
+          <Link to="/">Kembali ke Beranda</Link>
         </Button>
       </Container>
     );
@@ -46,18 +46,18 @@ const OrderConfirmation: React.FC = () => {
       link.href = image;
       link.download = `Order-${orderNumber || orderId}.png`;
       link.click();
-      toaster.create({ title: "Image Downloaded", type: "success" });
+      toaster.create({ title: "Berhasil Diunduh", type: "success" });
     } catch (error) {
       console.error(error);
-      toaster.create({ title: "Download Failed", type: "error" });
+      toaster.create({ title: "Gagal Mengunduh", type: "error" });
     }
   };
 
   return (
     <Container maxW="container.md" py={10}>
       <VStack gap={6}>
-        <Heading color="teal.600">Order Placed Successfully!</Heading>
-        <Text>Thank you for your order. Please save this confirmation.</Text>
+        <Heading color="teal.600">Pesanan Berhasil Dibuat!</Heading>
+        <Text>Terima kasih atas pesanan Anda. Silakan simpan konfirmasi ini.</Text>
 
         <Box 
           ref={printRef} 
@@ -69,10 +69,10 @@ const OrderConfirmation: React.FC = () => {
           borderColor="#e2e8f0"
         >
           <VStack align="stretch" gap={4}>
-            <Heading size="md" textAlign="center" mb={2} color="#000000">BAM Store Order {orderNumber || '#' + orderId}</Heading>
-            
+            <Heading size="md" textAlign="center" mb={2} color="#000000">Pesanan BAM Store {orderNumber || '#' + orderId}</Heading>
+
             <Box color="#000000">
-              <Text fontWeight="bold">Recipient Details</Text>
+              <Text fontWeight="bold">Detail Penerima</Text>
               <Text>{formData.checkout_name}</Text>
               <Text>{formData.phone_number}</Text>
               <Text>{formData.qobilah}</Text>
@@ -81,7 +81,7 @@ const OrderConfirmation: React.FC = () => {
             <Box borderBottomWidth="1px" borderColor="#e2e8f0" />
 
             <Box color="#000000">
-              <Text fontWeight="bold" mb={2}>Items</Text>
+              <Text fontWeight="bold" mb={2}>Item</Text>
               {items.map((item, index) => (
                 <Box key={index} mb={2}>
                   <HStack justify="space-between">
@@ -92,7 +92,7 @@ const OrderConfirmation: React.FC = () => {
                     {item.quantity} x Rp {item.unit_price.toLocaleString()}
                     {item.variants.length > 0 && ` (${item.variants.map(v => v.name).join(', ')})`}
                   </Text>
-                  <Text fontSize="xs" color="#718096">For: {item.recipient_name}</Text>
+                  <Text fontSize="xs" color="#718096">Untuk: {item.recipient_name}</Text>
                 </Box>
               ))}
             </Box>
@@ -100,29 +100,29 @@ const OrderConfirmation: React.FC = () => {
             <Box borderBottomWidth="1px" borderColor="#e2e8f0" />
 
             <HStack justify="space-between">
-              <Heading size="sm" color="#000000">Total Amount</Heading>
+              <Heading size="sm" color="#000000">Total Pembayaran</Heading>
               <Heading size="sm" color="#2c7a7b">Rp {totalAmount.toLocaleString()}</Heading>
             </HStack>
 
             <Box bg="#f7fafc" p={3} borderRadius="md" mt={2} color="#000000">
-              <Text fontWeight="bold" fontSize="sm">Payment Method: {formData.payment_method === 'transfer' ? 'Bank Transfer' : 'Cash'}</Text>
+              <Text fontWeight="bold" fontSize="sm">Metode Pembayaran: {formData.payment_method === 'transfer' ? 'Transfer Bank' : 'Tunai'}</Text>
               {formData.payment_method === 'transfer' ? (
                 <Text fontSize="sm">BCA 1234567890 a.n BAM Store</Text>
               ) : (
-                <Text fontSize="sm">Pay at Secretariat</Text>
+                <Text fontSize="sm">Bayar di Sekretariat</Text>
               )}
             </Box>
             
             <Text fontSize="xs" textAlign="center" color="#a0aec0" mt={4}>
-              Generated on {new Date().toLocaleDateString()}
+              Dibuat pada {new Date().toLocaleDateString('id-ID')}
             </Text>
           </VStack>
         </Box>
 
         <HStack>
-          <Button onClick={handleDownload} colorPalette="blue">Download as Image</Button>
+          <Button onClick={handleDownload} colorPalette="blue">Unduh sebagai Gambar</Button>
           <Button asChild variant="outline">
-            <Link to="/">Back to Home</Link>
+            <Link to="/">Kembali ke Beranda</Link>
           </Button>
         </HStack>
       </VStack>

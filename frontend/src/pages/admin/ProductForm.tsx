@@ -283,7 +283,7 @@ const ProductForm: React.FC = () => {
 
       if (errorMessages.length > 0) {
         toaster.create({
-          title: "Image Validation Error",
+          title: "Kesalahan Validasi Gambar",
           description: errorMessages.join("\n"),
           type: "error",
         });
@@ -313,33 +313,33 @@ const ProductForm: React.FC = () => {
 
     if (!formData.name.trim()) {
       newErrors.name = true;
-      errorMessages.push("Name is required");
+      errorMessages.push("Nama wajib diisi");
     }
     if (!formData.category_id) {
       newErrors.category_id = true;
-      errorMessages.push("Category is required");
+      errorMessages.push("Kategori wajib diisi");
     }
     if (!formData.base_price) {
       newErrors.base_price = true;
-      errorMessages.push("Base Price is required");
+      errorMessages.push("Harga Dasar wajib diisi");
     }
-    
+
     if (productType === 'simple') {
       if (formData.stock === '' || formData.stock === null) {
         newErrors.stock = true;
-        errorMessages.push("Stock is required for simple products");
+        errorMessages.push("Stok wajib diisi untuk produk sederhana");
       }
     } else {
       if (formData.variants.length === 0) {
         newErrors.variants = true;
-        errorMessages.push("At least one variant is required for variable products");
+        errorMessages.push("Minimal satu varian wajib diisi untuk produk variabel");
       }
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       toaster.create({
-        title: "Validation Error",
+        title: "Kesalahan Validasi",
         description: errorMessages.join("\n"),
         type: "error",
       });
@@ -408,14 +408,14 @@ const ProductForm: React.FC = () => {
         });
       }
       toaster.create({
-        title: "Success",
-        description: `Product ${isEdit ? 'updated' : 'created'} successfully.`,
+        title: "Berhasil",
+        description: `Produk berhasil ${isEdit ? 'diperbarui' : 'dibuat'}.`,
         type: "success",
       });
       navigate('/admin/products');
     } catch (error) {
       console.error(error);
-      let description = "Failed to save product.";
+      let description = "Gagal menyimpan produk.";
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const err = error as any;
 
@@ -427,7 +427,7 @@ const ProductForm: React.FC = () => {
         // Handle raw database errors (e.g. duplicate SKU)
         if (err.response.data.error && typeof err.response.data.error === 'string') {
           if (err.response.data.error.includes('UNIQUE constraint failed: product_skus.sku')) {
-            description = "The SKU is already in use. Please use a unique SKU.";
+            description = "SKU sudah digunakan. Gunakan SKU yang unik.";
           }
         }
 
@@ -467,7 +467,7 @@ const ProductForm: React.FC = () => {
       }
 
       toaster.create({
-        title: "Error",
+        title: "Kesalahan",
         description: description,
         type: "error",
       });
@@ -476,11 +476,11 @@ const ProductForm: React.FC = () => {
 
   return (
     <Box bg="white" p={6} borderRadius="lg" shadow="sm">
-      <Heading mb={6}>{isEdit ? 'Edit Product' : 'New Product'}</Heading>
+      <Heading mb={6}>{isEdit ? 'Ubah Produk' : 'Produk Baru'}</Heading>
       
       <VStack gap={4} align="stretch">
         <Box>
-          <Text mb={1}>Name <Text as="span" color="red.500">*</Text></Text>
+          <Text mb={1}>Nama <Text as="span" color="red.500">*</Text></Text>
           <Input 
             value={formData.name} 
             onChange={e => {
@@ -493,10 +493,10 @@ const ProductForm: React.FC = () => {
 
         <HStack gap={4} align="start">
           <Box flex={1}>
-            <Text mb={1}>Category <Text as="span" color="red.500">*</Text></Text>
+            <Text mb={1}>Kategori <Text as="span" color="red.500">*</Text></Text>
             <NativeSelect.Root>
-              <NativeSelect.Field 
-                placeholder="Select Category" 
+              <NativeSelect.Field
+                placeholder="Pilih Kategori" 
                 value={formData.category_id} 
                 onChange={e => {
                   setFormData({...formData, category_id: e.target.value});
@@ -510,10 +510,10 @@ const ProductForm: React.FC = () => {
             </NativeSelect.Root>
           </Box>
           <Box flex={1}>
-            <Text mb={1}>Vendor (Optional)</Text>
+            <Text mb={1}>Vendor (Opsional)</Text>
             <NativeSelect.Root>
-              <NativeSelect.Field 
-                placeholder="Select Vendor" 
+              <NativeSelect.Field
+                placeholder="Pilih Vendor" 
                 value={formData.vendor_id} 
                 onChange={e => setFormData({...formData, vendor_id: e.target.value})}
               >
@@ -525,14 +525,14 @@ const ProductForm: React.FC = () => {
           </Box>
         </HStack>
         <Box>
-          <Text mb={1}>Product Type</Text>
+          <Text mb={1}>Tipe Produk</Text>
           <NativeSelect.Root>
-            <NativeSelect.Field 
-              value={productType} 
+            <NativeSelect.Field
+              value={productType}
               onChange={handleProductTypeChange}
             >
-              <option value="simple">Simple Product (No Variants)</option>
-              <option value="variable">Variable Product (Size, Color, etc.)</option>
+              <option value="simple">Produk Sederhana (Tanpa Varian)</option>
+              <option value="variable">Produk Variabel (Ukuran, Warna, dll.)</option>
             </NativeSelect.Field>
           </NativeSelect.Root>
         </Box>
@@ -540,18 +540,18 @@ const ProductForm: React.FC = () => {
         <Box>
           <Text mb={1}>Status</Text>
           <NativeSelect.Root>
-            <NativeSelect.Field 
-              value={formData.status} 
+            <NativeSelect.Field
+              value={formData.status}
               onChange={e => setFormData({...formData, status: e.target.value})}
             >
-              <option value="ready">Ready Stock</option>
+              <option value="ready">Stok Tersedia</option>
               <option value="pre_order">Pre-Order</option>
             </NativeSelect.Field>
           </NativeSelect.Root>
         </Box>
 
         <Box>
-          <Text mb={1}>Base Price <Text as="span" color="red.500">*</Text></Text>
+          <Text mb={1}>Harga Dasar <Text as="span" color="red.500">*</Text></Text>
           <Input 
             value={formData.base_price} 
             onChange={e => {
@@ -565,36 +565,36 @@ const ProductForm: React.FC = () => {
         {productType === 'simple' && (
           <HStack gap={4} align="start">
             <Box flex={1}>
-              <Text mb={1}>{formData.status === 'pre_order' ? 'Quota' : 'Stock'} <Text as="span" color="red.500">*</Text></Text>
-              <Input 
-                type="number" 
-                value={formData.stock} 
+              <Text mb={1}>{formData.status === 'pre_order' ? 'Kuota' : 'Stok'} <Text as="span" color="red.500">*</Text></Text>
+              <Input
+                type="number"
+                value={formData.stock}
                 onChange={e => {
                   setFormData({...formData, stock: e.target.value});
                   if (errors.stock) setErrors(prev => ({...prev, stock: false}));
-                }} 
-                placeholder={formData.status === 'pre_order' ? "Available Quota" : "Available Stock"}
+                }}
+                placeholder={formData.status === 'pre_order' ? "Kuota Tersedia" : "Stok Tersedia"}
                 borderColor={errors.stock ? "red.500" : undefined}
               />
             </Box>
             <Box flex={1}>
-              <Text mb={1}>SKU (Optional)</Text>
-              <Input 
-                value={formData.simple_sku} 
-                onChange={e => setFormData({...formData, simple_sku: e.target.value})} 
-                placeholder="e.g. PROD-001"
+              <Text mb={1}>SKU (Opsional)</Text>
+              <Input
+                value={formData.simple_sku}
+                onChange={e => setFormData({...formData, simple_sku: e.target.value})}
+                placeholder="contoh: PROD-001"
               />
             </Box>
           </HStack>
         )}
 
         <Box>
-          <Text mb={1}>Description</Text>
+          <Text mb={1}>Deskripsi</Text>
           <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
         </Box>
 
         <Box borderWidth="1px" p={4} borderRadius="md">
-          <Heading size="sm" mb={4}>Images</Heading>
+          <Heading size="sm" mb={4}>Gambar</Heading>
           <Input type="file" multiple accept="image/*" onChange={handleImageChange} mb={4} />
           
           <HStack wrap="wrap" gap={4}>
@@ -632,23 +632,23 @@ const ProductForm: React.FC = () => {
         {productType === 'variable' && (
           <Box borderWidth="1px" p={4} borderRadius="md">
             <HStack justify="space-between" mb={4}>
-              <Heading size="sm">Variants</Heading>
-              <Button size="xs" onClick={addVariant}>Add Variant</Button>
+              <Heading size="sm">Varian</Heading>
+              <Button size="xs" onClick={addVariant}>Tambah Varian</Button>
             </HStack>
             
             <VStack gap={3}>
               {formData.variants.map((variant, index) => (
                 <HStack key={index} w="full" align="end">
                   <Box flex={1}>
-                    <Text fontSize="xs">Type</Text>
-                    <Input value={variant.type} onChange={e => handleVariantChange(index, 'type', e.target.value)} placeholder="Size/Color" />
+                    <Text fontSize="xs">Tipe</Text>
+                    <Input value={variant.type} onChange={e => handleVariantChange(index, 'type', e.target.value)} placeholder="Ukuran/Warna" />
                   </Box>
                   <Box flex={2}>
-                    <Text fontSize="xs">Name</Text>
-                    <Input value={variant.name} onChange={e => handleVariantChange(index, 'name', e.target.value)} placeholder="S, M, Red..." />
+                    <Text fontSize="xs">Nama</Text>
+                    <Input value={variant.name} onChange={e => handleVariantChange(index, 'name', e.target.value)} placeholder="S, M, Merah..." />
                   </Box>
                   <Box flex={1}>
-                    <Text fontSize="xs">Adj. Price</Text>
+                    <Text fontSize="xs">Penyesuaian Harga</Text>
                     <Input value={variant.price_adjustment} onChange={e => handleVariantChange(index, 'price_adjustment', formatNumber(e.target.value))} />
                   </Box>
                   <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeVariant(index)}>X</Button>
@@ -661,29 +661,29 @@ const ProductForm: React.FC = () => {
         {productType === 'variable' && (
           <Box borderWidth="1px" p={4} borderRadius="md">
             <HStack justify="space-between" mb={4}>
-              <Heading size="sm">Inventory / SKUs</Heading>
+              <Heading size="sm">Inventaris / SKU</Heading>
               <HStack>
-                <Button size="xs" onClick={addSku}>Add SKU</Button>
-                <Button size="xs" onClick={generateSkus}>Generate All</Button>
+                <Button size="xs" onClick={addSku}>Tambah SKU</Button>
+                <Button size="xs" onClick={generateSkus}>Generate Semua</Button>
               </HStack>
             </HStack>
-            
+
             <HStack mb={4} align="end" gap={4}>
                <Box>
-                  <Text fontSize="xs" mb={1}>Bulk Stock (Optional)</Text>
-                  <Input 
-                    size="sm" 
-                    width="150px" 
-                    placeholder="e.g. 100" 
-                    value={bulkStock} 
-                    onChange={(e) => setBulkStock(e.target.value)} 
+                  <Text fontSize="xs" mb={1}>Stok Massal (Opsional)</Text>
+                  <Input
+                    size="sm"
+                    width="150px"
+                    placeholder="contoh: 100"
+                    value={bulkStock}
+                    onChange={(e) => setBulkStock(e.target.value)}
                   />
                </Box>
-               <Button size="sm" variant="outline" onClick={applyBulkStock}>Apply to Existing SKUs</Button>
+               <Button size="sm" variant="outline" onClick={applyBulkStock}>Terapkan ke SKU yang Ada</Button>
             </HStack>
 
             <Text fontSize="sm" color="gray.500" mb={4}>
-              Generate SKUs to manage Stock (for Ready) or Quota (for Pre-Order) for each combination.
+              Generate SKU untuk mengelola Stok (untuk Siap) atau Kuota (untuk Pre-Order) untuk setiap kombinasi.
             </Text>
             
             <VStack gap={3}>
@@ -699,7 +699,7 @@ const ProductForm: React.FC = () => {
                 return (
                   <HStack key={index} w="full" align="end" borderWidth="1px" p={2} borderRadius="md" wrap="wrap">
                     <Box flex={3} minW="200px">
-                      <Text fontSize="xs" fontWeight="bold" mb={1}>Combination</Text>
+                      <Text fontSize="xs" fontWeight="bold" mb={1}>Kombinasi</Text>
                       <HStack wrap="wrap">
                         {Object.keys(variantsByType).map(type => {
                           const selectedIndex = sku.variant_indices.find(i => {
@@ -711,8 +711,8 @@ const ProductForm: React.FC = () => {
                             <Box key={type}>
                               <Text fontSize="xs" color="gray.500">{type}</Text>
                               <NativeSelect.Root size="sm">
-                                <NativeSelect.Field 
-                                  placeholder="Select..." 
+                                <NativeSelect.Field
+                                  placeholder="Pilih..." 
                                   value={selectedIndex !== undefined ? selectedIndex : ''}
                                   onChange={e => handleSkuVariantChange(index, type, Number(e.target.value))}
                                 >
@@ -727,14 +727,14 @@ const ProductForm: React.FC = () => {
                       </HStack>
                     </Box>
                     <Box flex={1} minW="100px">
-                      <Text fontSize="xs">Price (Override)</Text>
+                      <Text fontSize="xs">Harga (Override)</Text>
                       <Input 
                         value={parseNumber(sku.price.toString()) > 0 ? sku.price : formatNumber(calculateSkuPrice(sku.variant_indices))} 
                         onChange={e => handleSkuChange(index, 'price', formatNumber(e.target.value))} 
                       />
                     </Box>
                     <Box flex={1} minW="100px">
-                      <Text fontSize="xs">{formData.status === 'pre_order' ? 'Quota' : 'Stock'}</Text>
+                      <Text fontSize="xs">{formData.status === 'pre_order' ? 'Kuota' : 'Stok'}</Text>
                       <Input type="number" value={sku.stock} onChange={e => handleSkuChange(index, 'stock', e.target.value)} />
                     </Box>
                     <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeSku(index)}>X</Button>
@@ -745,7 +745,7 @@ const ProductForm: React.FC = () => {
           </Box>
         )}
 
-        <Button colorPalette="teal" onClick={handleSubmit}>Save Product</Button>
+        <Button colorPalette="teal" onClick={handleSubmit}>Simpan Produk</Button>
       </VStack>
     </Box>
   );

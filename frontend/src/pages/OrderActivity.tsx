@@ -38,11 +38,11 @@ const OrderActivity: React.FC = () => {
 
   return (
     <Container maxW="container.lg" py={10}>
-      <Heading mb={6}>Order Activity</Heading>
+      <Heading mb={6}>Aktivitas Pesanan</Heading>
       
       <VStack gap={6} align="stretch">
         <Input 
-          placeholder="Search by Recipient Name..." 
+          placeholder="Cari berdasarkan Nama Penerima..." 
           value={search} 
           onChange={e => setSearch(e.target.value)} 
           maxW="md"
@@ -52,12 +52,12 @@ const OrderActivity: React.FC = () => {
           <Table.Root>
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader>Recipient</Table.ColumnHeader>
-                <Table.ColumnHeader>Product</Table.ColumnHeader>
-                <Table.ColumnHeader>Variants</Table.ColumnHeader>
-                <Table.ColumnHeader>Qty</Table.ColumnHeader>
+                <Table.ColumnHeader>Penerima</Table.ColumnHeader>
+                <Table.ColumnHeader>Produk</Table.ColumnHeader>
+                <Table.ColumnHeader>Varian</Table.ColumnHeader>
+                <Table.ColumnHeader>Jml</Table.ColumnHeader>
                 <Table.ColumnHeader>Status</Table.ColumnHeader>
-                <Table.ColumnHeader>Time</Table.ColumnHeader>
+                <Table.ColumnHeader>Waktu</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -77,7 +77,7 @@ const OrderActivity: React.FC = () => {
               ))}
               {items.length === 0 && !loading && (
                 <Table.Row>
-                  <Table.Cell colSpan={6} textAlign="center">No activity found.</Table.Cell>
+                  <Table.Cell colSpan={6} textAlign="center">Tidak ada aktivitas.</Table.Cell>
                 </Table.Row>
               )}
             </Table.Body>

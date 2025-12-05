@@ -28,8 +28,8 @@ const CategoryForm: React.FC = () => {
     if (!formData.name.trim()) {
       setErrors({ name: true });
       toaster.create({
-        title: "Validation Error",
-        description: "Category Name is required.",
+        title: "Kesalahan Validasi",
+        description: "Nama Kategori wajib diisi.",
         type: "error",
       });
       return;
@@ -42,16 +42,16 @@ const CategoryForm: React.FC = () => {
         await client.post('/admin/categories', { name: formData.name });
       }
       toaster.create({
-        title: "Success",
-        description: `Category ${isEdit ? 'updated' : 'created'} successfully.`,
+        title: "Berhasil",
+        description: `Kategori berhasil ${isEdit ? 'diperbarui' : 'dibuat'}.`,
         type: "success",
       });
       navigate('/admin/categories');
     } catch (error) {
       console.error(error);
       toaster.create({
-        title: "Error",
-        description: "Failed to save category.",
+        title: "Kesalahan",
+        description: "Gagal menyimpan kategori.",
         type: "error",
       });
     }
@@ -59,23 +59,23 @@ const CategoryForm: React.FC = () => {
 
   return (
     <Box maxW="500px" bg="white" p={6} borderRadius="lg" shadow="sm">
-      <Heading mb={6}>{isEdit ? 'Edit Category' : 'New Category'}</Heading>
-      
+      <Heading mb={6}>{isEdit ? 'Ubah Kategori' : 'Kategori Baru'}</Heading>
+
       <VStack gap={4} align="stretch">
         <Box>
-          <Text mb={1}>Name <Text as="span" color="red.500">*</Text></Text>
-          <Input 
-            value={formData.name} 
+          <Text mb={1}>Nama <Text as="span" color="red.500">*</Text></Text>
+          <Input
+            value={formData.name}
             onChange={e => {
               setFormData({...formData, name: e.target.value});
               if (errors.name) setErrors({});
-            }} 
-            placeholder="e.g. T-Shirts"
+            }}
+            placeholder="contoh: Kaos"
             borderColor={errors.name ? "red.500" : undefined}
           />
         </Box>
 
-        <Button colorPalette="teal" onClick={handleSubmit}>Save Category</Button>
+        <Button colorPalette="teal" onClick={handleSubmit}>Simpan Kategori</Button>
       </VStack>
     </Box>
   );

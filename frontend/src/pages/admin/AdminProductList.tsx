@@ -33,15 +33,15 @@ const AdminProductList: React.FC = () => {
     try {
       await client.delete(`/admin/products/${deleteId}`);
       toaster.create({
-        title: "Product Deleted",
+        title: "Produk Dihapus",
         type: "success",
       });
       fetchProducts();
     } catch (error) {
       console.error(error);
       toaster.create({
-        title: "Error",
-        description: "Failed to delete product.",
+        title: "Kesalahan",
+        description: "Gagal menghapus produk.",
         type: "error",
       });
     } finally {
@@ -52,9 +52,9 @@ const AdminProductList: React.FC = () => {
   return (
     <Box>
       <HStack justify="space-between" mb={6}>
-        <Heading>Products</Heading>
+        <Heading>Produk</Heading>
         <Button asChild colorPalette="teal">
-          <Link to="/admin/products/new">Add Product</Link>
+          <Link to="/admin/products/new">Tambah Produk</Link>
         </Button>
       </HStack>
 
@@ -62,11 +62,11 @@ const AdminProductList: React.FC = () => {
         <Table.Root>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Nama</Table.ColumnHeader>
               <Table.ColumnHeader>Status</Table.ColumnHeader>
-              <Table.ColumnHeader>Price</Table.ColumnHeader>
-              <Table.ColumnHeader>Variants</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+              <Table.ColumnHeader>Harga</Table.ColumnHeader>
+              <Table.ColumnHeader>Varian</Table.ColumnHeader>
+              <Table.ColumnHeader>Aksi</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -79,14 +79,14 @@ const AdminProductList: React.FC = () => {
                   </Badge>
                 </Table.Cell>
                 <Table.Cell>Rp {Number(product.base_price).toLocaleString()}</Table.Cell>
-                <Table.Cell>{product.variants?.length || 0} variants</Table.Cell>
+                <Table.Cell>{product.variants?.length || 0} varian</Table.Cell>
                 <Table.Cell>
                   <HStack>
                     <Button asChild size="xs" variant="outline">
-                      <Link to={`/admin/products/${product.slug || product.id}/edit`}>Edit</Link>
+                      <Link to={`/admin/products/${product.slug || product.id}/edit`}>Ubah</Link>
                     </Button>
                     <Button size="xs" colorPalette="red" variant="ghost" onClick={() => setDeleteId(product.id)}>
-                      Delete
+                      Hapus
                     </Button>
                   </HStack>
                 </Table.Cell>
@@ -99,16 +99,16 @@ const AdminProductList: React.FC = () => {
       <DialogRoot open={!!deleteId} onOpenChange={(e) => !e.open && setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Product</DialogTitle>
+            <DialogTitle>Hapus Produk</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            Are you sure you want to delete this product? This action cannot be undone.
+            Apakah Anda yakin ingin menghapus produk ini? Tindakan ini tidak dapat dibatalkan.
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">Batal</Button>
             </DialogActionTrigger>
-            <Button colorPalette="red" onClick={confirmDelete}>Delete</Button>
+            <Button colorPalette="red" onClick={confirmDelete}>Hapus</Button>
           </DialogFooter>
         </DialogContent>
       </DialogRoot>

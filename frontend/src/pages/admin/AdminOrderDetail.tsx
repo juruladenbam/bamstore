@@ -32,41 +32,41 @@ const AdminOrderDetail: React.FC = () => {
     fetchOrder();
   };
 
-  if (loading) return <Container py={10}><Text>Loading...</Text></Container>;
-  if (!order) return <Container py={10}><Text>Order not found</Text></Container>;
+  if (loading) return <Container py={10}><Text>Memuat...</Text></Container>;
+  if (!order) return <Container py={10}><Text>Pesanan tidak ditemukan</Text></Container>;
 
   return (
     <Container maxW="container.lg" py={6}>
       <Link to="/admin/orders">
-        <Button variant="outline" size="sm" mb={4}>Back to Orders</Button>
+        <Button variant="outline" size="sm" mb={4}>Kembali ke Pesanan</Button>
       </Link>
       
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" mb={6}>
         <HStack justify="space-between" mb={4}>
-          <Heading size="lg">Order {order.order_number || '#' + order.id}</Heading>
+          <Heading size="lg">Pesanan {order.order_number || '#' + order.id}</Heading>
           <Badge size="lg" colorPalette={order.status === 'paid' ? 'green' : 'gray'}>
             {order.status.toUpperCase()}
           </Badge>
         </HStack>
         
         <VStack align="start" gap={2} mb={6}>
-          <Text><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</Text>
-          <Text><strong>Name:</strong> {order.checkout_name}</Text>
-          <Text><strong>Phone:</strong> {order.phone_number}</Text>
+          <Text><strong>Tanggal:</strong> {new Date(order.created_at).toLocaleString('id-ID')}</Text>
+          <Text><strong>Nama:</strong> {order.checkout_name}</Text>
+          <Text><strong>Telepon:</strong> {order.phone_number}</Text>
           <Text><strong>Qobilah:</strong> {order.qobilah}</Text>
-          <Text><strong>Payment Method:</strong> {order.payment_method}</Text>
+          <Text><strong>Metode Pembayaran:</strong> {order.payment_method}</Text>
         </VStack>
 
-        <Heading size="md" mb={4}>Items</Heading>
+        <Heading size="md" mb={4}>Item</Heading>
         <Table.Root mb={6}>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>Product</Table.ColumnHeader>
+              <Table.ColumnHeader>Produk</Table.ColumnHeader>
               <Table.ColumnHeader>SKU</Table.ColumnHeader>
-              <Table.ColumnHeader>Variant</Table.ColumnHeader>
-              <Table.ColumnHeader>Recipient</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">Price</Table.ColumnHeader>
-              <Table.ColumnHeader textAlign="end">Qty</Table.ColumnHeader>
+              <Table.ColumnHeader>Varian</Table.ColumnHeader>
+              <Table.ColumnHeader>Penerima</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="end">Harga</Table.ColumnHeader>
+              <Table.ColumnHeader textAlign="end">Jml</Table.ColumnHeader>
               <Table.ColumnHeader textAlign="end">Subtotal</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
@@ -91,22 +91,22 @@ const AdminOrderDetail: React.FC = () => {
             <Heading size="md">Total: Rp {Number(order.total_amount).toLocaleString()}</Heading>
         </HStack>
 
-        <Heading size="md" mb={4}>Actions</Heading>
+        <Heading size="md" mb={4}>Aksi</Heading>
         <HStack>
             {order.status === 'new' && (
-                <Button colorPalette="green" onClick={() => updateStatus('paid')}>Mark Paid</Button>
+                <Button colorPalette="green" onClick={() => updateStatus('paid')}>Tandai Dibayar</Button>
             )}
             {order.status === 'paid' && (
-                <Button colorPalette="blue" onClick={() => updateStatus('processed')}>Process Order</Button>
+                <Button colorPalette="blue" onClick={() => updateStatus('processed')}>Proses Pesanan</Button>
             )}
             {order.status === 'processed' && (
-                <Button colorPalette="purple" onClick={() => updateStatus('ready_pickup')}>Ready for Pickup</Button>
+                <Button colorPalette="purple" onClick={() => updateStatus('ready_pickup')}>Siap Diambil</Button>
             )}
             {order.status === 'ready_pickup' && (
-                <Button colorPalette="teal" onClick={() => updateStatus('completed')}>Complete Order</Button>
+                <Button colorPalette="teal" onClick={() => updateStatus('completed')}>Selesaikan Pesanan</Button>
             )}
             {order.status !== 'cancelled' && order.status !== 'completed' && (
-                <Button colorPalette="red" variant="outline" onClick={() => updateStatus('cancelled')}>Cancel Order</Button>
+                <Button colorPalette="red" variant="outline" onClick={() => updateStatus('cancelled')}>Batalkan Pesanan</Button>
             )}
         </HStack>
       </Box>

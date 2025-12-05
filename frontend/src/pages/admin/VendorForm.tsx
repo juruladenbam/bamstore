@@ -44,16 +44,16 @@ const VendorForm: React.FC = () => {
         await client.post('/admin/vendors', formData);
       }
       toaster.create({
-        title: "Success",
-        description: `Vendor ${isEdit ? 'updated' : 'created'} successfully.`,
+        title: "Berhasil",
+        description: `Vendor berhasil ${isEdit ? 'diperbarui' : 'dibuat'}.`,
         type: "success",
       });
       navigate('/admin/vendors');
     } catch (error) {
       console.error(error);
       toaster.create({
-        title: "Error",
-        description: "Failed to save vendor.",
+        title: "Kesalahan",
+        description: "Gagal menyimpan vendor.",
         type: "error",
       });
     }
@@ -61,11 +61,11 @@ const VendorForm: React.FC = () => {
 
   return (
     <Box bg="white" p={6} borderRadius="lg" shadow="sm" maxW="container.md">
-      <Heading mb={6}>{isEdit ? 'Edit Vendor' : 'New Vendor'}</Heading>
-      
+      <Heading mb={6}>{isEdit ? 'Ubah Vendor' : 'Vendor Baru'}</Heading>
+
       <VStack gap={4} align="stretch">
         <Box>
-          <Text mb={1}>Name <Text as="span" color="red.500">*</Text></Text>
+          <Text mb={1}>Nama <Text as="span" color="red.500">*</Text></Text>
           <Input 
             value={formData.name} 
             onChange={e => {
@@ -77,7 +77,7 @@ const VendorForm: React.FC = () => {
         </Box>
 
         <Box>
-          <Text mb={1}>Contact Info</Text>
+          <Text mb={1}>Info Kontak</Text>
           <Input 
             value={formData.contact_info} 
             onChange={e => setFormData({...formData, contact_info: e.target.value})} 
@@ -85,14 +85,14 @@ const VendorForm: React.FC = () => {
         </Box>
 
         <Box>
-          <Text mb={1}>Address</Text>
+          <Text mb={1}>Alamat</Text>
           <Textarea 
             value={formData.address} 
             onChange={e => setFormData({...formData, address: e.target.value})} 
           />
         </Box>
 
-        <Button colorPalette="teal" onClick={handleSubmit}>Save Vendor</Button>
+        <Button colorPalette="teal" onClick={handleSubmit}>Simpan Vendor</Button>
       </VStack>
     </Box>
   );

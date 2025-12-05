@@ -91,7 +91,7 @@ const ProductDetail: React.FC = () => {
   }, [id]);
 
   if (loading || !product) {
-    return <Container py={10}><Text>Loading...</Text></Container>;
+    return <Container py={10}><Text>Memuat...</Text></Container>;
   }
 
   // Helper to find matching SKU
@@ -198,7 +198,7 @@ const ProductDetail: React.FC = () => {
 
     if (missingTypes.length > 0) {
       newErrors.missingVariants = missingTypes;
-      errorMessages.push(`Please select: ${missingTypes.join(', ')}`);
+      errorMessages.push(`Silakan pilih: ${missingTypes.join(', ')}`);
       hasError = true;
     }
 
@@ -207,7 +207,7 @@ const ProductDetail: React.FC = () => {
       const nameErrors = recipients.map(r => !r.name.trim());
       if (nameErrors.some(e => e)) {
         newErrors.recipientNames = nameErrors;
-        errorMessages.push("Please fill in all recipient names");
+        errorMessages.push("Harap isi semua nama penerima");
         hasError = true;
       }
     }
@@ -215,7 +215,7 @@ const ProductDetail: React.FC = () => {
     if (hasError) {
       setErrors(newErrors);
       toaster.create({
-        title: "Validation Error",
+        title: "Kesalahan Validasi",
         description: errorMessages.join("\n"),
         type: "error",
       });
@@ -227,8 +227,8 @@ const ProductDetail: React.FC = () => {
     if (matchingSku) {
       if (matchingSku.stock < quantity) {
         toaster.create({
-          title: "Stock Error",
-          description: `Only ${matchingSku.stock} items available.`,
+          title: "Stok Tidak Cukup",
+          description: `Hanya tersedia ${matchingSku.stock} item.`,
           type: "error",
         });
         return;
@@ -237,8 +237,8 @@ const ProductDetail: React.FC = () => {
        // If we are here, it means we passed the missingTypes check (so all types are selected),
        // but we couldn't find a matching SKU. This means the combination doesn't exist.
        toaster.create({
-          title: "Unavailable",
-          description: "This combination of options is currently unavailable.",
+          title: "Tidak Tersedia",
+          description: "Kombinasi pilihan ini saat ini tidak tersedia.",
           type: "error",
         });
        return;
@@ -268,8 +268,8 @@ const ProductDetail: React.FC = () => {
     }
 
     toaster.create({
-      title: "Added to Cart",
-      description: `${product?.name} added to your cart.`,
+      title: "Ditambahkan ke Keranjang",
+      description: `${product?.name} telah ditambahkan ke keranjang.`,
       type: "success",
     });
     setIsDialogOpen(true);
@@ -280,18 +280,18 @@ const ProductDetail: React.FC = () => {
       <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Added to Cart</DialogTitle>
+            <DialogTitle>Ditambahkan ke Keranjang</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <VStack align="start" gap={2}>
               <Text fontWeight="bold">{product.name}</Text>
               {selectedVariants.length > 0 && (
                 <Text fontSize="sm" color="gray.600">
-                  Variants: {selectedVariants.map(v => v.name).join(', ')}
+                  Varian: {selectedVariants.map(v => v.name).join(', ')}
                 </Text>
               )}
               <Text fontSize="sm">
-                Quantity: {quantity}
+                Jumlah: {quantity}
               </Text>
               <Text fontWeight="bold" color="teal.600">
                 Total: Rp {(currentPrice * quantity).toLocaleString()}
@@ -299,8 +299,8 @@ const ProductDetail: React.FC = () => {
             </VStack>
           </DialogBody>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Add Another Product</Button>
-            <Button colorPalette="teal" onClick={() => navigate('/checkout')}>Continue to Checkout</Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Tambah Produk Lain</Button>
+            <Button colorPalette="teal" onClick={() => navigate('/checkout')}>Lanjut ke Pembayaran</Button>
           </DialogFooter>
         </DialogContent>
       </DialogRoot>
@@ -348,7 +348,7 @@ const ProductDetail: React.FC = () => {
         
         <VStack align="start" gap={4}>
           <Badge colorPalette={product.status === 'ready' ? 'green' : 'blue'}>
-            {product.status === 'ready' ? 'READY STOCK' : 'PRE-ORDER'}
+            {product.status === 'ready' ? 'STOK SIAP' : 'PRE-ORDER'}
           </Badge>
           <Heading size={{ base: "lg", md: "xl" }}>{product.name}</Heading>
           <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="teal.600">
@@ -357,7 +357,7 @@ const ProductDetail: React.FC = () => {
           
           {matchingSku && (
             <Text fontSize="sm" color={matchingSku.stock > 0 ? "green.600" : "red.600"} fontWeight="medium">
-              {product.status === 'pre_order' ? 'Quota Available: ' : 'Stock: '} 
+              {product.status === 'pre_order' ? 'Kuota Tersedia: ' : 'Stok: '} 
               {matchingSku.stock}
             </Text>
           )}
@@ -365,7 +365,7 @@ const ProductDetail: React.FC = () => {
           <Text>{product.description}</Text>
 
           <Box w="full">
-            <Text mb={2} fontWeight="bold">Variants</Text>
+            <Text mb={2} fontWeight="bold">Varian</Text>
             {Object.entries(
               (product.variants || []).reduce((acc, v) => {
                 const type = v.type || 'General';
@@ -381,7 +381,7 @@ const ProductDetail: React.FC = () => {
                   mb={2} 
                   color={errors.missingVariants?.includes(type) ? "red.500" : "gray.600"}
                 >
-                  {type} {errors.missingVariants?.includes(type) && "(Required)"}
+                  {type} {errors.missingVariants?.includes(type) && "(Wajib)"}
                 </Text>
                 <HStack wrap="wrap" gap={2}>
                   {variants.map(v => {
@@ -405,7 +405,7 @@ const ProductDetail: React.FC = () => {
           </Box>
 
           <Box w="full">
-            <Text mb={2} fontWeight="bold">Quantity</Text>
+            <Text mb={2} fontWeight="bold">Jumlah</Text>
             <Input 
               type="number" 
               min={1} 
@@ -415,21 +415,21 @@ const ProductDetail: React.FC = () => {
           </Box>
 
           <Box w="full">
-            <Text mb={2} fontWeight="bold">For Whom?</Text>
+            <Text mb={2} fontWeight="bold">Untuk Siapa?</Text>
             <HStack mb={2}>
-              <Button 
-                variant={recipientType === 'myself' ? 'solid' : 'outline'} 
+              <Button
+                variant={recipientType === 'myself' ? 'solid' : 'outline'}
                 onClick={() => setRecipientType('myself')}
                 size="sm"
               >
-                Myself
+                Untuk Saya
               </Button>
-              <Button 
-                variant={recipientType === 'others' ? 'solid' : 'outline'} 
+              <Button
+                variant={recipientType === 'others' ? 'solid' : 'outline'}
                 onClick={() => setRecipientType('others')}
                 size="sm"
               >
-                Others
+                Untuk Orang Lain
               </Button>
             </HStack>
             
@@ -437,11 +437,11 @@ const ProductDetail: React.FC = () => {
               <VStack gap={4} align="stretch">
                 {recipients.map((recipient, index) => (
                   <Box key={index} borderWidth="1px" borderRadius="md" p={3}>
-                    <Text fontWeight="bold" mb={2}>Recipient #{index + 1}</Text>
+                    <Text fontWeight="bold" mb={2}>Penerima #{index + 1}</Text>
                     <VStack gap={2}>
                         <Box w="full" position="relative">
-                            <Input 
-                            placeholder="Name"
+                            <Input
+                            placeholder="Nama"
                             value={recipient.name} 
                             onChange={(e) => handleRecipientChange(index, e.target.value)}
                             onBlur={() => setTimeout(() => setActiveRecipientIndex(null), 200)}
@@ -486,7 +486,7 @@ const ProductDetail: React.FC = () => {
           </Box>
 
           <Button colorPalette="teal" size="lg" width="full" onClick={handleAddToCart}>
-            Add to Cart
+            Tambah ke Keranjang
           </Button>
         </VStack>
       </Box>

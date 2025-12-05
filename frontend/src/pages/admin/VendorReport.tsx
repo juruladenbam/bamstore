@@ -41,8 +41,8 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
                 <Table.Root size="sm" variant="outline">
                     <Table.Header>
                         <Table.Row>
-                            <Table.ColumnHeader>Product</Table.ColumnHeader>
-                            <Table.ColumnHeader textAlign="right">Total Quantity</Table.ColumnHeader>
+                            <Table.ColumnHeader>Produk</Table.ColumnHeader>
+                            <Table.ColumnHeader textAlign="right">Total Jumlah</Table.ColumnHeader>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
@@ -235,7 +235,7 @@ const VendorReport: React.FC = () => {
       .catch(err => {
         console.error(err);
         setLoading(false);
-        toaster.create({ title: "Failed to load report", type: "error" });
+        toaster.create({ title: "Gagal memuat laporan", type: "error" });
       });
   };
 
@@ -260,14 +260,14 @@ const VendorReport: React.FC = () => {
     <>
       <Container maxW="container.xl" py={10} id="printable-area">
         <HStack justify="space-between" mb={6} className="no-print">
-          <Heading>Vendor Recapitulation Report</Heading>
-          <Button onClick={handlePrint} colorPalette="blue">Print / PDF</Button>
+          <Heading>Laporan Rekapitulasi Vendor</Heading>
+          <Button onClick={handlePrint} colorPalette="blue">Cetak / PDF</Button>
         </HStack>
 
         <Box mb={6} className="no-print" maxW="300px">
           <NativeSelect.Root>
               <NativeSelect.Field value={selectedVendor} onChange={(e) => setSelectedVendor(e.target.value)}>
-                  <option value="">All Vendors</option>
+                  <option value="">Semua Vendor</option>
                   {vendors.map(v => (
                       <option key={v.id} value={v.id}>{v.name}</option>
                   ))}
@@ -286,7 +286,7 @@ const VendorReport: React.FC = () => {
           ))}
           
           {reportData.length === 0 && !loading && (
-              <Text textAlign="center" color="gray.500">No data found</Text>
+              <Text textAlign="center" color="gray.500">Tidak ada data</Text>
           )}
         </VStack>
       </Container>

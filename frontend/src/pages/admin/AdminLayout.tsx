@@ -115,18 +115,18 @@ const AdminLayout: React.FC = () => {
           
           <VStack align="stretch" gap={0} w="full">
             <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mb={2} px={6}>
-              Management
+              Manajemen
             </Text>
-            <NavItem to="/admin/orders" icon={FiList}>Orders</NavItem>
-            <NavItem to="/admin/products" icon={FiBox}>Products</NavItem>
-            <NavItem to="/admin/categories" icon={FiGrid}>Categories</NavItem>
-            <NavItem to="/admin/vendors" icon={FiUsers}>Vendors</NavItem>
-            
+            <NavItem to="/admin/orders" icon={FiList}>Pesanan</NavItem>
+            <NavItem to="/admin/products" icon={FiBox}>Produk</NavItem>
+            <NavItem to="/admin/categories" icon={FiGrid}>Kategori</NavItem>
+            <NavItem to="/admin/vendors" icon={FiUsers}>Vendor</NavItem>
+
             <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={6} mb={2} px={6}>
-              Reports
+              Laporan
             </Text>
-            <NavItem to="/admin/reports/vendor" icon={FiFileText}>Vendor Reports</NavItem>
-            <NavItem to="/admin/reports/finance" icon={FiDollarSign}>Financial</NavItem>
+            <NavItem to="/admin/reports/vendor" icon={FiFileText}>Laporan Vendor</NavItem>
+            <NavItem to="/admin/reports/finance" icon={FiDollarSign}>Keuangan</NavItem>
           </VStack>
         </Box>
 
@@ -134,12 +134,12 @@ const AdminLayout: React.FC = () => {
 
         <Box py={6} borderTop="1px" borderColor="gray.700" bg="gray.900">
            <VStack align="stretch" gap={0} w="full">
-            <NavItem to="/" icon={FiHome}>Back to Store</NavItem>
-            <Button 
-              w="full" 
-              variant="ghost" 
-              justifyContent="flex-start" 
-              color="red.300" 
+            <NavItem to="/" icon={FiHome}>Kembali ke Toko</NavItem>
+            <Button
+              w="full"
+              variant="ghost"
+              justifyContent="flex-start"
+              color="red.300"
               _hover={{ bg: 'red.900', color: 'red.200' }}
               onClick={handleLogout}
               px={6}
@@ -148,7 +148,7 @@ const AdminLayout: React.FC = () => {
               borderRadius={0}
             >
                <Icon as={FiLogOut} mr={3} boxSize={5} />
-               Logout
+               Keluar
             </Button>
           </VStack>
           

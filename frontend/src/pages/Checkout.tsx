@@ -86,17 +86,17 @@ const Checkout: React.FC = () => {
 
     if (!formData.checkout_name.trim()) {
       newErrors.checkout_name = true;
-      errorMessages.push("Name is required");
+      errorMessages.push("Nama harus diisi");
     }
     if (!formData.phone_number.trim()) {
       newErrors.phone_number = true;
-      errorMessages.push("Phone Number is required");
+      errorMessages.push("Nomor Telepon harus diisi");
     }
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       toaster.create({
-        title: "Validation Error",
+        title: "Kesalahan Validasi",
         description: errorMessages.join("\n"),
         type: "error",
       });
@@ -126,8 +126,8 @@ const Checkout: React.FC = () => {
       clearCart();
       setIsDialogOpen(false);
       toaster.create({
-        title: "Order Placed",
-        description: "Your order has been placed successfully!",
+        title: "Pesanan Berhasil",
+        description: "Pesanan Anda telah berhasil dibuat!",
         type: "success",
       });
       navigate('/order-confirmation', { 
@@ -142,8 +142,8 @@ const Checkout: React.FC = () => {
     } catch (error) {
       console.error(error);
       toaster.create({
-        title: "Order Failed",
-        description: "Failed to place order. Please try again.",
+        title: "Pesanan Gagal",
+        description: "Gagal membuat pesanan. Silakan coba lagi.",
         type: "error",
       });
       setIsDialogOpen(false);
@@ -153,16 +153,16 @@ const Checkout: React.FC = () => {
   };
 
   if (items.length === 0) {
-    return <Container py={10}><Text>Your cart is empty.</Text></Container>;
+    return <Container py={10}><Text>Keranjang Anda kosong.</Text></Container>;
   }
 
   return (
     <Container maxW="container.md" py={10}>
-      <Heading mb={6}>Checkout</Heading>
+      <Heading mb={6}>Pembayaran</Heading>
       
       <VStack gap={6} align="stretch">
         <Box borderWidth="1px" borderRadius="lg" p={4}>
-          <Heading size="md" mb={4}>Cart Items</Heading>
+          <Heading size="md" mb={4}>Item Keranjang</Heading>
           {items.map((item, index) => {
             const unitPrice = item.unit_price;
             
@@ -171,12 +171,12 @@ const Checkout: React.FC = () => {
                 <Text fontWeight="bold">{item.product.name}</Text>
                 {item.variants.length > 0 && (
                   <Text fontSize="sm" color="gray.600">
-                    Variants: {item.variants.map(v => v.name).join(', ')}
+                    Varian: {item.variants.map(v => v.name).join(', ')}
                   </Text>
                 )}
-                <Text fontSize="sm">For: {item.recipient_name}</Text>
-                <Text fontSize="sm">Qty: {item.quantity} x Rp {unitPrice.toLocaleString()}</Text>
-                <Button size="xs" colorPalette="red" variant="ghost" onClick={() => removeFromCart(index)}>Remove</Button>
+                <Text fontSize="sm">Untuk: {item.recipient_name}</Text>
+                <Text fontSize="sm">Jml: {item.quantity} x Rp {unitPrice.toLocaleString()}</Text>
+                <Button size="xs" colorPalette="red" variant="ghost" onClick={() => removeFromCart(index)}>Hapus</Button>
               </Box>
             );
           })}
@@ -185,15 +185,15 @@ const Checkout: React.FC = () => {
         </Box>
 
         <Box borderWidth="1px" borderRadius="lg" p={4}>
-          <Heading size="md" mb={4}>Your Details</Heading>
+          <Heading size="md" mb={4}>Detail Anda</Heading>
           <VStack gap={4}>
             <Box w="full" position="relative">
-              <Text mb={1}>Name <Text as="span" color="red.500">*</Text></Text>
-              <Input 
-                value={formData.checkout_name} 
+              <Text mb={1}>Nama <Text as="span" color="red.500">*</Text></Text>
+              <Input
+                value={formData.checkout_name}
                 onChange={handleNameChange}
                 onBlur={() => setTimeout(() => setShowSuggestions({field: null}), 200)}
-                placeholder="Your Name"
+                placeholder="Nama Anda"
                 borderColor={errors.checkout_name ? "red.500" : undefined}
                 autoComplete="off"
               />
@@ -228,7 +228,7 @@ const Checkout: React.FC = () => {
               )}
             </Box>
             <Box w="full" position="relative">
-              <Text mb={1}>Phone Number <Text as="span" color="red.500">*</Text></Text>
+              <Text mb={1}>Nomor Telepon <Text as="span" color="red.500">*</Text></Text>
               <Input 
                 value={formData.phone_number} 
                 onChange={handlePhoneChange}
@@ -258,7 +258,7 @@ const Checkout: React.FC = () => {
                       _hover={{ bg: "gray.100", cursor: "pointer" }}
                       onClick={() => selectMember(member)}
                     >
-                      <Text fontWeight="bold" fontSize="sm">{member.phone_number || 'No Phone'}</Text>
+                      <Text fontWeight="bold" fontSize="sm">{member.phone_number || 'Tidak ada nomor'}</Text>
                       <Text fontSize="xs" color="gray.600">
                         {member.name} - {member.qobilah || ''}
                       </Text>
@@ -282,7 +282,7 @@ const Checkout: React.FC = () => {
         </Box>
 
         <Box borderWidth="1px" borderRadius="lg" p={4}>
-          <Heading size="md" mb={4}>Payment Method</Heading>
+          <Heading size="md" mb={4}>Metode Pembayaran</Heading>
           <RadioGroup.Root 
             value={formData.payment_method} 
             onValueChange={e => setFormData({...formData, payment_method: e.value || 'transfer'})}
@@ -291,40 +291,40 @@ const Checkout: React.FC = () => {
               <RadioGroup.Item value="transfer">
                 <RadioGroup.ItemHiddenInput />
                 <RadioGroup.ItemControl />
-                <RadioGroup.ItemText>Bank Transfer</RadioGroup.ItemText>
+                <RadioGroup.ItemText>Transfer Bank</RadioGroup.ItemText>
               </RadioGroup.Item>
               <RadioGroup.Item value="cash">
                 <RadioGroup.ItemHiddenInput />
                 <RadioGroup.ItemControl />
-                <RadioGroup.ItemText>Cash</RadioGroup.ItemText>
+                <RadioGroup.ItemText>Tunai</RadioGroup.ItemText>
               </RadioGroup.Item>
             </Stack>
           </RadioGroup.Root>
           
           <Box mt={4} p={3} bg="blue.50" borderRadius="md">
             {formData.payment_method === 'transfer' ? (
-              <Text>Please transfer to BCA 1234567890 a.n BAM Store</Text>
+              <Text>Silakan transfer ke BCA 1234567890 a.n BAM Store</Text>
             ) : (
-              <Text>Please pay at the Secretariat.</Text>
+              <Text>Silakan bayar di Sekretariat.</Text>
             )}
           </Box>
         </Box>
 
         <Button colorPalette="teal" size="lg" onClick={handlePlaceOrderClick} loading={loading}>
-          Place Order
+          Pesan Sekarang
         </Button>
 
         <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Confirm Order</DialogTitle>
+              <DialogTitle>Konfirmasi Pesanan</DialogTitle>
             </DialogHeader>
             <DialogBody>
               <VStack align="stretch" gap={4}>
-                <Text>Please review your order details:</Text>
+                <Text>Silakan periksa detail pesanan Anda:</Text>
                 
                 <Box bg="gray.50" p={3} borderRadius="md">
-                  <Text fontWeight="bold" mb={2}>Items ({items.length})</Text>
+                  <Text fontWeight="bold" mb={2}>Item ({items.length})</Text>
                   <VStack align="stretch" gap={2} mb={3}>
                     {items.map((item, index) => {
                       const unitPrice = item.unit_price;
@@ -338,7 +338,7 @@ const Checkout: React.FC = () => {
                               {item.variants.map(v => v.name).join(', ')}
                             </Text>
                           )}
-                          <Text fontSize="xs" color="gray.600">For: {item.recipient_name}</Text>
+                          <Text fontSize="xs" color="gray.600">Untuk: {item.recipient_name}</Text>
                           <Stack direction="row" justify="space-between" mt={1}>
                             <Text fontSize="xs">{item.quantity} x Rp {unitPrice.toLocaleString()}</Text>
                             <Text fontSize="xs" fontWeight="bold">Rp {itemTotal.toLocaleString()}</Text>
@@ -349,32 +349,32 @@ const Checkout: React.FC = () => {
                   </VStack>
                   <Separator mb={2} borderColor="gray.300" />
                   <Stack direction="row" justify="space-between">
-                    <Text fontWeight="bold">Total Amount</Text>
+                    <Text fontWeight="bold">Total Pembayaran</Text>
                     <Text fontWeight="bold" color="teal.600">Rp {total.toLocaleString()}</Text>
                   </Stack>
                 </Box>
 
                 <Box bg="gray.50" p={3} borderRadius="md">
-                  <Text fontWeight="bold">Recipient</Text>
+                  <Text fontWeight="bold">Penerima</Text>
                   <Text fontSize="sm">{formData.checkout_name}</Text>
                   <Text fontSize="sm">{formData.phone_number}</Text>
                   <Text fontSize="sm">{formData.qobilah}</Text>
                 </Box>
                 <Box bg="gray.50" p={3} borderRadius="md">
-                  <Text fontWeight="bold">Payment Method</Text>
-                  <Text fontSize="sm" textTransform="capitalize">{formData.payment_method}</Text>
+                  <Text fontWeight="bold">Metode Pembayaran</Text>
+                  <Text fontSize="sm" textTransform="capitalize">{formData.payment_method === 'transfer' ? 'Transfer Bank' : 'Tunai'}</Text>
                 </Box>
                 <Text fontSize="sm" color="gray.600">
-                  Are you sure all details are correct?
+                  Apakah semua detail sudah benar?
                 </Text>
               </VStack>
             </DialogBody>
             <DialogFooter>
               <DialogActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline">Batal</Button>
               </DialogActionTrigger>
               <Button colorPalette="teal" onClick={handleConfirmOrder} loading={loading}>
-                Confirm Order
+                Konfirmasi Pesanan
               </Button>
             </DialogFooter>
           </DialogContent>
