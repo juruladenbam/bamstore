@@ -33,15 +33,15 @@ const AdminCategoryList: React.FC = () => {
     try {
       await client.delete(`/admin/categories/${deleteId}`);
       toaster.create({
-        title: "Category Deleted",
+        title: "Kategori Dihapus",
         type: "success",
       });
       fetchCategories();
     } catch (error) {
       console.error(error);
       toaster.create({
-        title: "Error",
-        description: "Failed to delete category. It might be in use.",
+        title: "Kesalahan",
+        description: "Gagal menghapus kategori. Mungkin masih digunakan.",
         type: "error",
       });
     } finally {
@@ -52,9 +52,9 @@ const AdminCategoryList: React.FC = () => {
   return (
     <Box>
       <HStack justify="space-between" mb={6}>
-        <Heading>Categories</Heading>
+        <Heading>Kategori</Heading>
         <Button asChild colorPalette="teal">
-          <Link to="/admin/categories/new">Add Category</Link>
+          <Link to="/admin/categories/new">Tambah Kategori</Link>
         </Button>
       </HStack>
 
@@ -62,9 +62,9 @@ const AdminCategoryList: React.FC = () => {
         <Table.Root>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Nama</Table.ColumnHeader>
               <Table.ColumnHeader>Slug</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+              <Table.ColumnHeader>Aksi</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -75,10 +75,10 @@ const AdminCategoryList: React.FC = () => {
                 <Table.Cell>
                   <HStack>
                     <Button asChild size="xs" variant="outline">
-                      <Link to={`/admin/categories/${category.slug || category.id}/edit`}>Edit</Link>
+                      <Link to={`/admin/categories/${category.slug || category.id}/edit`}>Ubah</Link>
                     </Button>
                     <Button size="xs" colorPalette="red" variant="ghost" onClick={() => setDeleteId(category.id)}>
-                      Delete
+                      Hapus
                     </Button>
                   </HStack>
                 </Table.Cell>
@@ -91,16 +91,16 @@ const AdminCategoryList: React.FC = () => {
       <DialogRoot open={!!deleteId} onOpenChange={(e) => !e.open && setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Category</DialogTitle>
+            <DialogTitle>Hapus Kategori</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            Are you sure? This might affect products in this category.
+            Apakah Anda yakin? Ini mungkin mempengaruhi produk dalam kategori ini.
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">Batal</Button>
             </DialogActionTrigger>
-            <Button colorPalette="red" onClick={confirmDelete}>Delete</Button>
+            <Button colorPalette="red" onClick={confirmDelete}>Hapus</Button>
           </DialogFooter>
         </DialogContent>
       </DialogRoot>

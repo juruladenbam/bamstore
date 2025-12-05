@@ -24,50 +24,50 @@ const FinancialReport: React.FC = () => {
       .catch(err => {
         console.error(err);
         setLoading(false);
-        toaster.create({ title: "Failed to load report", type: "error" });
+        toaster.create({ title: "Gagal memuat laporan", type: "error" });
       });
   }, []);
 
-  if (loading) return <Container py={10}><Text>Loading...</Text></Container>;
-  if (!data) return <Container py={10}><Text>No data available.</Text></Container>;
+  if (loading) return <Container py={10}><Text>Memuat...</Text></Container>;
+  if (!data) return <Container py={10}><Text>Tidak ada data.</Text></Container>;
 
   return (
     <Container maxW="container.xl" py={10}>
-      <Heading mb={6}>Financial Overview</Heading>
-      
+      <Heading mb={6}>Ikhtisar Keuangan</Heading>
+
       <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} mb={8}>
-        <StatCard 
-          label="Gross Sales" 
-          value={data.gross_sales} 
-          color="teal.600" 
-          helpText="Total from Paid Orders"
+        <StatCard
+          label="Penjualan Kotor"
+          value={data.gross_sales}
+          color="teal.600"
+          helpText="Total dari Pesanan Dibayar"
         />
-        <StatCard 
-          label="Total COGS" 
-          value={data.total_cogs} 
-          color="red.500" 
-          helpText="Estimated Cost of Goods Sold"
+        <StatCard
+          label="Total HPP"
+          value={data.total_cogs}
+          color="red.500"
+          helpText="Estimasi Harga Pokok Penjualan"
         />
-        <StatCard 
-          label="Gross Profit" 
-          value={data.gross_profit} 
-          color="green.600" 
-          helpText="Sales - COGS"
+        <StatCard
+          label="Laba Kotor"
+          value={data.gross_profit}
+          color="green.600"
+          helpText="Penjualan - HPP"
         />
       </SimpleGrid>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} gap={6}>
-        <StatCard 
-          label="Total Vendor Payments" 
-          value={data.total_vendor_payments} 
-          color="orange.500" 
-          helpText="Actual Cash Outflow to Vendors"
+        <StatCard
+          label="Total Pembayaran Vendor"
+          value={data.total_vendor_payments}
+          color="orange.500"
+          helpText="Arus Kas Keluar ke Vendor"
         />
-        <StatCard 
-          label="Net Cash Flow" 
-          value={data.net_cash_flow} 
-          color={data.net_cash_flow >= 0 ? "blue.600" : "red.600"} 
-          helpText="Sales - Vendor Payments"
+        <StatCard
+          label="Arus Kas Bersih"
+          value={data.net_cash_flow}
+          color={data.net_cash_flow >= 0 ? "blue.600" : "red.600"}
+          helpText="Penjualan - Pembayaran Vendor"
         />
       </SimpleGrid>
     </Container>

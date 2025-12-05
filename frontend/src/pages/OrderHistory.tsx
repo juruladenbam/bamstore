@@ -28,7 +28,7 @@ const OrderHistory: React.FC = () => {
 
   const handleCheck = async () => {
     if (!phoneNumber.trim()) {
-      toaster.create({ title: "Please enter your phone number", type: "error" });
+      toaster.create({ title: "Masukkan nomor telepon Anda", type: "error" });
       return;
     }
 
@@ -39,7 +39,7 @@ const OrderHistory: React.FC = () => {
       setSearched(true);
     } catch (error) {
       console.error(error);
-      toaster.create({ title: "Failed to fetch orders", type: "error" });
+      toaster.create({ title: "Gagal memuat pesanan", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -47,14 +47,14 @@ const OrderHistory: React.FC = () => {
 
   return (
     <Container maxW="container.md" py={10}>
-      <Heading mb={6} textAlign="center">Check My Orders</Heading>
+      <Heading mb={6} textAlign="center">Cek Pesanan Saya</Heading>
       
       <Card.Root mb={8}>
         <Card.Body>
           <VStack gap={4}>
-            <Text>Enter your phone number to view your order history.</Text>
+            <Text>Masukkan nomor telepon untuk melihat riwayat pesanan Anda.</Text>
             <Input 
-              placeholder="e.g. 08123456789" 
+              placeholder="contoh: 08123456789" 
               value={phoneNumber} 
               onChange={e => setPhoneNumber(e.target.value)} 
               size="lg"
@@ -66,7 +66,7 @@ const OrderHistory: React.FC = () => {
               onClick={handleCheck} 
               loading={loading}
             >
-              Check Orders
+              Cek Pesanan
             </Button>
           </VStack>
         </Card.Body>
@@ -74,7 +74,7 @@ const OrderHistory: React.FC = () => {
 
       {searched && (
         <VStack gap={6} align="stretch">
-          <Heading size="md">Found {orders.length} Orders</Heading>
+          <Heading size="md">Ditemukan {orders.length} Pesanan</Heading>
           
           {orders.map(order => (
             <Box key={order.id} borderWidth="1px" borderRadius="lg" p={4} bg="white" shadow="sm">
@@ -91,9 +91,9 @@ const OrderHistory: React.FC = () => {
               <Table.Root size="sm" mb={4}>
                 <Table.Header>
                   <Table.Row>
-                    <Table.ColumnHeader>Product</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="right">Qty</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="right">Price</Table.ColumnHeader>
+                    <Table.ColumnHeader>Produk</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="right">Jml</Table.ColumnHeader>
+                    <Table.ColumnHeader textAlign="right">Harga</Table.ColumnHeader>
                   </Table.Row>
                 </Table.Header>
                 <Table.Body>
@@ -118,7 +118,7 @@ const OrderHistory: React.FC = () => {
           ))}
 
           {orders.length === 0 && (
-            <Text textAlign="center" color="gray.500">No orders found for this phone number.</Text>
+            <Text textAlign="center" color="gray.500">Tidak ada pesanan untuk nomor telepon ini.</Text>
           )}
         </VStack>
       )}

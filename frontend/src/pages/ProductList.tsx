@@ -27,16 +27,16 @@ const ProductList: React.FC = () => {
   }, [searchQuery]);
 
   if (loading) {
-    return <Container py={10}><Text>Loading...</Text></Container>;
+    return <Container py={10}><Text>Memuat...</Text></Container>;
   }
 
   return (
     <Container maxW="container.xl" py={10}>
       <Heading mb={6}>
-        {searchQuery ? `Search Results for "${searchQuery}"` : 'Products'}
+        {searchQuery ? `Hasil Pencarian untuk "${searchQuery}"` : 'Produk'}
       </Heading>
       {products.length === 0 ? (
-        <Text>No products found.</Text>
+        <Text>Tidak ada produk.</Text>
       ) : (
         <SimpleGrid columns={{ base: 2, md: 3, lg: 4 }} gap={{ base: 3, md: 6 }}>
           {products.map(product => {
@@ -59,7 +59,7 @@ const ProductList: React.FC = () => {
                     colorPalette={product.status === 'ready' ? 'green' : 'blue'} 
                     size={{ base: "sm", md: "md" }}
                   >
-                    {product.status === 'ready' ? 'READY' : 'PRE-ORDER'}
+                    {product.status === 'ready' ? 'SIAP' : 'PRE-ORDER'}
                   </Badge>
                   <Heading size={{ base: "sm", md: "md" }} lineClamp={2} minH={{ base: "2.5em", md: "auto" }}>
                     {product.name}
@@ -68,7 +68,7 @@ const ProductList: React.FC = () => {
                     Rp {Number(product.base_price).toLocaleString()}
                   </Text>
                   <Button asChild width="full" colorPalette="teal" size={{ base: "xs", md: "md" }}>
-                    <Link to={`/products/${product.slug || product.id}`}>View</Link>
+                    <Link to={`/products/${product.slug || product.id}`}>Lihat</Link>
                   </Button>
                 </VStack>
               </Box>

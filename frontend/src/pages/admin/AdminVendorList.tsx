@@ -33,15 +33,15 @@ const AdminVendorList: React.FC = () => {
     try {
       await client.delete(`/admin/vendors/${deleteId}`);
       toaster.create({
-        title: "Vendor Deleted",
+        title: "Vendor Dihapus",
         type: "success",
       });
       fetchVendors();
     } catch (error) {
       console.error(error);
       toaster.create({
-        title: "Error",
-        description: "Failed to delete vendor.",
+        title: "Kesalahan",
+        description: "Gagal menghapus vendor.",
         type: "error",
       });
     } finally {
@@ -52,9 +52,9 @@ const AdminVendorList: React.FC = () => {
   return (
     <Box>
       <HStack justify="space-between" mb={6}>
-        <Heading>Vendors</Heading>
+        <Heading>Vendor</Heading>
         <Button asChild colorPalette="teal">
-          <Link to="/admin/vendors/new">Add Vendor</Link>
+          <Link to="/admin/vendors/new">Tambah Vendor</Link>
         </Button>
       </HStack>
 
@@ -62,10 +62,10 @@ const AdminVendorList: React.FC = () => {
         <Table.Root>
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeader>Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Nama</Table.ColumnHeader>
               <Table.ColumnHeader>Slug</Table.ColumnHeader>
-              <Table.ColumnHeader>Contact Info</Table.ColumnHeader>
-              <Table.ColumnHeader>Actions</Table.ColumnHeader>
+              <Table.ColumnHeader>Info Kontak</Table.ColumnHeader>
+              <Table.ColumnHeader>Aksi</Table.ColumnHeader>
             </Table.Row>
           </Table.Header>
           <Table.Body>
@@ -77,13 +77,13 @@ const AdminVendorList: React.FC = () => {
                 <Table.Cell>
                   <HStack>
                     <Button asChild size="xs" variant="outline">
-                      <Link to={`/admin/vendors/${vendor.slug || vendor.id}/edit`}>Edit</Link>
+                      <Link to={`/admin/vendors/${vendor.slug || vendor.id}/edit`}>Ubah</Link>
                     </Button>
                     <Button asChild size="xs" variant="outline" colorPalette="blue">
-                      <Link to={`/admin/vendors/${vendor.id}/payments`}>Payments</Link>
+                      <Link to={`/admin/vendors/${vendor.id}/payments`}>Pembayaran</Link>
                     </Button>
                     <Button size="xs" colorPalette="red" variant="ghost" onClick={() => setDeleteId(vendor.id)}>
-                      Delete
+                      Hapus
                     </Button>
                   </HStack>
                 </Table.Cell>
@@ -96,16 +96,16 @@ const AdminVendorList: React.FC = () => {
       <DialogRoot open={!!deleteId} onOpenChange={(e) => !e.open && setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Vendor</DialogTitle>
+            <DialogTitle>Hapus Vendor</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            Are you sure? This will delete all associated products and payments.
+            Apakah Anda yakin? Ini akan menghapus semua produk dan pembayaran terkait.
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">Batal</Button>
             </DialogActionTrigger>
-            <Button colorPalette="red" onClick={confirmDelete}>Delete</Button>
+            <Button colorPalette="red" onClick={confirmDelete}>Hapus</Button>
           </DialogFooter>
         </DialogContent>
       </DialogRoot>

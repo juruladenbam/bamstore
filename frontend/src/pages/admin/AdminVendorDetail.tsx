@@ -88,7 +88,7 @@ const AdminVendorDetail: React.FC = () => {
   const handleAddPayment = async () => {
     const amountValue = parseNumber(newPayment.amount);
     if (!amountValue || amountValue <= 0) {
-      toaster.create({ title: "Invalid Amount", type: "error" });
+      toaster.create({ title: "Jumlah Tidak Valid", type: "error" });
       return;
     }
 
@@ -98,7 +98,7 @@ const AdminVendorDetail: React.FC = () => {
         ...newPayment,
         amount: amountValue
       });
-      toaster.create({ title: "Payment Added", type: "success" });
+      toaster.create({ title: "Pembayaran Ditambahkan", type: "success" });
       setNewPayment({
         amount: '',
         type: 'dp',
@@ -108,7 +108,7 @@ const AdminVendorDetail: React.FC = () => {
       fetchPayments();
     } catch (error) {
       console.error(error);
-      toaster.create({ title: "Failed to add payment", type: "error" });
+      toaster.create({ title: "Gagal menambah pembayaran", type: "error" });
     }
   };
 
@@ -116,54 +116,54 @@ const AdminVendorDetail: React.FC = () => {
     if (!deleteId) return;
     try {
       await client.delete(`/admin/vendor-payments/${deleteId}`);
-      toaster.create({ title: "Payment Deleted", type: "success" });
+      toaster.create({ title: "Pembayaran Dihapus", type: "success" });
       fetchPayments();
     } catch (error) {
       console.error(error);
-      toaster.create({ title: "Failed to delete payment", type: "error" });
+      toaster.create({ title: "Gagal menghapus pembayaran", type: "error" });
     } finally {
       setDeleteId(null);
     }
   };
 
-  if (loading) return <Text>Loading...</Text>;
-  if (!vendor) return <Text>Vendor not found</Text>;
+  if (loading) return <Text>Memuat...</Text>;
+  if (!vendor) return <Text>Vendor tidak ditemukan</Text>;
 
   return (
     <Box>
       <HStack mb={6} justify="space-between">
-        <Heading>{vendor.name} - Payments</Heading>
+        <Heading>{vendor.name} - Pembayaran</Heading>
         <Button asChild variant="outline">
-          <Link to="/admin/vendors">Back to Vendors</Link>
+          <Link to="/admin/vendors">Kembali ke Vendor</Link>
         </Button>
       </HStack>
 
       <HStack align="start" gap={8} wrap="wrap">
         <Box flex={1} minW="300px" bg="white" p={6} borderRadius="lg" shadow="sm">
-          <Heading size="md" mb={4}>Add Payment</Heading>
+          <Heading size="md" mb={4}>Tambah Pembayaran</Heading>
           <VStack gap={4} align="stretch">
             <Box>
-              <Text mb={1}>Amount</Text>
+              <Text mb={1}>Jumlah</Text>
               <Input 
                 value={newPayment.amount} 
                 onChange={e => setNewPayment({...newPayment, amount: formatNumber(e.target.value)})} 
               />
             </Box>
             <Box>
-              <Text mb={1}>Type</Text>
+              <Text mb={1}>Tipe</Text>
               <NativeSelect.Root>
-                <NativeSelect.Field 
-                  value={newPayment.type} 
+                <NativeSelect.Field
+                  value={newPayment.type}
                   onChange={e => setNewPayment({...newPayment, type: e.target.value as VendorPayment['type']})}
                 >
-                  <option value="dp">Down Payment (DP)</option>
-                  <option value="installment">Installment</option>
-                  <option value="full_payment">Full Payment</option>
+                  <option value="dp">Uang Muka (DP)</option>
+                  <option value="installment">Cicilan</option>
+                  <option value="full_payment">Pelunasan</option>
                 </NativeSelect.Field>
               </NativeSelect.Root>
             </Box>
             <Box>
-              <Text mb={1}>Date</Text>
+              <Text mb={1}>Tanggal</Text>
               <Input 
                 type="date" 
                 value={newPayment.payment_date} 
@@ -171,14 +171,14 @@ const AdminVendorDetail: React.FC = () => {
               />
             </Box>
             <Box>
-              <Text mb={1}>Notes</Text>
-              <Textarea 
-                value={newPayment.notes} 
-                onChange={e => setNewPayment({...newPayment, notes: e.target.value})} 
-                placeholder="e.g. Down Payment for Gamis A Batch 1"
+              <Text mb={1}>Catatan</Text>
+              <Textarea
+                value={newPayment.notes}
+                onChange={e => setNewPayment({...newPayment, notes: e.target.value})}
+                placeholder="contoh: Uang Muka untuk Gamis A Batch 1"
               />
             </Box>
-            <Button colorPalette="teal" onClick={handleAddPayment}>Record Payment</Button>
+            <Button colorPalette="teal" onClick={handleAddPayment}>Catat Pembayaran</Button>
           </VStack>
         </Box>
 
@@ -186,11 +186,11 @@ const AdminVendorDetail: React.FC = () => {
           <Table.Root>
             <Table.Header>
               <Table.Row>
-                <Table.ColumnHeader>Date</Table.ColumnHeader>
-                <Table.ColumnHeader>Type</Table.ColumnHeader>
-                <Table.ColumnHeader>Amount</Table.ColumnHeader>
-                <Table.ColumnHeader>Notes</Table.ColumnHeader>
-                <Table.ColumnHeader>Action</Table.ColumnHeader>
+                <Table.ColumnHeader>Tanggal</Table.ColumnHeader>
+                <Table.ColumnHeader>Tipe</Table.ColumnHeader>
+                <Table.ColumnHeader>Jumlah</Table.ColumnHeader>
+                <Table.ColumnHeader>Catatan</Table.ColumnHeader>
+                <Table.ColumnHeader>Aksi</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
             <Table.Body>
@@ -207,7 +207,7 @@ const AdminVendorDetail: React.FC = () => {
               ))}
               {payments.length === 0 && (
                 <Table.Row>
-                  <Table.Cell colSpan={5} textAlign="center">No payments recorded.</Table.Cell>
+                  <Table.Cell colSpan={5} textAlign="center">Belum ada pembayaran tercatat.</Table.Cell>
                 </Table.Row>
               )}
             </Table.Body>
@@ -218,16 +218,16 @@ const AdminVendorDetail: React.FC = () => {
       <DialogRoot open={!!deleteId} onOpenChange={(e) => !e.open && setDeleteId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Payment</DialogTitle>
+            <DialogTitle>Hapus Pembayaran</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            Are you sure you want to delete this payment record?
+            Apakah Anda yakin ingin menghapus catatan pembayaran ini?
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline">Batal</Button>
             </DialogActionTrigger>
-            <Button colorPalette="red" onClick={confirmDelete}>Delete</Button>
+            <Button colorPalette="red" onClick={confirmDelete}>Hapus</Button>
           </DialogFooter>
         </DialogContent>
       </DialogRoot>

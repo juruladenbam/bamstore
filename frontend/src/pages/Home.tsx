@@ -47,7 +47,7 @@ const Home: React.FC = () => {
     fetchData();
   }, []);
 
-  if (loading) return <Container py={10}><Text>Loading...</Text></Container>;
+  if (loading) return <Container py={10}><Text>Memuat...</Text></Container>;
 
   return (
     <Box>
@@ -61,8 +61,8 @@ const Home: React.FC = () => {
         display={{ base: 'none', md: 'block' }}
       >
         <Container maxW="container.xl">
-          <Heading size="3xl" mb={6} fontWeight="extrabold">Welcome to BAM Store</Heading>
-          <Text fontSize="2xl" mb={10} opacity={0.9}>Your one-stop shop for everything you need.</Text>
+          <Heading size="3xl" mb={6} fontWeight="extrabold">Selamat Datang di BAM Store</Heading>
+          <Text fontSize="2xl" mb={10} opacity={0.9}>Toko serba ada untuk semua kebutuhan Anda.</Text>
           <Button 
             asChild 
             size="xl" 
@@ -74,7 +74,7 @@ const Home: React.FC = () => {
             _hover={{ transform: 'scale(1.05)' }}
             transition="all 0.2s"
           >
-            <Link to="/products">Shop Now <Icon as={FaArrowRight} ml={2} /></Link>
+            <Link to="/products">Belanja Sekarang <Icon as={FaArrowRight} ml={2} /></Link>
           </Button>
         </Container>
       </Box>
@@ -83,9 +83,9 @@ const Home: React.FC = () => {
         
         {/* Recent Activity */}
         <HStack justify="space-between" mb={4}>
-            <Heading size="xl">Recent Activity</Heading>
+            <Heading size="xl">Aktivitas Terbaru</Heading>
             <Button asChild variant="ghost" colorPalette="teal">
-                <Link to="/activity">View All <Icon as={FaArrowRight} /></Link>
+                <Link to="/activity">Lihat Semua <Icon as={FaArrowRight} /></Link>
             </Button>
         </HStack>
 
@@ -107,11 +107,11 @@ const Home: React.FC = () => {
                     </VStack>
                 </Box>
             ))}
-             {activities.length === 0 && <Text color="gray.500">No recent activity.</Text>}
+             {activities.length === 0 && <Text color="gray.500">Tidak ada aktivitas terbaru.</Text>}
         </SimpleGrid>
 
         {/* Categories */}
-        <Heading size="xl" mb={6}>Categories</Heading>
+        <Heading size="xl" mb={6}>Kategori</Heading>
         
         {/* Mobile: Horizontal Scroll */}
         <Box display={{ base: 'block', md: 'none' }} mb={8} mx={-4} px={4}>
@@ -147,9 +147,9 @@ const Home: React.FC = () => {
 
         {/* Featured Products */}
         <HStack justify="space-between" mb={6}>
-            <Heading size="xl">New Arrivals</Heading>
+            <Heading size="xl">Produk Terbaru</Heading>
             <Button asChild variant="ghost" colorPalette="teal">
-                <Link to="/products">View All <Icon as={FaArrowRight} /></Link>
+                <Link to="/products">Lihat Semua <Icon as={FaArrowRight} /></Link>
             </Button>
         </HStack>
         
@@ -172,7 +172,7 @@ const Home: React.FC = () => {
                     <Heading size={{ base: "sm", md: "md" }} mb={2} lineClamp={1}>{product.name}</Heading>
                     <Text fontWeight="bold" color="teal.600">Rp {Number(product.base_price).toLocaleString()}</Text>
                     <Button asChild width="full" mt={4} size="sm" variant="outline">
-                        <Link to={`/products/${product.slug || product.id}`}>View</Link>
+                        <Link to={`/products/${product.slug || product.id}`}>Lihat</Link>
                     </Button>
                 </Box>
             )

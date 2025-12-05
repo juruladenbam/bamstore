@@ -45,7 +45,7 @@ const Navbar: React.FC = () => {
                   <Link to="/">
                     <Flex align="center" gap={2}>
                       <Icon><FaArrowLeft /></Icon>
-                      <Text fontSize="md">Back</Text>
+                      <Text fontSize="md">Kembali</Text>
                     </Flex>
                   </Link>
                 </ChakraLink>
@@ -62,7 +62,7 @@ const Navbar: React.FC = () => {
           <Box flex="1" maxW="600px" mx={{ base: 2, md: 8 }}>
              <Box position="relative" width="full">
                 <Input 
-                  placeholder="Search products..." 
+                  placeholder="Cari produk..." 
                   bg="white" 
                   color="gray.800" 
                   borderRadius="md" 
@@ -90,12 +90,12 @@ const Navbar: React.FC = () => {
           {/* Desktop Menu */}
           <Flex gap={6} align="center" display={{ base: 'none', md: 'flex' }}>
             <ChakraLink asChild color="white" fontWeight="medium">
-              <Link to="/products">Products</Link>
+              <Link to="/products">Produk</Link>
             </ChakraLink>
             
             <ChakraLink asChild color="white" position="relative" fontWeight="medium">
               <Link to="/checkout">
-                Cart
+                Keranjang
                 {cartCount > 0 && (
                   <Badge 
                     colorPalette="red" 
@@ -114,11 +114,11 @@ const Navbar: React.FC = () => {
             </ChakraLink>
 
             <ChakraLink asChild color="white" fontWeight="medium">
-              <Link to="/activity">Activity</Link>
+              <Link to="/activity">Aktivitas</Link>
             </ChakraLink>
             
             <ChakraLink asChild color="white" fontWeight="medium">
-              <Link to="/history">My Orders</Link>
+              <Link to="/history">Pesanan Saya</Link>
             </ChakraLink>
           </Flex>
 
@@ -167,10 +167,10 @@ const Navbar: React.FC = () => {
         boxShadow="0 -2px 10px rgba(0,0,0,0.05)"
       >
         <Flex justify="space-around" align="center">
-          <NavItem to="/" icon={FaHome} label="Home" isActive={location.pathname === '/'} />
-          <NavItem to="/products" icon={FaBoxOpen} label="Products" isActive={location.pathname.startsWith('/products')} />
-          <NavItem to="/activity" icon={FaClipboardList} label="Activity" isActive={location.pathname === '/activity'} />
-          <NavItem to="/history" icon={FaHistory} label="My Orders" isActive={location.pathname === '/history'} />
+          <NavItem to="/" icon={FaHome} label="Beranda" isActive={location.pathname === '/'} />
+          <NavItem to="/products" icon={FaBoxOpen} label="Produk" isActive={location.pathname.startsWith('/products')} />
+          <NavItem to="/activity" icon={FaClipboardList} label="Aktivitas" isActive={location.pathname === '/activity'} />
+          <NavItem to="/history" icon={FaHistory} label="Pesanan Saya" isActive={location.pathname === '/history'} />
         </Flex>
       </Box>
     </>
