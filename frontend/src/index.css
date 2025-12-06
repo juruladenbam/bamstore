@@ -12,3 +12,14 @@ body {
   min-height: 100vh;
 }
 
+/* Remove outline border on active state for navigation elements */
+a:active,
+button:active,
+[role="button"]:active,
+[role="link"]:active {
+  outline: none !important;
+  box-shadow: none !important; /* Ensure no residual box-shadow acting as outline */
+}
+
+
+

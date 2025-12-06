@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Heading, Table, Input, Badge, VStack } from '@chakra-ui/react';
+import { Box, Container, Heading, Table, Input, Badge, VStack, Text, Flex } from '@chakra-ui/react';
 import client from '../api/client';
 
 interface ActivityItem {
@@ -48,7 +48,8 @@ const OrderActivity: React.FC = () => {
           maxW="md"
         />
 
-        <Box bg="white" borderRadius="lg" shadow="sm" overflow="hidden">
+        {/* Desktop Table View */}
+        <Box bg="white" borderRadius="lg" shadow="sm" overflow="hidden" display={{ base: 'none', md: 'block' }}>
           <Table.Root>
             <Table.Header>
               <Table.Row>
@@ -83,6 +84,34 @@ const OrderActivity: React.FC = () => {
             </Table.Body>
           </Table.Root>
         </Box>
+
+        {/* Mobile List View */}
+        <VStack gap={4} display={{ base: 'flex', md: 'none' }} align="stretch">
+            {items.map(item => (
+                <Box key={item.id} bg="white" p={4} borderRadius="lg" shadow="sm" borderWidth="1px">
+                    <Flex justify="space-between" align="start" mb={2}>
+                        <VStack align="start" gap={0}>
+                            <Text fontWeight="bold" fontSize="md">{item.recipient_name}</Text>
+                            <Text fontSize="xs" color="gray.500">{item.date}</Text>
+                        </VStack>
+                        <Badge colorPalette={item.status === 'paid' ? 'green' : 'yellow'}>
+                            {item.status}
+                        </Badge>
+                    </Flex>
+                    
+                    <Box mb={2}>
+                        <Text fontSize="sm" fontWeight="medium">{item.product_name}</Text>
+                        <Text fontSize="xs" color="gray.600">
+                            {item.variants ? `Varian: ${item.variants}` : 'Tanpa Varian'} • Jml: {item.quantity}
+                        </Text>
+                    </Box>
+                </Box>
+            ))}
+            {items.length === 0 && !loading && (
+                <Text textAlign="center" color="gray.500">Tidak ada aktivitas.</Text>
+            )}
+        </VStack>
+
       </VStack>
     </Container>
   );
