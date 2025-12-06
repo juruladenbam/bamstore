@@ -45,7 +45,18 @@ const ProductList: React.FC = () => {
               : (product.image_url || 'https://via.placeholder.com/300');
 
             return (
-              <Box key={product.id} borderWidth="1px" borderRadius="lg" overflow="hidden" p={{ base: 2, md: 4 }}>
+              <Box 
+                key={product.id} 
+                as={Link}
+                to={`/products/${product.slug || product.id}`}
+                borderWidth="1px" 
+                borderRadius="lg" 
+                overflow="hidden" 
+                p={{ base: 2, md: 4 }}
+                display="block"
+                _hover={{ shadow: 'md', borderColor: 'teal.500', transform: 'translateY(-2px)' }}
+                transition="all 0.2s"
+              >
                 <Image 
                   src={imageUrl} 
                   alt={product.name} 
@@ -67,9 +78,6 @@ const ProductList: React.FC = () => {
                   <Text fontWeight="bold" fontSize={{ base: "sm", md: "md" }}>
                     Rp {Number(product.base_price).toLocaleString()}
                   </Text>
-                  <Button asChild width="full" colorPalette="teal" size={{ base: "xs", md: "md" }}>
-                    <Link to={`/products/${product.slug || product.id}`}>Lihat</Link>
-                  </Button>
                 </VStack>
               </Box>
             );
