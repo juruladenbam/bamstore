@@ -68,9 +68,14 @@ class OrderController extends Controller
      *     )
      * )
      */
-    public function show(Order $order)
+    public function show($id)
     {
-        return response()->json($order->load(['items.product', 'items.variants']));
+        $order = Order::with(['items.product', 'items.variants'])
+            ->where('id', $id)
+            ->orWhere('order_number', $id)
+            ->firstOrFail();
+
+        return response()->json($order);
     }
 
     /**
@@ -99,8 +104,12 @@ class OrderController extends Controller
      *     )
      * )
      */
-    public function updateStatus(Request $request, Order $order)
+    public function updateStatus(Request $request, $id)
     {
+        $order = Order::where('id', $id)
+            ->orWhere('order_number', $id)
+            ->firstOrFail();
+
         $validated = $request->validate([
             'status' => 'required|in:new,paid,processed,ready_pickup,completed,cancelled',
         ]);
