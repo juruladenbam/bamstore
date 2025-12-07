@@ -1,6 +1,7 @@
 import React, { useEffect, useState }                                                 from 'react';
 import { useParams, useNavigate }                                                     from 'react-router-dom';
-import { Box, Container, Heading, Text, Image, Badge, Button, VStack, HStack, Input } from '@chakra-ui/react';
+import { Box, Container, Heading, Text, Image, Badge, Button, VStack, HStack, Input, NumberInput, IconButton } from '@chakra-ui/react';
+import { LuMinus, LuPlus }                                                            from 'react-icons/lu';
 import client                                                                         from '../api/client';
 import { STORAGE_URL }                                                                from '../config';
 import { useCart }                                                                    from '../context/CartContext';
@@ -166,8 +167,8 @@ const ProductDetail: React.FC = () => {
     });
   };
 
-  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQty = parseInt(e.target.value) || 1;
+  const handleQuantityChange = (details: { value: string; valueAsNumber: number }) => {
+    const newQty = details.valueAsNumber || 1;
     setQuantity(newQty);
     setRecipients(prev => {
       const newRecipients = [...prev];
@@ -276,7 +277,7 @@ const ProductDetail: React.FC = () => {
   };
 
   return (
-    <Container maxW="container.md" py={{ base: 4, md: 10 }} px={{ base: 0, md: 4 }}>
+    <Container maxW="container.xl" py={{ base: 4, md: 10 }} px={{ base: 4, md: 8 }}>
       <DialogRoot open={isDialogOpen} onOpenChange={(e) => setIsDialogOpen(e.open)}>
         <DialogContent>
           <DialogHeader>
@@ -306,189 +307,228 @@ const ProductDetail: React.FC = () => {
       </DialogRoot>
 
       <Box 
-        borderWidth={{ base: 0, md: "1px" }} 
-        borderRadius={{ base: "none", md: "lg" }} 
-        overflow="hidden" 
-        p={{ base: 4, md: 6 }}
         bg="white"
+        borderRadius="lg"
+        p={{ base: 0, md: 6 }}
+        shadow={{ base: "none", md: "sm" }}
       >
-        <Box mb={6}>
-          <Image 
-            src={currentImageSrc} 
-            alt={product.name} 
-            borderRadius={{ base: "none", md: "md" }}
-            width="100%" 
-            height={{ base: "300px", md: "400px" }} 
-            objectFit="contain" 
-          />
-          {images.length > 1 && (
-            <HStack mt={2} overflowX="auto" py={2}>
-              {images.map((img, idx) => (
-                <Box 
-                  key={img.id} 
-                  borderWidth={idx === currentImageIndex ? '2px' : '1px'} 
-                  borderColor={idx === currentImageIndex ? 'teal.500' : 'gray.200'}
-                  borderRadius="md"
-                  cursor="pointer"
-                  onClick={() => setCurrentImageIndex(idx)}
-                  flexShrink={0}
-                >
-                  <Image 
-                    src={img.image_path.startsWith('http') ? img.image_path : `${STORAGE_URL}/${img.image_path}`} 
-                    width="80px" 
-                    height="80px" 
-                    objectFit="cover" 
-                    borderRadius="sm"
-                  />
-                </Box>
-              ))}
-            </HStack>
-          )}
-        </Box>
-        
-        <VStack align="start" gap={4}>
-          <Badge colorPalette={product.status === 'ready' ? 'green' : 'blue'}>
-            {product.status === 'ready' ? 'STOK SIAP' : 'PRE-ORDER'}
-          </Badge>
-          <Heading size={{ base: "lg", md: "xl" }}>{product.name}</Heading>
-          <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="bold" color="teal.600">
-            Rp {currentPrice.toLocaleString()}
-          </Text>
-          
-          {matchingSku && (
-            <Text fontSize="sm" color={matchingSku.stock > 0 ? "green.600" : "red.600"} fontWeight="medium">
-              {product.status === 'pre_order' ? 'Kuota Tersedia: ' : 'Stok: '} 
-              {matchingSku.stock}
-            </Text>
-          )}
-
-          <Text>{product.description}</Text>
-
-          <Box w="full">
-            <Text mb={2} fontWeight="bold">Varian</Text>
-            {Object.entries(
-              (product.variants || []).reduce((acc, v) => {
-                const type = v.type || 'General';
-                if (!acc[type]) acc[type] = [];
-                acc[type].push(v);
-                return acc;
-              }, {} as Record<string, ProductVariant[]>)
-            ).map(([type, variants]) => (
-              <Box key={type} mb={4}>
-                <Text 
-                  fontSize="sm" 
-                  fontWeight="semibold" 
-                  mb={2} 
-                  color={errors.missingVariants?.includes(type) ? "red.500" : "gray.600"}
-                >
-                  {type} {errors.missingVariants?.includes(type) && "(Wajib)"}
-                </Text>
-                <HStack wrap="wrap" gap={2}>
-                  {variants.map(v => {
-                    const isSelected = selectedVariants.some(sv => sv.id === v.id);
-                    return (
-                      <Button 
-                        key={v.id} 
-                        size="sm" 
-                        variant={isSelected ? "solid" : "outline"}
-                        colorPalette={isSelected ? "teal" : "gray"}
-                        borderColor={errors.missingVariants?.includes(type) && !isSelected ? "red.500" : undefined}
-                        onClick={() => handleVariantToggle(v)}
-                      >
-                        {v.name} ({v.price_adjustment > 0 ? '+' : ''}{Number(v.price_adjustment).toLocaleString()})
-                      </Button>
-                    );
-                  })}
-                </HStack>
-              </Box>
-            ))}
-          </Box>
-
-          <Box w="full">
-            <Text mb={2} fontWeight="bold">Jumlah</Text>
-            <Input 
-              type="number" 
-              min={1} 
-              value={quantity} 
-              onChange={handleQuantityChange} 
-            />
-          </Box>
-
-          <Box w="full">
-            <Text mb={2} fontWeight="bold">Untuk Siapa?</Text>
-            <HStack mb={2}>
-              <Button
-                variant={recipientType === 'myself' ? 'solid' : 'outline'}
-                onClick={() => setRecipientType('myself')}
-                size="sm"
-              >
-                Untuk Saya
-              </Button>
-              <Button
-                variant={recipientType === 'others' ? 'solid' : 'outline'}
-                onClick={() => setRecipientType('others')}
-                size="sm"
-              >
-                Untuk Orang Lain
-              </Button>
-            </HStack>
+        {/* Top Section: Images & Details */}
+        <HStack align="start" flexDirection={{ base: "column", md: "row" }} gap={{ base: 6, md: 10 }} mb={10}>
             
-            {recipientType === 'others' && (
-              <VStack gap={4} align="stretch">
-                {recipients.map((recipient, index) => (
-                  <Box key={index} borderWidth="1px" borderRadius="md" p={3}>
-                    <Text fontWeight="bold" mb={2}>Penerima #{index + 1}</Text>
-                    <VStack gap={2}>
-                        <Box w="full" position="relative">
-                            <Input
-                            placeholder="Nama"
-                            value={recipient.name} 
-                            onChange={(e) => handleRecipientChange(index, e.target.value)}
-                            onBlur={() => setTimeout(() => setActiveRecipientIndex(null), 200)}
-                            borderColor={errors.recipientNames?.[index] ? "red.500" : undefined}
-                            autoComplete="off"
-                            />
-                            {activeRecipientIndex === index && searchResults.length > 0 && (
-                            <Box 
-                                position="absolute" 
-                                top="100%" 
-                                left={0} 
-                                right={0} 
-                                zIndex={10} 
-                                bg="white" 
-                                borderWidth="1px" 
-                                borderRadius="md" 
-                                boxShadow="md" 
-                                maxH="200px" 
-                                overflowY="auto"
+            {/* Column 1: Images */}
+            <Box w={{ base: "full", md: "50%" }}>
+                <Image 
+                    src={currentImageSrc} 
+                    alt={product.name} 
+                    borderRadius="md"
+                    width="100%" 
+                    height={{ base: "350px", md: "500px" }} 
+                    objectFit="contain" 
+                    bg="gray.50"
+                    mb={4}
+                />
+                {images.length > 1 && (
+                    <HStack overflowX="auto" gap={2} py={1}>
+                    {images.map((img, idx) => (
+                        <Box 
+                        key={img.id} 
+                        borderWidth={idx === currentImageIndex ? '2px' : '1px'} 
+                        borderColor={idx === currentImageIndex ? 'teal.500' : 'gray.200'}
+                        borderRadius="md"
+                        cursor="pointer"
+                        onClick={() => setCurrentImageIndex(idx)}
+                        flexShrink={0}
+                        w="80px"
+                        h="80px"
+                        overflow="hidden"
+                        >
+                        <Image 
+                            src={img.image_path.startsWith('http') ? img.image_path : `${STORAGE_URL}/${img.image_path}`} 
+                            width="100%" 
+                            height="100%" 
+                            objectFit="cover" 
+                        />
+                        </Box>
+                    ))}
+                    </HStack>
+                )}
+            </Box>
+
+            {/* Column 2: Product Details & Options */}
+            <VStack align="start" gap={6} w={{ base: "full", md: "50%" }}>
+                <Box>
+                    <Badge colorPalette={product.status === 'ready' ? 'green' : 'blue'} mb={2}>
+                        {product.status === 'ready' ? 'STOK SIAP' : 'PRE-ORDER'}
+                    </Badge>
+                    <Heading size="2xl" mb={2}>{product.name}</Heading>
+                    <Text fontSize="3xl" fontWeight="bold" color="teal.600">
+                        Rp {currentPrice.toLocaleString()}
+                    </Text>
+                    {matchingSku && (
+                        <Text fontSize="sm" color={matchingSku.stock > 0 ? "green.600" : "red.600"} fontWeight="medium" mt={1}>
+                        {product.status === 'pre_order' ? 'Kuota Tersedia: ' : 'Stok: '} 
+                        {matchingSku.stock}
+                        </Text>
+                    )}
+                </Box>
+
+                <Box w="full" borderTopWidth="1px" borderBottomWidth="1px" borderColor="gray.100" py={6}>
+                    <VStack align="start" gap={6}>
+                         {/* Variants */}
+                        {Object.entries(
+                        (product.variants || []).reduce((acc, v) => {
+                            const type = v.type || 'General';
+                            if (!acc[type]) acc[type] = [];
+                            acc[type].push(v);
+                            return acc;
+                        }, {} as Record<string, ProductVariant[]>)
+                        ).map(([type, variants]) => (
+                        <Box key={type} w="full">
+                            <Text 
+                            fontSize="sm" 
+                            fontWeight="semibold" 
+                            mb={2} 
+                            color={errors.missingVariants?.includes(type) ? "red.500" : "gray.600"}
                             >
-                                {searchResults.map((member, idx) => (
-                                <Box 
-                                    key={idx} 
-                                    p={2} 
-                                    _hover={{ bg: "gray.100", cursor: "pointer" }}
-                                    onMouseDown={() => selectRecipient(index, member)}
+                            {type} {errors.missingVariants?.includes(type) && "(Wajib)"}
+                            </Text>
+                            <HStack wrap="wrap" gap={2}>
+                            {variants.map(v => {
+                                const isSelected = selectedVariants.some(sv => sv.id === v.id);
+                                return (
+                                <Button 
+                                    key={v.id} 
+                                    size="sm" 
+                                    variant={isSelected ? "solid" : "outline"}
+                                    colorPalette={isSelected ? "teal" : "gray"}
+                                    borderColor={errors.missingVariants?.includes(type) && !isSelected ? "red.500" : undefined}
+                                    onClick={() => handleVariantToggle(v)}
                                 >
-                                    <Text fontWeight="bold" fontSize="sm">{member.name}</Text>
-                                    <Text fontSize="xs" color="gray.600">
-                                        {member.phone_number ? `${member.phone_number} - ` : ''}{member.qobilah || ''}
-                                    </Text>
+                                    {v.name} ({v.price_adjustment > 0 ? '+' : ''}{Number(v.price_adjustment).toLocaleString()})
+                                </Button>
+                                );
+                            })}
+                            </HStack>
+                        </Box>
+                        ))}
+
+                         {/* Recipient Selection */}
+                        <Box w="full">
+                            <Text mb={2} fontWeight="bold">Untuk Siapa?</Text>
+                            <HStack mb={3}>
+                                <Button
+                                    variant={recipientType === 'myself' ? 'solid' : 'outline'}
+                                    onClick={() => setRecipientType('myself')}
+                                    size="sm"
+                                    colorPalette="teal"
+                                >
+                                    Untuk Saya
+                                </Button>
+                                <Button
+                                    variant={recipientType === 'others' ? 'solid' : 'outline'}
+                                    onClick={() => setRecipientType('others')}
+                                    size="sm"
+                                    colorPalette="teal"
+                                >
+                                    Untuk Orang Lain
+                                </Button>
+                            </HStack>
+                            
+                            {recipientType === 'others' && (
+                            <VStack gap={4} align="stretch" mt={2}>
+                                {recipients.map((recipient, index) => (
+                                <Box key={index} borderWidth="1px" borderRadius="md" p={3} bg="gray.50">
+                                    <Text fontWeight="bold" mb={2} fontSize="sm">Penerima #{index + 1}</Text>
+                                    <VStack gap={2}>
+                                        <Box w="full" position="relative">
+                                            <Input
+                                            placeholder="Cari Nama Anggota..."
+                                            value={recipient.name} 
+                                            onChange={(e) => handleRecipientChange(index, e.target.value)}
+                                            onBlur={() => setTimeout(() => setActiveRecipientIndex(null), 200)}
+                                            borderColor={errors.recipientNames?.[index] ? "red.500" : "white"}
+                                            bg="white"
+                                            autoComplete="off"
+                                            />
+                                            {activeRecipientIndex === index && searchResults.length > 0 && (
+                                            <Box 
+                                                position="absolute" 
+                                                top="100%" 
+                                                left={0} 
+                                                right={0} 
+                                                zIndex={10} 
+                                                bg="white" 
+                                                borderWidth="1px" 
+                                                borderRadius="md" 
+                                                boxShadow="md" 
+                                                maxH="200px" 
+                                                overflowY="auto"
+                                            >
+                                                {searchResults.map((member, idx) => (
+                                                <Box 
+                                                    key={idx} 
+                                                    p={2} 
+                                                    _hover={{ bg: "gray.100", cursor: "pointer" }}
+                                                    onMouseDown={() => selectRecipient(index, member)}
+                                                >
+                                                    <Text fontWeight="bold" fontSize="sm">{member.name}</Text>
+                                                    <Text fontSize="xs" color="gray.600">
+                                                        {member.phone_number ? `${member.phone_number} - ` : ''}{member.qobilah || ''}
+                                                    </Text>
+                                                </Box>
+                                                ))}
+                                            </Box>
+                                            )}
+                                        </Box>
+                                    </VStack>
                                 </Box>
                                 ))}
-                            </Box>
+                            </VStack>
                             )}
                         </Box>
                     </VStack>
-                  </Box>
-                ))}
-              </VStack>
-            )}
-          </Box>
+                </Box>
 
-          <Button colorPalette="teal" size="lg" width="full" onClick={handleAddToCart}>
-            Tambah ke Keranjang
-          </Button>
-        </VStack>
+                {/* Action Row */}
+                <HStack w="full" gap={4}>
+                    <NumberInput.Root
+                        size="lg" 
+                        maxW="150px" 
+                        min={1} 
+                        value={quantity.toString()} 
+                        onValueChange={handleQuantityChange}
+                        unstyled
+                        spinOnPress={false}
+                    >
+                        <HStack gap={2}>
+                            <NumberInput.DecrementTrigger asChild>
+                                <IconButton variant="outline" size="sm">
+                                    <LuMinus />
+                                </IconButton>
+                            </NumberInput.DecrementTrigger>
+                            <NumberInput.ValueText textAlign="center" fontSize="lg" minW="3ch" />
+                            <NumberInput.IncrementTrigger asChild>
+                                <IconButton variant="outline" size="sm">
+                                    <LuPlus />
+                                </IconButton>
+                            </NumberInput.IncrementTrigger>
+                        </HStack>
+                    </NumberInput.Root>
+                    <Button colorPalette="teal" size="lg" flex={1} onClick={handleAddToCart}>
+                        Tambah ke Keranjang
+                    </Button>
+                </HStack>
+            </VStack>
+        </HStack>
+
+        {/* Bottom Section: Description */}
+        <Box borderTopWidth="1px" pt={8} borderColor="gray.200">
+             <Heading size="lg" mb={4}>Deskripsi Produk</Heading>
+             <Text whiteSpace="pre-line" color="gray.700" lineHeight="tall">
+                {product.description}
+             </Text>
+        </Box>
+
       </Box>
     </Container>
   );

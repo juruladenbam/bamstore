@@ -182,6 +182,8 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            broadcast(new \App\Events\NewOrderReceived($order));
+
             return response()->json([
                 'message' => 'Order created successfully',
                 'order_id' => $order->id,

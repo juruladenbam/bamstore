@@ -21,8 +21,38 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (item: CartItem) => {
-    setItems(prev => [...prev, item]);
+  const addToCart = (newItem: CartItem) => {
+    setItems(prevItems => {
+      const existingItemIndex = prevItems.findIndex(item => {
+        // Check Product ID
+        if (item.product.id !== newItem.product.id) return false;
+
+        // Check Recipient Name
+        if (item.recipient_name !== newItem.recipient_name) return false;
+
+        // Check SKU ID
+        if (item.sku_id !== newItem.sku_id) return false;
+
+        // Check Variants
+        if (item.variants.length !== newItem.variants.length) return false;
+        
+        const itemVariantIds = item.variants.map(v => v.id).sort((a, b) => a - b);
+        const newItemVariantIds = newItem.variants.map(v => v.id).sort((a, b) => a - b);
+
+        return itemVariantIds.every((id, index) => id === newItemVariantIds[index]);
+      });
+
+      if (existingItemIndex > -1) {
+        const updatedItems = [...prevItems];
+        updatedItems[existingItemIndex] = {
+          ...updatedItems[existingItemIndex],
+          quantity: updatedItems[existingItemIndex].quantity + newItem.quantity
+        };
+        return updatedItems;
+      }
+
+      return [...prevItems, newItem];
+    });
   };
 
   const removeFromCart = (index: number) => {
