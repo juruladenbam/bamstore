@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Heading, SimpleGrid, Text, Image, Badge, Button, VStack } from '@chakra-ui/react';
+import { Box, Container, Heading, SimpleGrid, Text, Image, Badge, VStack } from '@chakra-ui/react';
 import { Link, useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 import { STORAGE_URL } from '../config';
@@ -45,15 +45,16 @@ const ProductList: React.FC = () => {
               : (product.image_url || 'https://via.placeholder.com/300');
 
             return (
-              <Box 
-                key={product.id} 
-                as={Link}
+              <Link 
+                key={product.id}
                 to={`/products/${product.slug || product.id}`}
+                style={{ display: 'block', textDecoration: 'none' }}
+              >
+              <Box 
                 borderWidth="1px" 
                 borderRadius="lg" 
                 overflow="hidden" 
                 p={{ base: 2, md: 4 }}
-                display="block"
                 _hover={{ shadow: 'md', borderColor: 'teal.500', transform: 'translateY(-2px)' }}
                 transition="all 0.2s"
               >
@@ -80,6 +81,7 @@ const ProductList: React.FC = () => {
                   </Text>
                 </VStack>
               </Box>
+              </Link>
             );
           })}
         </SimpleGrid>
