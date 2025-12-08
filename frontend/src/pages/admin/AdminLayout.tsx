@@ -87,7 +87,7 @@ const AdminLayout: React.FC = () => {
         };
 
         setNotifications(prev => [newNotif, ...prev]);
-        setUnreadCount(prev => prev + prev + 1);
+        setUnreadCount(prev => prev + 1);
 
         // Browser Notification
         if (Notification.permission === "granted") {

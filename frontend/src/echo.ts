@@ -10,11 +10,6 @@ declare global {
 
 window.Pusher = Pusher;
 
-console.log('Pusher Configuration:', {
-    key_exists: !!import.meta.env.VITE_PUSHER_APP_KEY,
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER
-});
-
 const EchoInstance = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY,
