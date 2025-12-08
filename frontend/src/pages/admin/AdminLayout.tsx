@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState }             from 'react';
 import { 
   Box, 
   Flex, 
@@ -18,7 +18,7 @@ import {
   Badge,
   IconButton
 } from '@chakra-ui/react';
-import echoInstance from '../../echo'; // Import echoInstance
+import echoInstance                               from '../../echo'; // Import echoInstance
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   FiBox, 
@@ -33,7 +33,7 @@ import {
   FiGrid,
   FiBell
 } from 'react-icons/fi';
-import { toaster } from '../../components/ui/toaster';
+import { toaster }                                from '../../components/ui/toaster';
 
 interface Notification {
   id: string;
@@ -87,7 +87,7 @@ const AdminLayout: React.FC = () => {
         };
 
         setNotifications(prev => [newNotif, ...prev]);
-        setUnreadCount(prev => prev + prev + 1);
+        setUnreadCount(prev => prev + 1);
 
         // Browser Notification
         if (Notification.permission === "granted") {
