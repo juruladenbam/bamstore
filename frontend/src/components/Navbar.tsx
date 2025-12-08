@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Flex, Heading, Link as ChakraLink, Badge, Input, Icon, VStack, Text } from '@chakra-ui/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useCart } from '../features/cart/context/CartContext';
 import { FaHome, FaBoxOpen, FaClipboardList, FaHistory, FaShoppingCart, FaSearch, FaArrowLeft } from 'react-icons/fa';
 
 const Navbar: React.FC = () => {
