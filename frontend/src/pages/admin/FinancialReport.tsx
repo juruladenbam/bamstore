@@ -65,21 +65,21 @@ const FinancialReport: React.FC = () => {
     <Container maxW="container.xl" py={10}>
       <HStack justify="space-between" mb={6} wrap="wrap" gap={4}>
         <Heading>Laporan Keuangan</Heading>
-        <HStack>
+        <HStack wrap="wrap" gap={2} w={{ base: "full", md: "auto" }}>
           <Input 
             type="date" 
             value={startDate} 
             onChange={(e) => setStartDate(e.target.value)} 
-            w="auto"
+            w={{ base: "full", md: "auto" }}
           />
-          <Text>-</Text>
+          <Text display={{ base: "none", md: "block" }}>-</Text>
           <Input 
             type="date" 
             value={endDate} 
             onChange={(e) => setEndDate(e.target.value)} 
-            w="auto"
+            w={{ base: "full", md: "auto" }}
           />
-          <Button onClick={handleFilter} colorPalette="blue">Filter</Button>
+          <Button onClick={handleFilter} colorPalette="blue" w={{ base: "full", md: "auto" }}>Filter</Button>
         </HStack>
       </HStack>
 
@@ -126,6 +126,7 @@ const FinancialReport: React.FC = () => {
               <Heading size="md">Rincian Transaksi</Heading>
             </Card.Header>
             <Card.Body>
+              <Box overflowX="auto">
               <Table.Root size="sm" striped>
                 <Table.Header>
                   <Table.Row>
@@ -164,6 +165,7 @@ const FinancialReport: React.FC = () => {
                   )}
                 </Table.Body>
               </Table.Root>
+              </Box>
             </Card.Body>
           </Card.Root>
         </>

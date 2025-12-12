@@ -143,6 +143,7 @@ function DataTable<T extends Record<string, any>>({
       </Flex>
 
       <Box bg="white" borderRadius="lg" shadow="sm" overflow="hidden" borderWidth="1px">
+        <Box overflowX="auto">
         <Table.Root>
           <Table.Header bg="gray.50">
             <Table.Row>
@@ -194,6 +195,7 @@ function DataTable<T extends Record<string, any>>({
             )}
           </Table.Body>
         </Table.Root>
+        </Box>
         
         {/* Pagination */}
         <Flex justify="space-between" align="center" p={4} borderTopWidth="1px">
