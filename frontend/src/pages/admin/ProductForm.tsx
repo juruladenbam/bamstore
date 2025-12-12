@@ -600,7 +600,11 @@ const ProductForm: React.FC = () => {
           <HStack wrap="wrap" gap={4}>
             {existingImages.map((img) => (
               <Box key={img.id} position="relative" width="100px" height="100px">
-                <img src={`${STORAGE_URL}/${img.image_path}`} alt="Product" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+                <img 
+                  src={img.image_path.startsWith('http') ? img.image_path : `${STORAGE_URL}/${img.image_path}`} 
+                  alt="Product" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} 
+                />
                 <Button 
                   size="xs" 
                   colorPalette="red" 
