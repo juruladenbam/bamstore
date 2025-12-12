@@ -10,6 +10,7 @@ import OrderHistory                                     from './pages/OrderHisto
 import OrderConfirmation                                from './pages/OrderConfirmation';
 import AdminLayout                                      from './pages/admin/AdminLayout';
 import AdminProductList                                 from './pages/admin/AdminProductList';
+import Dashboard                                        from './pages/admin/Dashboard';
 import ProductForm                                      from './pages/admin/ProductForm';
 import AdminCategoryList                                from './pages/admin/AdminCategoryList';
 import CategoryForm                                     from './pages/admin/CategoryForm';
@@ -47,7 +48,7 @@ function App() {
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminProductList />} />
+            <Route index element={<Dashboard />} />
             <Route path="products" element={<AdminProductList />} />
             <Route path="products/new" element={<ProductForm />} />
             <Route path="products/:id/edit" element={<ProductForm />} />
