@@ -47,4 +47,10 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/reports/finance', [\App\Http\Controllers\Api\Admin\FinancialReportController::class, 'index']);
 
     Route::post('/settings', [\App\Http\Controllers\SettingController::class, 'update']);
+
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
 });
