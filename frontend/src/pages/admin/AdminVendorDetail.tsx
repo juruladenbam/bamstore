@@ -1,9 +1,10 @@
 import React, { useEffect, useState }                                                       from 'react';
 import { useParams, Link }                                                                  from 'react-router-dom';
-import { Box, Heading, Table, Button, HStack, VStack, Text, Input, NativeSelect, Textarea } from '@chakra-ui/react';
+import { Box, Heading, Button, HStack, VStack, Text, Input, NativeSelect, Textarea } from '@chakra-ui/react';
 import client                                                                               from '../../api/client';
 import type { Vendor }                                                                      from '../../types';
 import { toaster }                                                                          from '../../components/ui/toaster';
+import DataTable, { type Column } from '../../components/DataTable';
 import {
   DialogBody,
   DialogActionTrigger,
@@ -48,7 +49,8 @@ const AdminVendorDetail: React.FC = () => {
   const [vendor, setVendor] = useState<Vendor | null>(null);
   const [payments, setPayments] = useState<VendorPayment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteIds, setDeleteIds] = useState<any[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   
   // New Payment Form State
   const [newPayment, setNewPayment] = useState({
@@ -98,7 +100,8 @@ const AdminVendorDetail: React.FC = () => {
         ...newPayment,
         amount: amountValue
       });
-      toaster.create({ title: "Pembayaran Ditambahkan", type: "success" });
+      
+      toaster.create({ title: "Pembayaran Dicatat", type: "success" });
       setNewPayment({
         amount: '',
         type: 'dp',
@@ -108,45 +111,86 @@ const AdminVendorDetail: React.FC = () => {
       fetchPayments();
     } catch (error) {
       console.error(error);
-      toaster.create({ title: "Gagal menambah pembayaran", type: "error" });
+      toaster.create({ title: "Gagal mencatat pembayaran", type: "error" });
     }
+  };
+
+  const handleBulkDelete = (ids: any[]) => {
+    setDeleteIds(ids);
+    setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (!deleteId) return;
     try {
-      await client.delete(`/admin/vendor-payments/${deleteId}`);
-      toaster.create({ title: "Pembayaran Dihapus", type: "success" });
+      await Promise.all(deleteIds.map(pid => client.delete(`/admin/vendor-payments/${pid}`)));
+      toaster.create({
+        title: "Pembayaran Dihapus",
+        description: `${deleteIds.length} pembayaran berhasil dihapus.`,
+        type: "success",
+      });
       fetchPayments();
     } catch (error) {
       console.error(error);
-      toaster.create({ title: "Gagal menghapus pembayaran", type: "error" });
+      toaster.create({
+        title: "Kesalahan",
+        description: "Gagal menghapus beberapa pembayaran.",
+        type: "error",
+      });
     } finally {
-      setDeleteId(null);
+      setIsDeleteDialogOpen(false);
+      setDeleteIds([]);
     }
   };
 
-  if (loading) return <Text>Memuat...</Text>;
-  if (!vendor) return <Text>Vendor tidak ditemukan</Text>;
+  const columns: Column<VendorPayment>[] = [
+    { 
+      header: 'Tanggal', 
+      cell: (p) => new Date(p.payment_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) 
+    },
+    { 
+      header: 'Tipe', 
+      cell: (p) => p.type.replace('_', ' ').toUpperCase() 
+    },
+    { 
+      header: 'Jumlah', 
+      cell: (p) => `Rp ${Number(p.amount).toLocaleString('id-ID')}` 
+    },
+    { header: 'Catatan', accessorKey: 'notes' },
+    {
+      header: 'Aksi',
+      cell: (p) => (
+        <Button size="xs" colorPalette="red" variant="ghost" onClick={() => handleBulkDelete([p.id])}>Hapus</Button>
+      )
+    }
+  ];
+
+  if (loading) return <Box p={5}>Loading...</Box>;
+  if (!vendor) return <Box p={5}>Vendor not found</Box>;
 
   return (
     <Box>
-      <HStack mb={6} justify="space-between">
-        <Heading>{vendor.name} - Pembayaran</Heading>
-        <Button asChild variant="outline">
-          <Link to="/admin/vendors">Kembali ke Vendor</Link>
+      <HStack mb={6}>
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin/vendors">Kembali</Link>
         </Button>
+        <Heading size="lg">{vendor.name}</Heading>
       </HStack>
 
       <HStack align="start" gap={8} wrap="wrap">
         <Box flex={1} minW="300px" bg="white" p={6} borderRadius="lg" shadow="sm">
-          <Heading size="md" mb={4}>Tambah Pembayaran</Heading>
-          <VStack gap={4} align="stretch">
+          <Heading size="md" mb={4}>Catat Pembayaran Baru</Heading>
+          <VStack align="stretch" gap={4}>
             <Box>
-              <Text mb={1}>Jumlah</Text>
+              <Text mb={1}>Jumlah (Rp)</Text>
               <Input 
                 value={newPayment.amount} 
-                onChange={e => setNewPayment({...newPayment, amount: formatNumber(e.target.value)})} 
+                onChange={e => {
+                  const val = e.target.value;
+                  // Allow typing numbers and formatting
+                  const num = parseNumber(val);
+                  setNewPayment({...newPayment, amount: formatNumber(num)})
+                }}
+                placeholder="0"
               />
             </Box>
             <Box>
@@ -182,46 +226,25 @@ const AdminVendorDetail: React.FC = () => {
           </VStack>
         </Box>
 
-        <Box flex={2} minW="300px" bg="white" borderRadius="lg" shadow="sm" overflow="hidden">
-          <Table.Root>
-            <Table.Header>
-              <Table.Row>
-                <Table.ColumnHeader>Tanggal</Table.ColumnHeader>
-                <Table.ColumnHeader>Tipe</Table.ColumnHeader>
-                <Table.ColumnHeader>Jumlah</Table.ColumnHeader>
-                <Table.ColumnHeader>Catatan</Table.ColumnHeader>
-                <Table.ColumnHeader>Aksi</Table.ColumnHeader>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {payments.map(p => (
-                <Table.Row key={p.id}>
-                  <Table.Cell>{new Date(p.payment_date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</Table.Cell>
-                  <Table.Cell textTransform="uppercase">{p.type.replace('_', ' ')}</Table.Cell>
-                  <Table.Cell>Rp {Number(p.amount).toLocaleString('id-ID')}</Table.Cell>
-                  <Table.Cell>{p.notes}</Table.Cell>
-                  <Table.Cell>
-                    <Button size="xs" colorPalette="red" variant="ghost" onClick={() => setDeleteId(p.id)}>X</Button>
-                  </Table.Cell>
-                </Table.Row>
-              ))}
-              {payments.length === 0 && (
-                <Table.Row>
-                  <Table.Cell colSpan={5} textAlign="center">Belum ada pembayaran tercatat.</Table.Cell>
-                </Table.Row>
-              )}
-            </Table.Body>
-          </Table.Root>
+        <Box flex={2} minW="300px">
+          <DataTable 
+            data={payments} 
+            columns={columns} 
+            keyField="id" 
+            title="Riwayat Pembayaran"
+            searchPlaceholder="Cari pembayaran..."
+            onBulkDelete={handleBulkDelete}
+          />
         </Box>
       </HStack>
 
-      <DialogRoot open={!!deleteId} onOpenChange={(e) => !e.open && setDeleteId(null)}>
+      <DialogRoot open={isDeleteDialogOpen} onOpenChange={(e) => setIsDeleteDialogOpen(e.open)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Hapus Pembayaran</DialogTitle>
+            <DialogTitle>Konfirmasi Hapus</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            Apakah Anda yakin ingin menghapus catatan pembayaran ini?
+            Apakah Anda yakin ingin menghapus {deleteIds.length} pembayaran yang dipilih? Tindakan ini tidak dapat dibatalkan.
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>
