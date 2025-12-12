@@ -210,6 +210,11 @@ const AdminLayout: React.FC = () => {
             </Text>
             <NavItem to="/admin/reports/vendor" icon={FiFileText}>Laporan Vendor</NavItem>
             <NavItem to="/admin/reports/finance" icon={FiDollarSign}>Keuangan</NavItem>
+            
+            <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={6} mb={2} px={6}>
+              Lainnya
+            </Text>
+            <NavItem to="/admin/settings" icon={FiSettings}>Pengaturan</NavItem>
           </VStack>
         </Box>
 
@@ -244,7 +249,9 @@ const AdminLayout: React.FC = () => {
               <Text fontSize="sm" fontWeight="bold">Admin</Text>
               <Text fontSize="xs" color="gray.400">Super User</Text>
             </Box>
-            <Icon as={FiSettings} color="gray.400" cursor="pointer" _hover={{ color: 'white' }} />
+            <Link to="/admin/settings">
+              <Icon as={FiSettings} color="gray.400" cursor="pointer" _hover={{ color: 'white' }} />
+            </Link>
           </HStack>
         </Box>
       </Box>
