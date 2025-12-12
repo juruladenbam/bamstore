@@ -21,6 +21,7 @@ import {
 } from '@chakra-ui/react';
 import echoInstance                               from '../../echo'; // Import echoInstance
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import client                                     from '../../api/client';
 import { 
   FiBox, 
   FiList, 
@@ -39,8 +40,9 @@ import {
   FiX
 } from 'react-icons/fi';
 import { toaster }                                from '../../components/ui/toaster';
+import type { Notification as ApiNotification }   from '../../types';
 
-interface Notification {
+export interface Notification {
   id: string;
   title: string;
   message: string;
@@ -48,6 +50,15 @@ interface Notification {
   orderId?: number;
   orderNumber?: string;
   read: boolean;
+  raw?: ApiNotification; // Keep raw data for full view
+}
+
+export interface AdminOutletContext {
+  notifications: Notification[];
+  unreadCount: number;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  refreshNotifications: () => void;
 }
 
 const AdminLayout: React.FC = () => {
@@ -61,6 +72,36 @@ const AdminLayout: React.FC = () => {
   const [isMobileOpen, setMobileOpen] = useState(false);
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
+  const fetchNotifications = () => {
+      client.get('/admin/notifications').then(response => {
+          const backendNotifications = response.data.data;
+          const formattedNotifications = backendNotifications.map((n: any) => ({
+            id: n.id,
+            title: 'Pesanan Baru',
+            message: n.data.message,
+            time: new Date(n.created_at),
+            orderId: n.data.order_id,
+            orderNumber: n.data.order_number,
+            read: !!n.read_at,
+            raw: n
+          }));
+          setNotifications(formattedNotifications);
+          setUnreadCount(formattedNotifications.filter((n: any) => !n.read).length);
+      }).catch(err => console.error(err));
+  };
+
+  const markAsRead = (id: string) => {
+      client.post(`/admin/notifications/${id}/read`).catch(console.error);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const markAllAsRead = () => {
+      client.post('/admin/notifications/read-all').catch(console.error);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -71,6 +112,8 @@ const AdminLayout: React.FC = () => {
       if (Notification.permission !== "granted" && Notification.permission !== "denied") {
         Notification.requestPermission();
       }
+
+      fetchNotifications();
     }
   }, [navigate]);
 
@@ -84,19 +127,9 @@ const AdminLayout: React.FC = () => {
       .listen('.NewOrderReceived', (e: any) => { // Prepend dot to bypass namespace
          
         console.log('NewOrderReceived event received:', e);
-
-        const newNotif: Notification = {
-            id: Date.now().toString(),
-            title: 'Pesanan Baru',
-            message: `Pesanan #${e.order_number} - Rp ${e.total_amount.toLocaleString('id-ID')}`,
-            time: new Date(),
-            orderId: e.id,
-            orderNumber: e.order_number,
-            read: false
-        };
-
-        setNotifications(prev => [newNotif, ...prev]);
-        setUnreadCount(prev => prev + 1);
+        
+        // Refresh full list to ensure consistency
+        fetchNotifications();
 
         // Browser Notification
         if (Notification.permission === "granted") {
@@ -125,16 +158,17 @@ const AdminLayout: React.FC = () => {
     navigate('/admin/login');
   };
 
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-  };
+  // const markAllRead = () => {
+  //   client.post('/admin/notifications/read-all').catch(console.error);
+  //   setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  //   setUnreadCount(0);
+  // };
 
   const handleNotificationClick = (notif: Notification) => {
       // Mark specific as read logic could go here
       const targetId = notif.orderNumber || notif.orderId;
       if (targetId) {
-          navigate(`/admin/orders/${targetId}`);
+          navigate(`/admin/orders/${targetId}`, { state: { from: 'notifications', notificationId: notif.id } });
       }
   };
 
@@ -177,7 +211,7 @@ const AdminLayout: React.FC = () => {
     );
   });
 
-  const NavItem = ({ to, icon, children }: { to: string, icon: any, children: React.ReactNode }) => {
+  const NavItem = ({ to, icon, children, badge }: { to: string, icon: any, children: React.ReactNode, badge?: number }) => {
     const isActive = location.pathname === to || (to !== '/admin' && location.pathname.startsWith(to));
     const showText = !isSidebarCollapsed || (isMobile && isMobileOpen);
 
@@ -200,6 +234,11 @@ const AdminLayout: React.FC = () => {
           >
             <Icon as={icon} boxSize={5} />
             {showText && <Text fontWeight="medium">{children}</Text>}
+            {badge !== undefined && badge > 0 && showText && (
+                <Badge colorPalette="red" variant="solid" size="xs" borderRadius="full" ml="auto">
+                    {badge}
+                </Badge>
+            )}
           </HStack>
         </Link>
       </ChakraLink>
@@ -293,6 +332,7 @@ const AdminLayout: React.FC = () => {
               Lainnya
             </Text>
             )}
+            <NavItem to="/admin/notifications" icon={FiBell} badge={unreadCount}>Notifikasi</NavItem>
             <NavItem to="/admin/settings" icon={FiSettings}>Pengaturan</NavItem>
           </VStack>
         </Box>
@@ -381,7 +421,7 @@ const AdminLayout: React.FC = () => {
                 </Flex>
 
                 {/* Notification Section */}
-                <Menu.Root onOpenChange={(open) => open && markAllRead()}>
+                <Menu.Root>
                     <Menu.Trigger asChild>
                         <Box position="relative" cursor="pointer" mr={4}>
                             <IconButton aria-label="Notifikasi" variant="ghost" size="sm">
@@ -434,7 +474,7 @@ const AdminLayout: React.FC = () => {
 
         {/* Content Area */}
         <Box flex={1} p={{ base: 4, md: 8 }}>
-          <Outlet />
+          <Outlet context={{ notifications, unreadCount, markAsRead, markAllAsRead, refreshNotifications: fetchNotifications } satisfies AdminOutletContext} />
         </Box>
       </Box>
     </Flex>

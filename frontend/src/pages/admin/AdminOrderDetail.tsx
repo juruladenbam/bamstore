@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { Box, Heading, Text, Table, Badge, Button, VStack, HStack, Container } from '@chakra-ui/react';
 import client from '../../api/client';
 import type { Order } from '../../types';
@@ -8,6 +8,10 @@ const AdminOrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const fromNotifications = location.state?.from === 'notifications';
+  const notificationId = location.state?.notificationId;
 
   const fetchOrder = () => {
     client.get(`/admin/orders/${id}`)
@@ -23,8 +27,13 @@ const AdminOrderDetail: React.FC = () => {
 
   useEffect(() => {
     fetchOrder();
+    
+    // Mark notification as read if coming from notification
+    if (notificationId) {
+        client.post(`/admin/notifications/${notificationId}/read`).catch(console.error);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  }, [id, notificationId]);
 
   const updateStatus = async (newStatus: string) => {
     if (!order) return;
@@ -37,9 +46,15 @@ const AdminOrderDetail: React.FC = () => {
 
   return (
     <Container maxW="container.lg" py={6}>
-      <Link to="/admin/orders">
-        <Button variant="outline" size="sm" mb={4}>Kembali ke Pesanan</Button>
-      </Link>
+      {fromNotifications ? (
+          <Button variant="outline" size="sm" mb={4} onClick={() => navigate('/admin/notifications')}>
+              Kembali ke Notifikasi
+          </Button>
+      ) : (
+        <Link to="/admin/orders">
+            <Button variant="outline" size="sm" mb={4}>Kembali ke Pesanan</Button>
+        </Link>
+      )}
       
       <Box bg="white" p={6} borderRadius="lg" shadow="sm" mb={6}>
         <HStack justify="space-between" mb={4}>
