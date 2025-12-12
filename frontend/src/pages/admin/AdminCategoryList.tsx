@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Heading, Table, Button, HStack } from '@chakra-ui/react';
+import { Box, Heading, Button, HStack } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import client from '../../api/client';
 import type { Category } from '../../types';
 import { toaster } from '../../components/ui/toaster';
+import DataTable, { type Column } from '../../components/DataTable';
 import {
   DialogBody,
   DialogActionTrigger,
@@ -12,28 +13,42 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTitle,
-} from "../../components/ui/dialog"
+} from "../../components/ui/dialog";
 
 const AdminCategoryList: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [deleteIds, setDeleteIds] = useState<any[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const fetchCategories = () => {
+    setLoading(true);
     client.get('/admin/categories')
-      .then(res => setCategories(res.data))
-      .catch(console.error);
+      .then(res => {
+        setCategories(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
+  const handleBulkDelete = (ids: any[]) => {
+    setDeleteIds(ids);
+    setIsDeleteDialogOpen(true);
+  };
+
   const confirmDelete = async () => {
-    if (!deleteId) return;
     try {
-      await client.delete(`/admin/categories/${deleteId}`);
+      await Promise.all(deleteIds.map(id => client.delete(`/admin/categories/${id}`)));
       toaster.create({
         title: "Kategori Dihapus",
+        description: `${deleteIds.length} kategori berhasil dihapus.`,
         type: "success",
       });
       fetchCategories();
@@ -41,13 +56,32 @@ const AdminCategoryList: React.FC = () => {
       console.error(error);
       toaster.create({
         title: "Kesalahan",
-        description: "Gagal menghapus kategori. Mungkin masih digunakan.",
+        description: "Gagal menghapus beberapa kategori. Mungkin masih digunakan.",
         type: "error",
       });
     } finally {
-      setDeleteId(null);
+      setIsDeleteDialogOpen(false);
+      setDeleteIds([]);
     }
   };
+
+  const columns: Column<Category>[] = [
+    { header: 'Nama', accessorKey: 'name' },
+    { header: 'Slug', accessorKey: 'slug' },
+    {
+      header: 'Aksi',
+      cell: (category) => (
+        <HStack>
+          <Button asChild size="xs" variant="outline">
+            <Link to={`/admin/categories/${category.slug || category.id}/edit`}>Ubah</Link>
+          </Button>
+          <Button size="xs" colorPalette="red" variant="ghost" onClick={() => handleBulkDelete([category.id])}>
+            Hapus
+          </Button>
+        </HStack>
+      )
+    }
+  ];
 
   return (
     <Box>
@@ -58,43 +92,22 @@ const AdminCategoryList: React.FC = () => {
         </Button>
       </HStack>
 
-      <Box bg="white" borderRadius="lg" shadow="sm" overflow="hidden">
-        <Table.Root>
-          <Table.Header>
-            <Table.Row>
-              <Table.ColumnHeader>Nama</Table.ColumnHeader>
-              <Table.ColumnHeader>Slug</Table.ColumnHeader>
-              <Table.ColumnHeader>Aksi</Table.ColumnHeader>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {categories.map(category => (
-              <Table.Row key={category.id}>
-                <Table.Cell>{category.name}</Table.Cell>
-                <Table.Cell>{category.slug}</Table.Cell>
-                <Table.Cell>
-                  <HStack>
-                    <Button asChild size="xs" variant="outline">
-                      <Link to={`/admin/categories/${category.slug || category.id}/edit`}>Ubah</Link>
-                    </Button>
-                    <Button size="xs" colorPalette="red" variant="ghost" onClick={() => setDeleteId(category.id)}>
-                      Hapus
-                    </Button>
-                  </HStack>
-                </Table.Cell>
-              </Table.Row>
-            ))}
-          </Table.Body>
-        </Table.Root>
-      </Box>
+      <DataTable 
+        data={categories} 
+        columns={columns} 
+        keyField="id" 
+        searchPlaceholder="Cari kategori..."
+        onBulkDelete={handleBulkDelete}
+        isLoading={loading}
+      />
 
-      <DialogRoot open={!!deleteId} onOpenChange={(e) => !e.open && setDeleteId(null)}>
+      <DialogRoot open={isDeleteDialogOpen} onOpenChange={(e) => setIsDeleteDialogOpen(e.open)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Hapus Kategori</DialogTitle>
+            <DialogTitle>Konfirmasi Hapus</DialogTitle>
           </DialogHeader>
           <DialogBody>
-            Apakah Anda yakin? Ini mungkin mempengaruhi produk dalam kategori ini.
+            Apakah Anda yakin ingin menghapus {deleteIds.length} kategori yang dipilih? Tindakan ini tidak dapat dibatalkan.
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>

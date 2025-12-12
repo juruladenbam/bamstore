@@ -1,5 +1,5 @@
 // frontend/src/echo.ts
-import Echo from 'laravel-echo';
+import Echo   from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 declare global {

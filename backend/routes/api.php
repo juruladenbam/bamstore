@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
     Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
 
+    Route::get('/dashboard', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'index']);
+
     Route::get('/reports/recap', [\App\Http\Controllers\Api\Admin\VendorReportController::class, 'recap']);
     Route::get('/reports/finance', [\App\Http\Controllers\Api\Admin\FinancialReportController::class, 'index']);
 });

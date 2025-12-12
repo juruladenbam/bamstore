@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProductImage extends Model
 {
+    use \Illuminate\Database\Eloquent\Factories\HasFactory;
+
     protected $fillable = ['product_id', 'image_path', 'is_primary', 'sort_order'];
 
     public function product()
