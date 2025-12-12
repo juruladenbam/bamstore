@@ -21,6 +21,11 @@ import VendorForm                                       from './pages/admin/Vend
 import AdminVendorDetail                                from './pages/admin/AdminVendorDetail';
 import VendorReport                                     from './pages/admin/VendorReport';
 import FinancialReport                                  from './pages/admin/FinancialReport';
+import Settings                                         from './pages/admin/Settings';
+import Notifications                                    from './pages/admin/Notifications';
+import AdminUserList                                    from './pages/admin/AdminUserList';
+import UserForm                                         from './pages/admin/UserForm';
+import ProfileSettings                                  from './pages/admin/ProfileSettings';
 import Login                                            from './pages/admin/Login';
 import { Box, Text }                                    from '@chakra-ui/react';
 import { useLocation }                                  from 'react-router-dom';
@@ -33,8 +38,8 @@ function App() {
   return (
     <CartProvider>
       <Toaster />
-      <Box minH="100vh" bg="gray.50" pb={{ base: "60px", md: 0 }}>
-        <Navbar />
+      <Box minH="100vh" bg="gray.50" pb={isAdmin ? 0 : { base: "60px", md: 0 }}>
+        {!isAdmin && <Navbar />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
@@ -63,6 +68,12 @@ function App() {
             <Route path="vendors/:id/payments" element={<AdminVendorDetail />} />
             <Route path="reports/vendor" element={<VendorReport />} />
             <Route path="reports/finance" element={<FinancialReport />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="notifications" element={<Notifications />} />
+            <Route path="users" element={<AdminUserList />} />
+            <Route path="users/new" element={<UserForm />} />
+            <Route path="users/:id/edit" element={<UserForm />} />
+            <Route path="profile" element={<ProfileSettings />} />
           </Route>
         </Routes>
 

@@ -12,14 +12,15 @@ import {
   HStack,
   Breadcrumb,
   Button,
-  Spacer,
   Avatar,
   Menu,
   Badge,
-  IconButton
+  IconButton,
+  useBreakpointValue
 } from '@chakra-ui/react';
 import echoInstance                               from '../../echo'; // Import echoInstance
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import client                                     from '../../api/client';
 import { 
   FiBox, 
   FiList, 
@@ -30,13 +31,17 @@ import {
   FiLogOut, 
   FiSettings,
   FiChevronRight,
+  FiChevronLeft,
   FiGrid,
   FiBell,
-  FiPieChart
+  FiPieChart,
+  FiMenu,
+  FiX
 } from 'react-icons/fi';
 import { toaster }                                from '../../components/ui/toaster';
+import type { Notification as ApiNotification }   from '../../types';
 
-interface Notification {
+export interface Notification {
   id: string;
   title: string;
   message: string;
@@ -44,6 +49,15 @@ interface Notification {
   orderId?: number;
   orderNumber?: string;
   read: boolean;
+  raw?: ApiNotification; // Keep raw data for full view
+}
+
+export interface AdminOutletContext {
+  notifications: Notification[];
+  unreadCount: number;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  refreshNotifications: () => void;
 }
 
 const AdminLayout: React.FC = () => {
@@ -52,6 +66,50 @@ const AdminLayout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobileOpen, setMobileOpen] = useState(false);
+  const isMobile = useBreakpointValue({ base: true, lg: false });
+
+  const fetchNotifications = () => {
+      client.get('/admin/notifications').then(response => {
+          const backendNotifications = response.data.data;
+          const formattedNotifications = backendNotifications.map((n: any) => ({
+            id: n.id,
+            title: 'Pesanan Baru',
+            message: n.data.message,
+            time: new Date(n.created_at),
+            orderId: n.data.order_id,
+            orderNumber: n.data.order_number,
+            read: !!n.read_at,
+            raw: n
+          }));
+          setNotifications(formattedNotifications);
+          setUnreadCount(formattedNotifications.filter((n: any) => !n.read).length);
+      }).catch(err => console.error(err));
+  };
+
+  const markAsRead = (id: string) => {
+      client.post(`/admin/notifications/${id}/read`).catch(console.error);
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+  };
+
+  const fetchUser = async () => {
+      try {
+          const response = await client.get('/user');
+          setCurrentUser(response.data);
+      } catch (error) {
+          console.error('Error fetching user:', error);
+      }
+  };
+
+  const markAllAsRead = () => {
+      client.post('/admin/notifications/read-all').catch(console.error);
+      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setUnreadCount(0);
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -63,6 +121,9 @@ const AdminLayout: React.FC = () => {
       if (Notification.permission !== "granted" && Notification.permission !== "denied") {
         Notification.requestPermission();
       }
+
+      fetchNotifications();
+      fetchUser();
     }
   }, [navigate]);
 
@@ -76,19 +137,9 @@ const AdminLayout: React.FC = () => {
       .listen('.NewOrderReceived', (e: any) => { // Prepend dot to bypass namespace
          
         console.log('NewOrderReceived event received:', e);
-
-        const newNotif: Notification = {
-            id: Date.now().toString(),
-            title: 'Pesanan Baru',
-            message: `Pesanan #${e.order_number} - Rp ${e.total_amount.toLocaleString('id-ID')}`,
-            time: new Date(),
-            orderId: e.id,
-            orderNumber: e.order_number,
-            read: false
-        };
-
-        setNotifications(prev => [newNotif, ...prev]);
-        setUnreadCount(prev => prev + 1);
+        
+        // Refresh full list to ensure consistency
+        fetchNotifications();
 
         // Browser Notification
         if (Notification.permission === "granted") {
@@ -117,16 +168,17 @@ const AdminLayout: React.FC = () => {
     navigate('/admin/login');
   };
 
-  const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    setUnreadCount(0);
-  };
+  // const markAllRead = () => {
+  //   client.post('/admin/notifications/read-all').catch(console.error);
+  //   setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  //   setUnreadCount(0);
+  // };
 
   const handleNotificationClick = (notif: Notification) => {
       // Mark specific as read logic could go here
       const targetId = notif.orderNumber || notif.orderId;
       if (targetId) {
-          navigate(`/admin/orders/${targetId}`);
+          navigate(`/admin/orders/${targetId}`, { state: { from: 'notifications', notificationId: notif.id } });
       }
   };
 
@@ -147,11 +199,17 @@ const AdminLayout: React.FC = () => {
     
     const text = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
 
+    // Define paths that should not be clickable (grouping paths)
+    const nonClickablePaths = ['/admin/reports'];
+    const isNonClickable = nonClickablePaths.includes(path);
+
     return (
       <React.Fragment key={path}>
         <Breadcrumb.Item>
           {isLast ? (
              <Breadcrumb.CurrentLink fontWeight="semibold" color="gray.600">{text}</Breadcrumb.CurrentLink>
+          ) : isNonClickable ? (
+             <Text color="gray.500">{text}</Text>
           ) : (
              <Breadcrumb.Link asChild color="blue.500">
                <Link to={path}>{text}</Link>
@@ -163,15 +221,18 @@ const AdminLayout: React.FC = () => {
     );
   });
 
-  const NavItem = ({ to, icon, children }: { to: string, icon: any, children: React.ReactNode }) => {
+  const NavItem = ({ to, icon, children, badge }: { to: string, icon: any, children: React.ReactNode, badge?: number }) => {
     const isActive = location.pathname === to || (to !== '/admin' && location.pathname.startsWith(to));
+    const showText = !isSidebarCollapsed || (isMobile && isMobileOpen);
+
     return (
       <ChakraLink asChild w="full" _hover={{ textDecoration: 'none' }} display="block">
-        <Link to={to}>
+        <Link to={to} onClick={() => isMobile && setMobileOpen(false)}>
           <HStack 
             gap={3} 
             py={3}
-            px={6}
+            px={showText ? 6 : 0}
+            justify={showText ? "flex-start" : "center"}
             bg={isActive ? 'blue.600' : 'transparent'} 
             color={isActive ? 'white' : 'gray.300'}
             _hover={{ bg: 'blue.700', color: 'white' }}
@@ -179,82 +240,189 @@ const AdminLayout: React.FC = () => {
             w="full"
             borderRightWidth={isActive ? "4px" : "0px"}
             borderRightColor="blue.300"
+            title={!showText && typeof children === 'string' ? children : undefined}
           >
             <Icon as={icon} boxSize={5} />
-            <Text fontWeight="medium">{children}</Text>
+            {showText && <Text fontWeight="medium">{children}</Text>}
+            {badge !== undefined && badge > 0 && showText && (
+                <Badge colorPalette="red" variant="solid" size="xs" borderRadius="full" ml="auto">
+                    {badge}
+                </Badge>
+            )}
           </HStack>
         </Link>
       </ChakraLink>
     );
   };
 
+  const sidebarWidth = isSidebarCollapsed ? "80px" : "260px";
+
   return (
     <Flex minH="100vh">
+      {/* Mobile Overlay */}
+      {isMobile && isMobileOpen && (
+        <Box
+          position="fixed"
+          top="0"
+          left="0"
+          w="full"
+          h="full"
+          bg="black/50"
+          zIndex={15}
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <Box w="260px" bg="gray.900" color="white" display="flex" flexDirection="column" position="fixed" h="full" zIndex={10}>
-        <Box py={6}>
-          <Heading size="md" mb={8} px={6} color="white" letterSpacing="tight">BAM Admin</Heading>
+      <Box 
+        w={isMobile ? "260px" : sidebarWidth} 
+        bg="gray.900" 
+        color="white" 
+        display="flex" 
+        flexDirection="column" 
+        position="fixed" 
+        h="full" 
+        zIndex={20}
+        transition="width 0.2s, transform 0.2s"
+        transform={{
+            base: isMobileOpen ? "translateX(0)" : "translateX(-100%)",
+            lg: "translateX(0)"
+        }}
+      >
+        {/* Sidebar Header */}
+        <Box py={6} flexShrink={0}>
+          <Flex justify="space-between" align="center" px={isSidebarCollapsed && !isMobile ? 2 : 6}>
+             {(!isSidebarCollapsed || isMobile) && <Heading size="md" color="white" letterSpacing="tight">BAM Admin</Heading>}
+             
+             <IconButton
+                aria-label="Collapse Sidebar"
+                variant="ghost"
+                color="gray.400"
+                _hover={{ color: "white", bg: "gray.800" }}
+                onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
+                size="sm"
+                display={{ base: "none", lg: "flex" }}
+            >
+                <Icon as={isSidebarCollapsed ? FiChevronRight : FiChevronLeft} />
+            </IconButton>
+            
+            {isMobile && (
+                 <IconButton
+                    aria-label="Close Sidebar"
+                    variant="ghost"
+                    color="gray.400"
+                    onClick={() => setMobileOpen(false)}
+                    size="sm"
+                >
+                    <Icon as={FiX} />
+                </IconButton>
+            )}
+          </Flex>
+        </Box>
           
+        {/* Scrollable Menu */}
+        <Box flex={1} overflowY="auto" overflowX="hidden" py={2}>
           <VStack align="stretch" gap={0} w="full">
             <NavItem to="/admin" icon={FiPieChart}>Dashboard</NavItem>
+            {(!isSidebarCollapsed || isMobile) && (
             <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={4} mb={2} px={6}>
               Manajemen
             </Text>
+            )}
             <NavItem to="/admin/orders" icon={FiList}>Pesanan</NavItem>
             <NavItem to="/admin/products" icon={FiBox}>Produk</NavItem>
             <NavItem to="/admin/categories" icon={FiGrid}>Kategori</NavItem>
             <NavItem to="/admin/vendors" icon={FiUsers}>Vendor</NavItem>
+            {currentUser?.all_permissions?.includes('manage users') && (
+                <NavItem to="/admin/users" icon={FiUsers}>Pengguna</NavItem>
+            )}
 
+            {(!isSidebarCollapsed || isMobile) && (
             <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={6} mb={2} px={6}>
               Laporan
             </Text>
+            )}
             <NavItem to="/admin/reports/vendor" icon={FiFileText}>Laporan Vendor</NavItem>
             <NavItem to="/admin/reports/finance" icon={FiDollarSign}>Keuangan</NavItem>
+            {(!isSidebarCollapsed || isMobile) && (
+            <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={6} mb={2} px={6}>
+              Lainnya
+            </Text>
+            )}
+            <NavItem to="/admin/notifications" icon={FiBell} badge={unreadCount}>Notifikasi</NavItem>
+            <NavItem to="/admin/settings" icon={FiSettings}>Pengaturan</NavItem>
           </VStack>
         </Box>
 
-        <Spacer />
-
-        <Box py={6} borderTop="1px" borderColor="gray.700" bg="gray.900">
+        <Box py={6} borderTop="1px" borderColor="gray.700" bg="gray.900" flexShrink={0}>
            <VStack align="stretch" gap={0} w="full">
             <NavItem to="/" icon={FiHome}>Kembali ke Toko</NavItem>
             <Button
               w="full"
               variant="ghost"
-              justifyContent="flex-start"
+              justifyContent={(!isSidebarCollapsed || isMobile) ? "flex-start" : "center"}
               color="red.300"
               _hover={{ bg: 'red.900', color: 'red.200' }}
               onClick={handleLogout}
-              px={6}
+              px={(!isSidebarCollapsed || isMobile) ? 6 : 0}
               h="auto"
               py={3}
               borderRadius={0}
+              title={(!isSidebarCollapsed || isMobile) ? undefined : "Keluar"}
             >
-               <Icon as={FiLogOut} mr={3} boxSize={5} />
-               Keluar
+               <Icon as={FiLogOut} mr={(!isSidebarCollapsed || isMobile) ? 3 : 0} boxSize={5} />
+               {(!isSidebarCollapsed || isMobile) && "Keluar"}
             </Button>
           </VStack>
           
           {/* User Profile Snippet */}
-          <HStack mt={6} px={6} gap={3} align="center">
+          <HStack mt={6} px={(!isSidebarCollapsed || isMobile) ? 6 : 2} gap={3} align="center" justify={(!isSidebarCollapsed || isMobile) ? "flex-start" : "center"}>
             <Avatar.Root size="sm" bg="blue.500">
-                <Avatar.Fallback>AD</Avatar.Fallback>
+                <Avatar.Fallback>{currentUser?.name?.substring(0, 2).toUpperCase() || 'AD'}</Avatar.Fallback>
             </Avatar.Root>
-            <Box flex={1}>
-              <Text fontSize="sm" fontWeight="bold">Admin</Text>
-              <Text fontSize="xs" color="gray.400">Super User</Text>
-            </Box>
-            <Icon as={FiSettings} color="gray.400" cursor="pointer" _hover={{ color: 'white' }} />
+            {(!isSidebarCollapsed || isMobile) && (
+                <>
+                <Box flex={1} overflow="hidden">
+                <Text fontSize="sm" fontWeight="bold" truncate>{currentUser?.name || 'Admin'}</Text>
+                <Text fontSize="xs" color="gray.400" truncate>{currentUser?.roles?.[0]?.name || 'User'}</Text>
+                </Box>
+                <Link to="/admin/profile">
+                <Icon as={FiSettings} color="gray.400" cursor="pointer" _hover={{ color: 'white' }} />
+                </Link>
+                </>
+            )}
           </HStack>
         </Box>
       </Box>
 
       {/* Main Content Wrapper - needs margin left to account for fixed sidebar */}
-      <Box flex={1} ml="260px" bg="gray.50" display="flex" flexDirection="column" minH="100vh">
+      <Box flex={1} ml={{ base: 0, lg: sidebarWidth }} transition="margin-left 0.2s" bg="gray.50" display="flex" flexDirection="column" minH="100vh" w="full" overflowX="hidden">
         {/* Header with Breadcrumbs */}
-        <Box bg="white" borderBottom="1px" borderColor="gray.200" px={8} py={4} position="sticky" top={0} zIndex={5}>
+        <Box 
+            bg="white" 
+            borderBottom="1px" 
+            borderColor="gray.200" 
+            px={{ base: 4, md: 8 }} 
+            py={4} 
+            position="fixed" 
+            top={0} 
+            right={0}
+            left={{ base: 0, lg: sidebarWidth }}
+            zIndex={5}
+            transition="left 0.2s"
+        >
             <Flex justify="space-between" align="center">
-                <Breadcrumb.Root>
+                <Flex align="center">
+                    <IconButton 
+                        aria-label="Menu" 
+                        variant="ghost" 
+                        onClick={() => setMobileOpen(!isMobileOpen)} 
+                        display={{ base: "flex", lg: "none" }} 
+                        mr={2}
+                    >
+                        <Icon as={isMobileOpen ? FiX : FiMenu} boxSize={6} />
+                    </IconButton>
+                    <Breadcrumb.Root>
                     <Breadcrumb.List>
                         {/* Always show Home/Admin root */}
                         {breadcrumbItems.length === 0 && (
@@ -265,9 +433,10 @@ const AdminLayout: React.FC = () => {
                         {breadcrumbItems}
                     </Breadcrumb.List>
                 </Breadcrumb.Root>
+                </Flex>
 
                 {/* Notification Section */}
-                <Menu.Root onOpenChange={(open) => open && markAllRead()}>
+                <Menu.Root>
                     <Menu.Trigger asChild>
                         <Box position="relative" cursor="pointer" mr={4}>
                             <IconButton aria-label="Notifikasi" variant="ghost" size="sm">
@@ -315,9 +484,12 @@ const AdminLayout: React.FC = () => {
             </Flex>
         </Box>
 
+        {/* Spacer for fixed header */}
+        <Box h="73px" />
+
         {/* Content Area */}
-        <Box flex={1} p={8}>
-          <Outlet />
+        <Box flex={1} p={{ base: 4, md: 8 }}>
+          <Outlet context={{ notifications, unreadCount, markAsRead, markAllAsRead, refreshNotifications: fetchNotifications } satisfies AdminOutletContext} />
         </Box>
       </Box>
     </Flex>

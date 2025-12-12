@@ -38,6 +38,7 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
         return (
             <Box mb={8} breakInside="avoid">
                 <Heading size="sm" mb={2}>{productName} ({vendorName})</Heading>
+                <Box overflowX="auto">
                 <Table.Root size="sm" variant="outline">
                     <Table.Header>
                         <Table.Row>
@@ -52,6 +53,7 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
                         </Table.Row>
                     </Table.Body>
                 </Table.Root>
+                </Box>
             </Box>
         );
     }
@@ -247,6 +249,7 @@ const VendorReport: React.FC = () => {
   const groupedByProduct = reportData.reduce((acc, item) => {
       if (!acc[item.product_id]) {
           acc[item.product_id] = {
+              productId: item.product_id,
               productName: item.product_name,
               vendorName: item.vendor_name,
               items: []
@@ -254,7 +257,7 @@ const VendorReport: React.FC = () => {
       }
       acc[item.product_id].items.push(item);
       return acc;
-  }, {} as Record<string, { productName: string, vendorName: string, items: any[] }>);
+  }, {} as Record<string, { productId: number, productName: string, vendorName: string, items: any[] }>);
 
   return (
     <>
@@ -278,7 +281,7 @@ const VendorReport: React.FC = () => {
         <VStack align="stretch" gap={8}>
           {Object.values(groupedByProduct).map((group: any) => (
               <ProductReportTable 
-                  key={group.productName} 
+                  key={group.productId} 
                   productName={group.productName} 
                   vendorName={group.vendorName} 
                   data={group.items} 

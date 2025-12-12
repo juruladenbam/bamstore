@@ -12,7 +12,11 @@ use App\Http\Controllers\Api\Admin\VendorController as AdminVendorController;
 use App\Http\Controllers\Api\Admin\VendorPaymentController as AdminVendorPaymentController;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $user->load('roles');
+    // Add all permissions (direct + via roles)
+    $user->all_permissions = $user->getAllPermissions()->pluck('name');
+    return $user;
 })->middleware('auth:sanctum');
 
 // Storefront Public Routes
@@ -23,6 +27,7 @@ Route::get('/order-activity', [\App\Http\Controllers\Api\OrderActivityController
 Route::post('/history', [\App\Http\Controllers\Api\OrderHistoryController::class, 'index']);
 Route::get('/members/search', [\App\Http\Controllers\Api\MemberDataController::class, 'search']);
 Route::post('/checkout', [CheckoutController::class, 'store']);
+Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);
 
 // Admin Auth
 Route::post('/admin/login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
@@ -44,4 +49,22 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
     Route::get('/reports/recap', [\App\Http\Controllers\Api\Admin\VendorReportController::class, 'recap']);
     Route::get('/reports/finance', [\App\Http\Controllers\Api\Admin\FinancialReportController::class, 'index']);
+
+    Route::post('/settings', [\App\Http\Controllers\SettingController::class, 'update']);
+
+    // User Management
+    Route::middleware(['permission:manage users'])->group(function () {
+        Route::apiResource('users', \App\Http\Controllers\Api\Admin\UserController::class);
+        Route::get('/roles', [\App\Http\Controllers\Api\Admin\RoleController::class, 'index']);
+    });
+
+    // Profile Settings
+    Route::put('/profile', [\App\Http\Controllers\Api\Admin\ProfileController::class, 'update']);
+    Route::put('/profile/password', [\App\Http\Controllers\Api\Admin\ProfileController::class, 'updatePassword']);
+
+    // Notifications
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\NotificationController::class, 'unreadCount']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
 });
