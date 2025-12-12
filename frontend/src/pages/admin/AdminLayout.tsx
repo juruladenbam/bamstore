@@ -39,6 +39,16 @@ import {
   FiX
 } from 'react-icons/fi';
 import { toaster }                                from '../../components/ui/toaster';
+import {
+  DialogRoot,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogBody,
+  DialogFooter,
+  DialogActionTrigger,
+  DialogCloseTrigger,
+} from '../../components/ui/dialog';
 import type { Notification as ApiNotification }   from '../../types';
 
 export interface Notification {
@@ -70,6 +80,7 @@ const AdminLayout: React.FC = () => {
   
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileOpen, setMobileOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
   const fetchNotifications = () => {
@@ -163,7 +174,7 @@ const AdminLayout: React.FC = () => {
     };
   }, []); // Removed 'toast' from dependency array as it's commented out
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
     localStorage.removeItem('token');
     navigate('/admin/login');
   };
@@ -363,7 +374,7 @@ const AdminLayout: React.FC = () => {
               justifyContent={(!isSidebarCollapsed || isMobile) ? "flex-start" : "center"}
               color="red.300"
               _hover={{ bg: 'red.900', color: 'red.200' }}
-              onClick={handleLogout}
+              onClick={() => setIsLogoutDialogOpen(true)}
               px={(!isSidebarCollapsed || isMobile) ? 6 : 0}
               h="auto"
               py={3}
@@ -492,6 +503,26 @@ const AdminLayout: React.FC = () => {
           <Outlet context={{ notifications, unreadCount, markAsRead, markAllAsRead, refreshNotifications: fetchNotifications } satisfies AdminOutletContext} />
         </Box>
       </Box>
+
+      <DialogRoot open={isLogoutDialogOpen} onOpenChange={(e) => setIsLogoutDialogOpen(e.open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Keluar</DialogTitle>
+            <DialogCloseTrigger />
+          </DialogHeader>
+          <DialogBody>
+            <Text>Apakah Anda yakin ingin keluar dari aplikasi?</Text>
+          </DialogBody>
+          <DialogFooter>
+            <DialogActionTrigger asChild>
+              <Button variant="outline">Batal</Button>
+            </DialogActionTrigger>
+            <Button colorPalette="red" onClick={confirmLogout}>
+              Keluar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </Flex>
   );
 };
