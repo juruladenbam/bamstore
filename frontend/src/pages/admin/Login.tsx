@@ -14,7 +14,7 @@ const Login: React.FC = () => {
       const res = await client.post('/admin/login', { email, password });
       localStorage.setItem('token', res.data.token);
       toaster.create({ title: "Login Berhasil", type: "success" });
-      navigate('/admin/products');
+      navigate('/admin');
     } catch (error) {
       toaster.create({ title: "Login Gagal", description: "Kredensial tidak valid", type: "error" });
     }
