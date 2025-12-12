@@ -23,6 +23,9 @@ import VendorReport                                     from './pages/admin/Vend
 import FinancialReport                                  from './pages/admin/FinancialReport';
 import Settings                                         from './pages/admin/Settings';
 import Notifications                                    from './pages/admin/Notifications';
+import AdminUserList                                    from './pages/admin/AdminUserList';
+import UserForm                                         from './pages/admin/UserForm';
+import ProfileSettings                                  from './pages/admin/ProfileSettings';
 import Login                                            from './pages/admin/Login';
 import { Box, Text }                                    from '@chakra-ui/react';
 import { useLocation }                                  from 'react-router-dom';
@@ -67,6 +70,10 @@ function App() {
             <Route path="reports/finance" element={<FinancialReport />} />
             <Route path="settings" element={<Settings />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="users" element={<AdminUserList />} />
+            <Route path="users/new" element={<UserForm />} />
+            <Route path="users/:id/edit" element={<UserForm />} />
+            <Route path="profile" element={<ProfileSettings />} />
           </Route>
         </Routes>
 

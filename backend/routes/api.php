@@ -12,7 +12,11 @@ use App\Http\Controllers\Api\Admin\VendorController as AdminVendorController;
 use App\Http\Controllers\Api\Admin\VendorPaymentController as AdminVendorPaymentController;
 
 Route::get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+    $user->load('roles');
+    // Add all permissions (direct + via roles)
+    $user->all_permissions = $user->getAllPermissions()->pluck('name');
+    return $user;
 })->middleware('auth:sanctum');
 
 // Storefront Public Routes
@@ -47,6 +51,16 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/reports/finance', [\App\Http\Controllers\Api\Admin\FinancialReportController::class, 'index']);
 
     Route::post('/settings', [\App\Http\Controllers\SettingController::class, 'update']);
+
+    // User Management
+    Route::middleware(['permission:manage users'])->group(function () {
+        Route::apiResource('users', \App\Http\Controllers\Api\Admin\UserController::class);
+        Route::get('/roles', [\App\Http\Controllers\Api\Admin\RoleController::class, 'index']);
+    });
+
+    // Profile Settings
+    Route::put('/profile', [\App\Http\Controllers\Api\Admin\ProfileController::class, 'update']);
+    Route::put('/profile/password', [\App\Http\Controllers\Api\Admin\ProfileController::class, 'updatePassword']);
 
     // Notifications
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);

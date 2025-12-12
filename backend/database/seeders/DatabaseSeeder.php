@@ -20,12 +20,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(RolesAndPermissionsSeeder::class);
+
         // 1. Create Admin User
-        User::factory()->create([
+        $admin = User::factory()->create([
             'name' => 'Admin',
-            'email' => 'admin@bamstore.com',
-            'password' => 'password',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
         ]);
+        $admin->assignRole('admin');
 
         // 2. Create Vendors
         $vendors = Vendor::factory(5)->create();
@@ -152,5 +155,29 @@ class DatabaseSeeder extends Seeder
 
             $order->update(['total_amount' => $orderTotal]);
         });
+
+        // 6. Create Product Costs
+        $products->each(function ($product) {
+            \App\Models\ProductCost::create([
+                'product_id' => $product->id,
+                'cost' => $product->base_price * 0.7, // Assume 70% of base price is cost
+            ]);
+        });
+
+        // 7. Create Vendor Payments
+        $vendors->each(function ($vendor) {
+            \App\Models\VendorPayment::create([
+                'vendor_id' => $vendor->id,
+                'amount' => rand(100000, 1000000),
+                'type' => 'dp',
+                'payment_date' => now()->subDays(rand(1, 30)),
+                'notes' => 'Initial Down Payment',
+            ]);
+        });
+
+        // 8. Create Default Settings
+        \App\Models\Setting::create(['key' => 'site_name', 'value' => 'BAM Store', 'type' => 'string', 'group' => 'general']);
+        \App\Models\Setting::create(['key' => 'site_description', 'value' => 'Your favorite fashion store', 'type' => 'text', 'group' => 'general']);
+        \App\Models\Setting::create(['key' => 'contact_email', 'value' => 'support@bamstore.com', 'type' => 'string', 'group' => 'contact']);
     }
 }
