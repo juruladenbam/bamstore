@@ -31,7 +31,8 @@ import {
   FiSettings,
   FiChevronRight,
   FiGrid,
-  FiBell
+  FiBell,
+  FiPieChart
 } from 'react-icons/fi';
 import { toaster }                                from '../../components/ui/toaster';
 
@@ -195,7 +196,8 @@ const AdminLayout: React.FC = () => {
           <Heading size="md" mb={8} px={6} color="white" letterSpacing="tight">BAM Admin</Heading>
           
           <VStack align="stretch" gap={0} w="full">
-            <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mb={2} px={6}>
+            <NavItem to="/admin" icon={FiPieChart}>Dashboard</NavItem>
+            <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={4} mb={2} px={6}>
               Manajemen
             </Text>
             <NavItem to="/admin/orders" icon={FiList}>Pesanan</NavItem>
