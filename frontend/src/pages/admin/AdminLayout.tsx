@@ -12,7 +12,6 @@ import {
   HStack,
   Breadcrumb,
   Button,
-  Spacer,
   Avatar,
   Menu,
   Badge,
@@ -67,6 +66,7 @@ const AdminLayout: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMobileOpen, setMobileOpen] = useState(false);
@@ -96,6 +96,15 @@ const AdminLayout: React.FC = () => {
       setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
+  const fetchUser = async () => {
+      try {
+          const response = await client.get('/user');
+          setCurrentUser(response.data);
+      } catch (error) {
+          console.error('Error fetching user:', error);
+      }
+  };
+
   const markAllAsRead = () => {
       client.post('/admin/notifications/read-all').catch(console.error);
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -114,6 +123,7 @@ const AdminLayout: React.FC = () => {
       }
 
       fetchNotifications();
+      fetchUser();
     }
   }, [navigate]);
 
@@ -279,8 +289,9 @@ const AdminLayout: React.FC = () => {
             lg: "translateX(0)"
         }}
       >
-        <Box py={6}>
-          <Flex justify="space-between" align="center" mb={8} px={isSidebarCollapsed && !isMobile ? 2 : 6}>
+        {/* Sidebar Header */}
+        <Box py={6} flexShrink={0}>
+          <Flex justify="space-between" align="center" px={isSidebarCollapsed && !isMobile ? 2 : 6}>
              {(!isSidebarCollapsed || isMobile) && <Heading size="md" color="white" letterSpacing="tight">BAM Admin</Heading>}
              
              <IconButton
@@ -307,7 +318,10 @@ const AdminLayout: React.FC = () => {
                 </IconButton>
             )}
           </Flex>
+        </Box>
           
+        {/* Scrollable Menu */}
+        <Box flex={1} overflowY="auto" overflowX="hidden" py={2}>
           <VStack align="stretch" gap={0} w="full">
             <NavItem to="/admin" icon={FiPieChart}>Dashboard</NavItem>
             {(!isSidebarCollapsed || isMobile) && (
@@ -319,6 +333,9 @@ const AdminLayout: React.FC = () => {
             <NavItem to="/admin/products" icon={FiBox}>Produk</NavItem>
             <NavItem to="/admin/categories" icon={FiGrid}>Kategori</NavItem>
             <NavItem to="/admin/vendors" icon={FiUsers}>Vendor</NavItem>
+            {currentUser?.all_permissions?.includes('manage users') && (
+                <NavItem to="/admin/users" icon={FiUsers}>Pengguna</NavItem>
+            )}
 
             {(!isSidebarCollapsed || isMobile) && (
             <Text fontSize="xs" fontWeight="bold" color="gray.500" textTransform="uppercase" mt={6} mb={2} px={6}>
@@ -337,9 +354,7 @@ const AdminLayout: React.FC = () => {
           </VStack>
         </Box>
 
-        <Spacer />
-
-        <Box py={6} borderTop="1px" borderColor="gray.700" bg="gray.900">
+        <Box py={6} borderTop="1px" borderColor="gray.700" bg="gray.900" flexShrink={0}>
            <VStack align="stretch" gap={0} w="full">
             <NavItem to="/" icon={FiHome}>Kembali ke Toko</NavItem>
             <Button
@@ -363,15 +378,15 @@ const AdminLayout: React.FC = () => {
           {/* User Profile Snippet */}
           <HStack mt={6} px={(!isSidebarCollapsed || isMobile) ? 6 : 2} gap={3} align="center" justify={(!isSidebarCollapsed || isMobile) ? "flex-start" : "center"}>
             <Avatar.Root size="sm" bg="blue.500">
-                <Avatar.Fallback>AD</Avatar.Fallback>
+                <Avatar.Fallback>{currentUser?.name?.substring(0, 2).toUpperCase() || 'AD'}</Avatar.Fallback>
             </Avatar.Root>
             {(!isSidebarCollapsed || isMobile) && (
                 <>
-                <Box flex={1}>
-                <Text fontSize="sm" fontWeight="bold">Admin</Text>
-                <Text fontSize="xs" color="gray.400">Super User</Text>
+                <Box flex={1} overflow="hidden">
+                <Text fontSize="sm" fontWeight="bold" truncate>{currentUser?.name || 'Admin'}</Text>
+                <Text fontSize="xs" color="gray.400" truncate>{currentUser?.roles?.[0]?.name || 'User'}</Text>
                 </Box>
-                <Link to="/admin/settings">
+                <Link to="/admin/profile">
                 <Icon as={FiSettings} color="gray.400" cursor="pointer" _hover={{ color: 'white' }} />
                 </Link>
                 </>
