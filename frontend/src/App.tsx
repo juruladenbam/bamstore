@@ -34,8 +34,8 @@ function App() {
   return (
     <CartProvider>
       <Toaster />
-      <Box minH="100vh" bg="gray.50" pb={{ base: "60px", md: 0 }}>
-        <Navbar />
+      <Box minH="100vh" bg="gray.50" pb={isAdmin ? 0 : { base: "60px", md: 0 }}>
+        {!isAdmin && <Navbar />}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<ProductList />} />
