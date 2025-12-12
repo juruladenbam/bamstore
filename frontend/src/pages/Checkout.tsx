@@ -1,4 +1,4 @@
-import React, { useState }                                                                                  from 'react';
+import React, { useState, useEffect }                                                                                  from 'react';
 import { Box, Container, Heading, Text, VStack, Input, NativeSelect, Button, RadioGroup, Stack, Separator } from '@chakra-ui/react';
 import { useCart }                                                                                          from '../context/CartContext';
 import client                                                                                               from '../api/client';
@@ -29,6 +29,21 @@ const Checkout: React.FC = () => {
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [cashDescription, setCashDescription] = useState('Silakan bayar di Sekretariat.');
+
+  useEffect(() => {
+    client.get('/settings')
+      .then(res => {
+        if (res.data.payment_methods) {
+          setPaymentMethods(res.data.payment_methods);
+        }
+        if (res.data.cash_payment_description) {
+          setCashDescription(res.data.cash_payment_description);
+        }
+      })
+      .catch(err => console.error(err));
+  }, []);
   
   // Auto-complete state
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -303,9 +318,22 @@ const Checkout: React.FC = () => {
           
           <Box mt={4} p={3} bg="blue.50" borderRadius="md">
             {formData.payment_method === 'transfer' ? (
-              <Text>Silakan transfer ke BCA 1234567890 a.n BAM Store</Text>
+              <VStack align="start" gap={2}>
+                <Text fontWeight="medium">Silakan transfer ke salah satu rekening berikut:</Text>
+                {paymentMethods.length > 0 ? (
+                  paymentMethods.map((method, idx) => (
+                    <Box key={idx}>
+                      <Text fontWeight="bold">{method.bankName} - {method.accountNumber}</Text>
+                      <Text fontSize="sm">a.n {method.accountHolder}</Text>
+                      {method.description && <Text fontSize="xs" color="gray.600">{method.description}</Text>}
+                    </Box>
+                  ))
+                ) : (
+                  <Text>Belum ada rekening bank yang dikonfigurasi.</Text>
+                )}
+              </VStack>
             ) : (
-              <Text>Silakan bayar di Sekretariat.</Text>
+              <Text>{cashDescription}</Text>
             )}
           </Box>
         </Box>
