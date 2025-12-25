@@ -21,15 +21,20 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'variants', 'images']);
+        $cacheKey = 'products_' . md5(json_encode($request->all()));
 
-        if ($request->has('search')) {
-            $search = $request->input('search');
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-        }
+        $products = \Illuminate\Support\Facades\Cache::remember($cacheKey, 60 * 60, function () use ($request) {
+            $query = Product::with(['category', 'variants', 'images']);
 
-        $products = $query->get();
+            if ($request->has('search')) {
+                $search = $request->input('search');
+                $query->where('name', 'like', "%{$search}%")
+                      ->orWhere('description', 'like', "%{$search}%");
+            }
+
+            return $query->get();
+        });
+
         return response()->json($products);
     }
 

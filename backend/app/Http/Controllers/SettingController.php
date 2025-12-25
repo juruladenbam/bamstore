@@ -9,20 +9,23 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $settings = Setting::all();
-        $formatted = [];
+        $formatted = \Illuminate\Support\Facades\Cache::rememberForever('settings_formatted', function () {
+            $settings = Setting::all();
+            $formatted = [];
 
-        foreach ($settings as $setting) {
-            $value = $setting->value;
-            if ($setting->type === 'json') {
-                $value = json_decode($value, true);
-            } elseif ($setting->type === 'boolean') {
-                $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
-            } elseif ($setting->type === 'integer') {
-                $value = (int) $value;
+            foreach ($settings as $setting) {
+                $value = $setting->value;
+                if ($setting->type === 'json') {
+                    $value = json_decode($value, true);
+                } elseif ($setting->type === 'boolean') {
+                    $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                } elseif ($setting->type === 'integer') {
+                    $value = (int) $value;
+                }
+                $formatted[$setting->key] = $value;
             }
-            $formatted[$setting->key] = $value;
-        }
+            return $formatted;
+        });
 
         return response()->json($formatted);
     }
@@ -55,6 +58,8 @@ class SettingController extends Controller
 
             $setting->save();
         }
+
+        \Illuminate\Support\Facades\Cache::forget('settings_formatted');
 
         return response()->json(['message' => 'Settings updated successfully', 'settings' => $this->index()->original]);
     }

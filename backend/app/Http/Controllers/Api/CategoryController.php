@@ -21,7 +21,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return response()->json(Category::all());
+        $categories = \Illuminate\Support\Facades\Cache::rememberForever('categories_all', function () {
+            return Category::all();
+        });
+        return response()->json($categories);
     }
 
     /**

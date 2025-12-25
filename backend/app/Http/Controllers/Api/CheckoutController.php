@@ -63,7 +63,7 @@ class CheckoutController extends Controller
             'payment_method' => 'required|in:transfer,cash',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.variant_ids' => 'array', // Can be empty if no variants selected
+            'items.*.variant_ids' => 'array',
             'items.*.variant_ids.*' => 'exists:product_variants,id',
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.recipient_name' => 'required|string|max:255',
@@ -77,30 +77,50 @@ class CheckoutController extends Controller
             $totalAmount = 0;
             $orderItemsToCreate = [];
 
+            // 1. Collect all IDs to batch fetch
+            $productIds = collect($validated['items'])->pluck('product_id')->unique();
+            $allVariantIds = collect($validated['items'])->pluck('variant_ids')->flatten()->unique()->filter();
+
+            // 2. Fetch Products and Variants
+            $products = \App\Models\Product::whereIn('id', $productIds)->get()->keyBy('id');
+            $variants = ProductVariant::whereIn('id', $allVariantIds)->get()->keyBy('id');
+
+            // 3. For SKUs, we must fetch ALL SKUs for these products to match correctly.
+            //    Crucial: Lock these rows to prevent race conditions.
+            $skus = ProductSku::whereIn('product_id', $productIds)->lockForUpdate()->get();
+            // Organize SKUs by product_id for fast lookup
+            $skusByProduct = $skus->groupBy('product_id');
+
             foreach ($validated['items'] as $item) {
-                $product = \App\Models\Product::find($item['product_id']);
+                $product = $products[$item['product_id']];
                 $basePrice = $product->base_price;
 
-                $variants = [];
+                $itemVariants = [];
                 $variantsTotalAdjustment = 0;
                 $selectedVariantIds = $item['variant_ids'] ?? [];
                 sort($selectedVariantIds);
 
                 if (!empty($selectedVariantIds)) {
-                    $variants = ProductVariant::whereIn('id', $selectedVariantIds)->get();
-                    foreach ($variants as $v) {
-                        $variantsTotalAdjustment += $v->price_adjustment;
+                    foreach ($selectedVariantIds as $vid) {
+                        if (isset($variants[$vid])) {
+                            $v = $variants[$vid];
+                            $itemVariants[] = $v;
+                            $variantsTotalAdjustment += $v->price_adjustment;
+                        }
                     }
                 }
 
-                // Check for SKU match
-                $sku = ProductSku::where('product_id', $product->id)->get()->first(function ($s) use ($selectedVariantIds) {
+                // Match SKU in memory
+                $productSkus = $skusByProduct->get($product->id, collect());
+                $sku = $productSkus->first(function ($s) use ($selectedVariantIds) {
                     $skuVariantIds = $s->variant_ids ?? [];
                     sort($skuVariantIds);
                     return $skuVariantIds == $selectedVariantIds;
                 });
 
                 $skuCode = null;
+                $unitPrice = $basePrice + $variantsTotalAdjustment;
+
                 if ($sku) {
                     if ($sku->stock < $item['quantity']) {
                         throw new \Exception("Insufficient stock for product {$product->name} (SKU: {$sku->sku})");
@@ -108,17 +128,9 @@ class CheckoutController extends Controller
                     $sku->decrement('stock', $item['quantity']);
                     $skuCode = $sku->sku;
 
-                    // Use SKU price if set, otherwise calculated
                     if ($sku->price > 0) {
                         $unitPrice = $sku->price;
-                    } else {
-                        $unitPrice = $basePrice + $variantsTotalAdjustment;
                     }
-                } else {
-                    // Fallback: Check individual variant stock?
-                    // For now, just use calculated price and assume infinite stock if no SKU defined
-                    // OR check product stock if no variants?
-                    $unitPrice = $basePrice + $variantsTotalAdjustment;
                 }
 
                 $subtotal = $unitPrice * $item['quantity'];
@@ -132,7 +144,7 @@ class CheckoutController extends Controller
                         'unit_price_at_order' => $unitPrice,
                         'quantity' => $item['quantity'],
                     ],
-                    'variants' => $variants
+                    'variants' => $itemVariants // Pass full variant objects
                 ];
             }
 
@@ -156,25 +168,19 @@ class CheckoutController extends Controller
                 }
             }
 
-                        // Update Member Data Pool for Payer
+            // Update Member Data Pool for Payer
             $this->updateMemberPool($validated['phone_number'], $validated['checkout_name'], $validated['qobilah']);
 
             // Update Member Data Pool for Recipients
-            $processedRecipients = [$validated['checkout_name']]; // Track by name to avoid duplicates in this order
+            $processedRecipients = [$validated['checkout_name']];
 
             foreach ($validated['items'] as $item) {
                 $rName = $item['recipient_name'];
                 $rPhone = $item['recipient_phone'] ?? null;
                 $rQobilah = $item['recipient_qobilah'] ?? null;
 
-                // If recipient is the payer, we already handled it.
-                if ($rName === $validated['checkout_name']) {
-                    continue;
-                }
-
-                if (in_array($rName, $processedRecipients)) {
-                    continue;
-                }
+                if ($rName === $validated['checkout_name']) continue;
+                if (in_array($rName, $processedRecipients)) continue;
 
                 $this->updateMemberPool($rPhone, $rName, $rQobilah);
                 $processedRecipients[] = $rName;
