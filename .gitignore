@@ -1,3 +1,4 @@
 .gemini/
 .specify/
 specs/
+.DS_Store

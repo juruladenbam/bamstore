@@ -1,35 +1,37 @@
-import { Routes, Route }                                from 'react-router-dom';
-import { CartProvider }                                 from './context/CartContext';
-import Navbar                                           from './components/Navbar';
-import Home                                             from './pages/Home';
-import ProductList                                      from './pages/ProductList';
-import ProductDetail                                    from './pages/ProductDetail';
-import Checkout                                         from './pages/Checkout';
-import OrderActivity                                    from './pages/OrderActivity';
-import OrderHistory                                     from './pages/OrderHistory';
-import OrderConfirmation                                from './pages/OrderConfirmation';
-import AdminLayout                                      from './pages/admin/AdminLayout';
-import AdminProductList                                 from './pages/admin/AdminProductList';
-import Dashboard                                        from './pages/admin/Dashboard';
-import ProductForm                                      from './pages/admin/ProductForm';
-import AdminCategoryList                                from './pages/admin/AdminCategoryList';
-import CategoryForm                                     from './pages/admin/CategoryForm';
-import AdminOrderList                                   from './pages/admin/AdminOrderList';
-import AdminOrderDetail                                 from './pages/admin/AdminOrderDetail';
-import AdminVendorList                                  from './pages/admin/AdminVendorList';
-import VendorForm                                       from './pages/admin/VendorForm';
-import AdminVendorDetail                                from './pages/admin/AdminVendorDetail';
-import VendorReport                                     from './pages/admin/VendorReport';
-import FinancialReport                                  from './pages/admin/FinancialReport';
-import Settings                                         from './pages/admin/Settings';
-import Notifications                                    from './pages/admin/Notifications';
-import AdminUserList                                    from './pages/admin/AdminUserList';
-import UserForm                                         from './pages/admin/UserForm';
-import ProfileSettings                                  from './pages/admin/ProfileSettings';
-import Login                                            from './pages/admin/Login';
-import { Box, Text }                                    from '@chakra-ui/react';
-import { useLocation }                                  from 'react-router-dom';
-import { Toaster }                                      from './components/ui/toaster';
+import { Routes, Route } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import ProductList from './pages/ProductList';
+import ProductDetail from './pages/ProductDetail';
+import Checkout from './pages/Checkout';
+import OrderActivity from './pages/OrderActivity';
+import OrderHistory from './pages/OrderHistory';
+import OrderConfirmation from './pages/OrderConfirmation';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminProductList from './pages/admin/AdminProductList';
+import Dashboard from './pages/admin/Dashboard';
+import ProductForm from './pages/admin/ProductForm';
+import AdminCategoryList from './pages/admin/AdminCategoryList';
+import CategoryForm from './pages/admin/CategoryForm';
+import AdminOrderList from './pages/admin/AdminOrderList';
+import AdminOrderDetail from './pages/admin/AdminOrderDetail';
+import AdminVendorList from './pages/admin/AdminVendorList';
+import VendorForm from './pages/admin/VendorForm';
+import AdminVendorDetail from './pages/admin/AdminVendorDetail';
+import VendorReport from './pages/admin/VendorReport';
+import FinancialReport from './pages/admin/FinancialReport';
+import Settings from './pages/admin/Settings';
+import Notifications from './pages/admin/Notifications';
+import AdminUserList from './pages/admin/AdminUserList';
+import UserForm from './pages/admin/UserForm';
+import ProfileSettings from './pages/admin/ProfileSettings';
+import Login from './pages/admin/Login';
+import { Box, Text } from '@chakra-ui/react';
+import { useLocation } from 'react-router-dom';
+import { Toaster } from './components/ui/toaster';
+
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   const location = useLocation();
@@ -38,6 +40,7 @@ function App() {
   return (
     <CartProvider>
       <Toaster />
+      <ScrollToTop />
       <Box minH="100vh" bg="gray.50" pb={isAdmin ? 0 : { base: "60px", md: 0 }}>
         {!isAdmin && <Navbar />}
         <Routes>
@@ -48,7 +51,7 @@ function App() {
           <Route path="/activity" element={<OrderActivity />} />
           <Route path="/history" element={<OrderHistory />} />
           <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          
+
           <Route path="/admin/login" element={<Login />} />
 
           {/* Admin Routes */}
