@@ -13,7 +13,8 @@ use App\Http\Controllers\Api\Admin\VendorPaymentController as AdminVendorPayment
 use App\Http\Controllers\PermissionDebugController;
 
 // Debug Permissions Route (protected by secret key in .env)
-Route::get('/debug-permissions', [PermissionDebugController::class, 'index']);
+Route::get('/debug-permissions', [PermissionDebugController::class, 'index'])
+    ->withoutMiddleware(['auth:sanctum']);
 
 Route::get('/user', function (Request $request) {
     $user = $request->user();

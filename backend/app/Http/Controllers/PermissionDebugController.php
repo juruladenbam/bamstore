@@ -17,11 +17,16 @@ class PermissionDebugController extends Controller
      */
     public function index(Request $request)
     {
-        $secretKey = env('DEBUG_PERMISSIONS_KEY');
+        // Use config() instead of env() for cached config compatibility
+        $secretKey = config('app.debug_permissions_key') ?: env('DEBUG_PERMISSIONS_KEY');
 
         // Validate secret key - disabled if not set in .env
         if (!$secretKey || $request->query('key') !== $secretKey) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json([
+                'error' => 'Unauthorized',
+                'hint' => 'Check DEBUG_PERMISSIONS_KEY in .env and clear config cache',
+                'key_exists' => !empty($secretKey),
+            ], 403);
         }
 
         $result = [
