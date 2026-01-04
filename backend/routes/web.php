@@ -32,6 +32,3 @@ Route::get('/clear-cache', function() {
     }
 });
 
-// Debug Permissions Route (protected by secret key in .env)
-Route::get('/debug-permissions', [\App\Http\Controllers\PermissionDebugController::class, 'index']);
-

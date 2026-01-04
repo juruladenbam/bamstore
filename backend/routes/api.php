@@ -10,6 +10,10 @@ use App\Http\Controllers\Api\Admin\CategoryController as AdminCategoryController
 use App\Http\Controllers\Api\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\Admin\VendorController as AdminVendorController;
 use App\Http\Controllers\Api\Admin\VendorPaymentController as AdminVendorPaymentController;
+use App\Http\Controllers\PermissionDebugController;
+
+// Debug Permissions Route (protected by secret key in .env)
+Route::get('/debug-permissions', [PermissionDebugController::class, 'index']);
 
 Route::get('/user', function (Request $request) {
     $user = $request->user();
