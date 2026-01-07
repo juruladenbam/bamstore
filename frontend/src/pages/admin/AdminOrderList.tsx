@@ -6,11 +6,22 @@ import client from '../../api/client';
 import type { Order } from '../../types';
 import { toaster } from '../../components/ui/toaster';
 import DataTable, { type Column } from '../../components/DataTable';
+import {
+  DialogBody,
+  DialogActionTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+} from "../../components/ui/dialog";
 
 const AdminOrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filterStatus, setFilterStatus] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deleteIds, setDeleteIds] = useState<any[]>([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const fetchOrders = () => {
     setLoading(true);
@@ -69,19 +80,46 @@ const AdminOrderList: React.FC = () => {
     }
   };
 
+  const handleBulkDelete = (ids: any[]) => {
+    setDeleteIds(ids);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await Promise.all(deleteIds.map(id => client.delete(`/admin/orders/${id}`)));
+      toaster.create({
+        title: "Pesanan Dihapus",
+        description: `${deleteIds.length} pesanan berhasil dihapus.`,
+        type: "success",
+      });
+      fetchOrders();
+    } catch (error) {
+      console.error(error);
+      toaster.create({
+        title: "Kesalahan",
+        description: "Gagal menghapus beberapa pesanan.",
+        type: "error",
+      });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setDeleteIds([]);
+    }
+  };
+
   const columns: Column<Order>[] = [
-    { 
-      header: 'No. Pesanan', 
-      cell: (order) => order.order_number || '#' + order.id 
+    {
+      header: 'No. Pesanan',
+      cell: (order) => order.order_number || '#' + order.id
     },
     { header: 'Nama', accessorKey: 'checkout_name' },
     { header: 'Qobilah', accessorKey: 'qobilah' },
-    { 
-      header: 'Total', 
-      cell: (order) => `Rp ${Number(order.total_amount).toLocaleString()}` 
+    {
+      header: 'Total',
+      cell: (order) => `Rp ${Number(order.total_amount).toLocaleString()}`
     },
-    { 
-      header: 'Status', 
+    {
+      header: 'Status',
       cell: (order) => (
         <Badge colorPalette={order.status === 'paid' ? 'green' : 'gray'}>
           {order.status}
@@ -115,6 +153,9 @@ const AdminOrderList: React.FC = () => {
               Selesai
             </Button>
           )}
+          <Button size="xs" colorPalette="red" variant="ghost" onClick={() => handleBulkDelete([order.id])}>
+            Hapus
+          </Button>
         </HStack>
       )
     }
@@ -125,38 +166,38 @@ const AdminOrderList: React.FC = () => {
     const firstStatus = selectedOrders[0]?.status;
     const allSameStatus = selectedOrders.every(o => o.status === firstStatus);
 
-    if (!allSameStatus) {
-      return (
-        <Button size="sm" variant="outline" disabled colorPalette="gray" title="Status harus sama untuk semua item yang dipilih">
-          Ubah Status (Status Berbeda)
-        </Button>
-      );
-    }
-
     return (
-      <Menu.Root positioning={{ placement: "bottom-end" }}>
-        <Menu.Trigger asChild>
-          <Button size="sm" variant="outline">
-            Ubah Status <FiChevronDown />
+      <HStack>
+        {!allSameStatus ? (
+          <Button size="sm" variant="outline" disabled colorPalette="gray" title="Status harus sama untuk semua item yang dipilih">
+            Ubah Status (Status Berbeda)
           </Button>
-        </Menu.Trigger>
-        <Menu.Positioner>
-          <Menu.Content>
-            <Menu.Item value="paid" onClick={() => handleBulkStatusUpdate(selectedIds, 'paid')}>
-              Tandai Dibayar
-            </Menu.Item>
-            <Menu.Item value="processed" onClick={() => handleBulkStatusUpdate(selectedIds, 'processed')}>
-              Tandai Diproses
-            </Menu.Item>
-            <Menu.Item value="ready_pickup" onClick={() => handleBulkStatusUpdate(selectedIds, 'ready_pickup')}>
-              Siap Diambil
-            </Menu.Item>
-            <Menu.Item value="completed" onClick={() => handleBulkStatusUpdate(selectedIds, 'completed')}>
-              Selesai
-            </Menu.Item>
-          </Menu.Content>
-        </Menu.Positioner>
-      </Menu.Root>
+        ) : (
+          <Menu.Root positioning={{ placement: "bottom-end" }}>
+            <Menu.Trigger asChild>
+              <Button size="sm" variant="outline">
+                Ubah Status <FiChevronDown />
+              </Button>
+            </Menu.Trigger>
+            <Menu.Positioner>
+              <Menu.Content>
+                <Menu.Item value="paid" onClick={() => handleBulkStatusUpdate(selectedIds, 'paid')}>
+                  Tandai Dibayar
+                </Menu.Item>
+                <Menu.Item value="processed" onClick={() => handleBulkStatusUpdate(selectedIds, 'processed')}>
+                  Tandai Diproses
+                </Menu.Item>
+                <Menu.Item value="ready_pickup" onClick={() => handleBulkStatusUpdate(selectedIds, 'ready_pickup')}>
+                  Siap Diambil
+                </Menu.Item>
+                <Menu.Item value="completed" onClick={() => handleBulkStatusUpdate(selectedIds, 'completed')}>
+                  Selesai
+                </Menu.Item>
+              </Menu.Content>
+            </Menu.Positioner>
+          </Menu.Root>
+        )}
+      </HStack>
     );
   };
 
@@ -166,9 +207,9 @@ const AdminOrderList: React.FC = () => {
         <Heading>Pesanan</Heading>
         <Box w="200px">
           <NativeSelect.Root>
-            <NativeSelect.Field 
-              placeholder="Filter Status" 
-              value={filterStatus} 
+            <NativeSelect.Field
+              placeholder="Filter Status"
+              value={filterStatus}
               onChange={e => setFilterStatus(e.target.value)}
             >
               <option value="">Semua</option>
@@ -183,14 +224,32 @@ const AdminOrderList: React.FC = () => {
         </Box>
       </HStack>
 
-      <DataTable 
-        data={orders} 
-        columns={columns} 
-        keyField="id" 
+      <DataTable
+        data={orders}
+        columns={columns}
+        keyField="id"
         searchPlaceholder="Cari pesanan..."
         renderBulkActions={renderBulkActions}
+        onBulkDelete={handleBulkDelete}
         isLoading={loading}
       />
+
+      <DialogRoot open={isDeleteDialogOpen} onOpenChange={(e) => setIsDeleteDialogOpen(e.open)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Konfirmasi Hapus</DialogTitle>
+          </DialogHeader>
+          <DialogBody>
+            Apakah Anda yakin ingin menghapus {deleteIds.length} pesanan yang dipilih? Tindakan ini tidak dapat dibatalkan.
+          </DialogBody>
+          <DialogFooter>
+            <DialogActionTrigger asChild>
+              <Button variant="outline">Batal</Button>
+            </DialogActionTrigger>
+            <Button colorPalette="red" onClick={confirmDelete}>Hapus</Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogRoot>
     </Box>
   );
 };

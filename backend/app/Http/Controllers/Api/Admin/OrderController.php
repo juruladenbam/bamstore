@@ -118,4 +118,34 @@ class OrderController extends Controller
 
         return response()->json($order);
     }
+
+    /**
+     * @OA\Delete(
+     *     path="/admin/orders/{id}",
+     *     summary="Delete order",
+     *     tags={"Admin Orders"},
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="Order ID or Order Number",
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Order deleted"
+     *     )
+     * )
+     */
+    public function destroy($id)
+    {
+        $order = Order::where('id', $id)
+            ->orWhere('order_number', $id)
+            ->firstOrFail();
+
+        $order->delete();
+
+        return response()->json(['message' => 'Order deleted successfully']);
+    }
 }
