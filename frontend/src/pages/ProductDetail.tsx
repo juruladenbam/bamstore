@@ -404,7 +404,7 @@ const ProductDetail: React.FC = () => {
                                     borderColor={errors.missingVariants?.includes(type) && !isSelected ? "red.500" : undefined}
                                     onClick={() => handleVariantToggle(v)}
                                 >
-                                    {v.name} ({v.price_adjustment > 0 ? '+' : ''}{Number(v.price_adjustment).toLocaleString()})
+                                    {v.name}
                                 </Button>
                                 );
                             })}
