@@ -19,7 +19,7 @@ class MemberDataPoolFactory extends Factory
         $qobilahs = [
             "QOBILAH MARIYAH", "QOBILAH BUSYRI", "QOBILAH MUZAMMAH", "QOBILAH SULHAN",
             "QOBILAH SHOLIHATUN", "QOBILAH NURSIYAM", "QOBILAH NI'MAH", "QOBILAH ABD MAJID",
-            "QOBILAH SAIDAH", "QOBILAH THOHIR AL ALY", "QOBILAH ABD. ROHIM (NGAGLIK)"
+            "QOBILAH SAIDAH", "QOBILAH THOHIR AL ALY", "NYAI NIHAYA (NGAGLIK)"
         ];
 
         return [
