@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Container, Heading, Input, Button, VStack, Text, Table, Badge, Card } from '@chakra-ui/react';
 import client from '../api/client';
 import { toaster } from '../components/ui/toaster';
+import { Link } from 'react-router-dom';
 
 interface OrderItem {
   id: number;
@@ -9,6 +10,8 @@ interface OrderItem {
   variant_name: string;
   quantity: number;
   price: number;
+  recipient_name?: string;
+  variants?: { name: string }[];
 }
 
 interface Order {
@@ -18,6 +21,10 @@ interface Order {
   status: string;
   total_amount: number;
   items: OrderItem[];
+  checkout_name?: string;
+  phone_number?: string;
+  qobilah?: string;
+  payment_method?: string;
 }
 
 const OrderHistory: React.FC = () => {
@@ -48,22 +55,22 @@ const OrderHistory: React.FC = () => {
   return (
     <Container maxW="container.md" py={10}>
       <Heading mb={6} textAlign="center">Cek Pesanan Saya</Heading>
-      
+
       <Card.Root mb={8}>
         <Card.Body>
           <VStack gap={4}>
             <Text>Masukkan nomor telepon untuk melihat riwayat pesanan Anda.</Text>
-            <Input 
-              placeholder="contoh: 08123456789" 
-              value={phoneNumber} 
-              onChange={e => setPhoneNumber(e.target.value)} 
+            <Input
+              placeholder="contoh: 08123456789"
+              value={phoneNumber}
+              onChange={e => setPhoneNumber(e.target.value)}
               size="lg"
             />
-            <Button 
-              colorPalette="teal" 
-              size="lg" 
-              width="full" 
-              onClick={handleCheck} 
+            <Button
+              colorPalette="teal"
+              size="lg"
+              width="full"
+              onClick={handleCheck}
               loading={loading}
             >
               Cek Pesanan
@@ -75,7 +82,7 @@ const OrderHistory: React.FC = () => {
       {searched && (
         <VStack gap={6} align="stretch">
           <Heading size="md">Ditemukan {orders.length} Pesanan</Heading>
-          
+
           {orders.map(order => (
             <Box key={order.id} borderWidth="1px" borderRadius="lg" p={4} bg="white" shadow="sm">
               <Box display="flex" justifyContent="space-between" mb={2}>
@@ -83,11 +90,11 @@ const OrderHistory: React.FC = () => {
                 <Badge colorPalette={order.status === 'paid' ? 'green' : 'yellow'}>{order.status}</Badge>
               </Box>
               <Text fontSize="sm" color="gray.500" mb={4}>
-                {new Date(order.created_at).toLocaleDateString('id-ID', { 
-                  day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
+                {new Date(order.created_at).toLocaleDateString('id-ID', {
+                  day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
                 })}
               </Text>
-              
+
               <Table.Root size="sm" mb={4}>
                 <Table.Header>
                   <Table.Row>
@@ -109,11 +116,22 @@ const OrderHistory: React.FC = () => {
                   ))}
                 </Table.Body>
               </Table.Root>
-              
-              <Box display="flex" justifyContent="space-between" borderTopWidth="1px" pt={2}>
+
+              <Box display="flex" justifyContent="space-between" borderTopWidth="1px" pt={2} mb={4}>
                 <Text fontWeight="bold">Total</Text>
                 <Text fontWeight="bold">Rp {Number(order.total_amount).toLocaleString('id-ID')}</Text>
               </Box>
+
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                width="full"
+              >
+                <Link to={`/order-confirmation/${order.order_number}`}>
+                  Lihat Detail Pesanan
+                </Link>
+              </Button>
             </Box>
           ))}
 

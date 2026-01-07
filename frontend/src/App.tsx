@@ -50,7 +50,7 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/activity" element={<OrderActivity />} />
           <Route path="/history" element={<OrderHistory />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
+          <Route path="/order-confirmation/:orderNumber?" element={<OrderConfirmation />} />
 
           <Route path="/admin/login" element={<Login />} />
 

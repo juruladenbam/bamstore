@@ -1,9 +1,9 @@
-import React, { useState, useEffect }                                                                                  from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Container, Heading, Text, VStack, Input, NativeSelect, Button, RadioGroup, Stack, Separator } from '@chakra-ui/react';
-import { useCart }                                                                                          from '../context/CartContext';
-import client                                                                                               from '../api/client';
-import { useNavigate }                                                                                      from 'react-router-dom';
-import { toaster }                                                                                          from '../components/ui/toaster';
+import { useCart } from '../context/CartContext';
+import client from '../api/client';
+import { useNavigate } from 'react-router-dom';
+import { toaster } from '../components/ui/toaster';
 import {
   DialogRoot,
   DialogContent,
@@ -19,7 +19,7 @@ import { QOBILAHS } from '../constants';
 const Checkout: React.FC = () => {
   const { items, total, clearCart, removeFromCart } = useCart();
   const navigate = useNavigate();
-  
+
   const [formData, setFormData] = useState({
     checkout_name: '',
     phone_number: '',
@@ -44,10 +44,10 @@ const Checkout: React.FC = () => {
       })
       .catch(err => console.error(err));
   }, []);
-  
+
   // Auto-complete state
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState<{field: 'name' | 'phone' | null}>({field: null});
+  const [showSuggestions, setShowSuggestions] = useState<{ field: 'name' | 'phone' | null }>({ field: null });
   const searchTimeout = React.useRef<any>(null);
 
   const handleSearch = (value: string, field: 'name' | 'phone') => {
@@ -59,29 +59,29 @@ const Checkout: React.FC = () => {
           .then(res => {
             if (res.data && res.data.length > 0) {
               setSearchResults(res.data);
-              setShowSuggestions({field});
+              setShowSuggestions({ field });
             } else {
-              setShowSuggestions({field: null});
+              setShowSuggestions({ field: null });
             }
           })
           .catch(err => console.error(err));
       }, 300);
     } else {
-      setShowSuggestions({field: null});
+      setShowSuggestions({ field: null });
     }
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setFormData(prev => ({...prev, phone_number: value}));
-    if (errors.phone_number) setErrors(prev => ({...prev, phone_number: false}));
+    setFormData(prev => ({ ...prev, phone_number: value }));
+    if (errors.phone_number) setErrors(prev => ({ ...prev, phone_number: false }));
     handleSearch(value, 'phone');
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setFormData(prev => ({...prev, checkout_name: value}));
-    if (errors.checkout_name) setErrors(prev => ({...prev, checkout_name: false}));
+    setFormData(prev => ({ ...prev, checkout_name: value }));
+    if (errors.checkout_name) setErrors(prev => ({ ...prev, checkout_name: false }));
     handleSearch(value, 'name');
   };
 
@@ -92,7 +92,7 @@ const Checkout: React.FC = () => {
       phone_number: member.phone_number || '',
       qobilah: member.qobilah || QOBILAHS[0]
     }));
-    setShowSuggestions({field: null});
+    setShowSuggestions({ field: null });
   };
 
   const handlePlaceOrderClick = () => {
@@ -145,14 +145,18 @@ const Checkout: React.FC = () => {
         description: "Pesanan Anda telah berhasil dibuat!",
         type: "success",
       });
-      navigate('/order-confirmation', { 
-        state: { 
-          orderId: res.data.order_id, 
+      navigate(`/order-confirmation/${res.data.order_number}`, {
+        state: {
+          orderId: res.data.order_id,
           orderNumber: res.data.order_number,
           totalAmount: res.data.total_amount,
           items: items,
-          formData: formData
-        } 
+          formData: formData,
+          settings: {
+            payment_methods: paymentMethods,
+            cash_payment_description: cashDescription
+          }
+        }
       });
     } catch (error) {
       console.error(error);
@@ -174,13 +178,13 @@ const Checkout: React.FC = () => {
   return (
     <Container maxW="container.md" py={10}>
       <Heading mb={6}>Pembayaran</Heading>
-      
+
       <VStack gap={6} align="stretch">
         <Box borderWidth="1px" borderRadius="lg" p={4}>
           <Heading size="md" mb={4}>Item Keranjang</Heading>
           {items.map((item, index) => {
             const unitPrice = item.unit_price;
-            
+
             return (
               <Box key={index} mb={4} p={2} bg="gray.50" borderRadius="md">
                 <Text fontWeight="bold">{item.product.name}</Text>
@@ -207,29 +211,29 @@ const Checkout: React.FC = () => {
               <Input
                 value={formData.checkout_name}
                 onChange={handleNameChange}
-                onBlur={() => setTimeout(() => setShowSuggestions({field: null}), 200)}
+                onBlur={() => setTimeout(() => setShowSuggestions({ field: null }), 200)}
                 placeholder="Nama Anda"
                 borderColor={errors.checkout_name ? "red.500" : undefined}
                 autoComplete="off"
               />
               {showSuggestions.field === 'name' && searchResults.length > 0 && (
-                <Box 
-                  position="absolute" 
-                  top="100%" 
-                  left={0} 
-                  right={0} 
-                  zIndex={10} 
-                  bg="white" 
-                  borderWidth="1px" 
-                  borderRadius="md" 
-                  boxShadow="md" 
-                  maxH="200px" 
+                <Box
+                  position="absolute"
+                  top="100%"
+                  left={0}
+                  right={0}
+                  zIndex={10}
+                  bg="white"
+                  borderWidth="1px"
+                  borderRadius="md"
+                  boxShadow="md"
+                  maxH="200px"
                   overflowY="auto"
                 >
                   {searchResults.map((member, idx) => (
-                    <Box 
-                      key={idx} 
-                      p={2} 
+                    <Box
+                      key={idx}
+                      p={2}
                       _hover={{ bg: "gray.100", cursor: "pointer" }}
                       onClick={() => selectMember(member)}
                     >
@@ -244,32 +248,32 @@ const Checkout: React.FC = () => {
             </Box>
             <Box w="full" position="relative">
               <Text mb={1}>Nomor Telepon <Text as="span" color="red.500">*</Text></Text>
-              <Input 
-                value={formData.phone_number} 
+              <Input
+                value={formData.phone_number}
                 onChange={handlePhoneChange}
-                onBlur={() => setTimeout(() => setShowSuggestions({field: null}), 200)}
+                onBlur={() => setTimeout(() => setShowSuggestions({ field: null }), 200)}
                 placeholder="08..."
                 borderColor={errors.phone_number ? "red.500" : undefined}
                 autoComplete="off"
               />
               {showSuggestions.field === 'phone' && searchResults.length > 0 && (
-                <Box 
-                  position="absolute" 
-                  top="100%" 
-                  left={0} 
-                  right={0} 
-                  zIndex={10} 
-                  bg="white" 
-                  borderWidth="1px" 
-                  borderRadius="md" 
-                  boxShadow="md" 
-                  maxH="200px" 
+                <Box
+                  position="absolute"
+                  top="100%"
+                  left={0}
+                  right={0}
+                  zIndex={10}
+                  bg="white"
+                  borderWidth="1px"
+                  borderRadius="md"
+                  boxShadow="md"
+                  maxH="200px"
                   overflowY="auto"
                 >
                   {searchResults.map((member, idx) => (
-                    <Box 
-                      key={idx} 
-                      p={2} 
+                    <Box
+                      key={idx}
+                      p={2}
                       _hover={{ bg: "gray.100", cursor: "pointer" }}
                       onClick={() => selectMember(member)}
                     >
@@ -285,9 +289,9 @@ const Checkout: React.FC = () => {
             <Box w="full">
               <Text mb={1}>Qobilah</Text>
               <NativeSelect.Root>
-                <NativeSelect.Field 
-                  value={formData.qobilah} 
-                  onChange={e => setFormData({...formData, qobilah: e.target.value})}
+                <NativeSelect.Field
+                  value={formData.qobilah}
+                  onChange={e => setFormData({ ...formData, qobilah: e.target.value })}
                 >
                   {QOBILAHS.map(q => <option key={q} value={q}>{q}</option>)}
                 </NativeSelect.Field>
@@ -298,9 +302,9 @@ const Checkout: React.FC = () => {
 
         <Box borderWidth="1px" borderRadius="lg" p={4}>
           <Heading size="md" mb={4}>Metode Pembayaran</Heading>
-          <RadioGroup.Root 
-            value={formData.payment_method} 
-            onValueChange={e => setFormData({...formData, payment_method: e.value || 'transfer'})}
+          <RadioGroup.Root
+            value={formData.payment_method}
+            onValueChange={e => setFormData({ ...formData, payment_method: e.value || 'transfer' })}
           >
             <Stack direction="row" gap={4}>
               <RadioGroup.Item value="transfer">
@@ -315,7 +319,7 @@ const Checkout: React.FC = () => {
               </RadioGroup.Item>
             </Stack>
           </RadioGroup.Root>
-          
+
           <Box mt={4} p={3} bg="blue.50" borderRadius="md">
             {formData.payment_method === 'transfer' ? (
               <VStack align="start" gap={2}>
@@ -350,7 +354,7 @@ const Checkout: React.FC = () => {
             <DialogBody>
               <VStack align="stretch" gap={4}>
                 <Text>Silakan periksa detail pesanan Anda:</Text>
-                
+
                 <Box bg="gray.50" p={3} borderRadius="md">
                   <Text fontWeight="bold" mb={2}>Item ({items.length})</Text>
                   <VStack align="stretch" gap={2} mb={3}>

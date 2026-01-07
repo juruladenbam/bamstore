@@ -30,6 +30,7 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
 Route::get('/order-activity', [\App\Http\Controllers\Api\OrderActivityController::class, 'index']);
 Route::post('/history', [\App\Http\Controllers\Api\OrderHistoryController::class, 'index']);
+Route::get('/orders/{order}', [\App\Http\Controllers\Api\OrderController::class, 'show']);
 Route::get('/members/search', [\App\Http\Controllers\Api\MemberDataController::class, 'search']);
 Route::post('/checkout', [CheckoutController::class, 'store']);
 Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);

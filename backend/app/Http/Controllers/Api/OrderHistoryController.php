@@ -46,7 +46,10 @@ class OrderHistoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($order) {
-                $order->order_number = 'ORD-' . str_pad($order->id, 5, '0', STR_PAD_LEFT);
+                // $order->order_number is already set from DB, but fallback to ID if missing
+                if (empty($order->order_number)) { 
+                    $order->order_number = (string) $order->id;
+                }
 
                 $order->items->transform(function ($item) {
                     $item->product_name = $item->product ? $item->product->name : 'Unknown Product';
