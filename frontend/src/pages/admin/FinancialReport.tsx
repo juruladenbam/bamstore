@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Container, 
-  Heading, 
-  SimpleGrid, 
-  Text, 
-  Table, 
-  Badge, 
-  HStack, 
-  Input, 
+import {
+  Box,
+  Container,
+  Heading,
+  SimpleGrid,
+  Text,
+  Table,
+  Badge,
+  HStack,
+  Input,
   Button,
   Card
 } from '@chakra-ui/react';
@@ -26,7 +26,7 @@ const StatCard = ({ label, value, color = "gray.600", helpText }: any) => (
 const FinancialReport: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Default to current month
   const today = new Date();
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
@@ -66,17 +66,17 @@ const FinancialReport: React.FC = () => {
       <HStack justify="space-between" mb={6} wrap="wrap" gap={4}>
         <Heading>Laporan Keuangan</Heading>
         <HStack wrap="wrap" gap={2} w={{ base: "full", md: "auto" }}>
-          <Input 
-            type="date" 
-            value={startDate} 
-            onChange={(e) => setStartDate(e.target.value)} 
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
             w={{ base: "full", md: "auto" }}
           />
           <Text display={{ base: "none", md: "block" }}>-</Text>
-          <Input 
-            type="date" 
-            value={endDate} 
-            onChange={(e) => setEndDate(e.target.value)} 
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
             w={{ base: "full", md: "auto" }}
           />
           <Button onClick={handleFilter} colorPalette="blue" w={{ base: "full", md: "auto" }}>Filter</Button>
@@ -85,39 +85,51 @@ const FinancialReport: React.FC = () => {
 
       {data && (
         <>
-          <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} mb={8}>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={6} mb={8}>
             <StatCard
               label="Penjualan Kotor"
               value={data.summary.gross_sales}
-              color="teal.600"
-              helpText="Total dari Pesanan Dibayar"
+              color="gray.600"
+              helpText="Total nilai barang terjual"
             />
             <StatCard
-              label="Total HPP"
-              value={data.summary.total_cogs}
+              label="Total Diskon"
+              value={data.summary.total_discount}
               color="red.500"
-              helpText="Estimasi Harga Pokok Penjualan"
+              helpText="Potongan dari kupon"
+            />
+            <StatCard
+              label="Penjualan Bersih"
+              value={data.summary.net_sales}
+              color="teal.600"
+              helpText="Uang riil yang diterima"
             />
             <StatCard
               label="Laba Kotor"
               value={data.summary.gross_profit}
               color="green.600"
-              helpText="Penjualan - HPP"
+              helpText="Penjualan Bersih - HPP"
             />
           </SimpleGrid>
 
-          <SimpleGrid columns={{ base: 1, md: 2 }} gap={6} mb={10}>
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} mb={10}>
+            <StatCard
+              label="Total HPP (COGS)"
+              value={data.summary.total_cogs}
+              color="orange.400"
+              helpText="Estimasi Harga Modal"
+            />
             <StatCard
               label="Total Pembayaran Vendor"
               value={data.summary.total_vendor_payments}
-              color="orange.500"
+              color="orange.600"
               helpText="Arus Kas Keluar ke Vendor"
             />
             <StatCard
               label="Arus Kas Bersih"
               value={data.summary.net_cash_flow}
               color={data.summary.net_cash_flow >= 0 ? "blue.600" : "red.600"}
-              helpText="Penjualan - Pembayaran Vendor"
+              helpText="Penjualan Bersih - Bayar Vendor"
             />
           </SimpleGrid>
 
@@ -127,44 +139,52 @@ const FinancialReport: React.FC = () => {
             </Card.Header>
             <Card.Body>
               <Box overflowX="auto">
-              <Table.Root size="sm" striped>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.ColumnHeader>Tanggal</Table.ColumnHeader>
-                    <Table.ColumnHeader>Tipe</Table.ColumnHeader>
-                    <Table.ColumnHeader>Kategori</Table.ColumnHeader>
-                    <Table.ColumnHeader>Deskripsi</Table.ColumnHeader>
-                    <Table.ColumnHeader textAlign="right">Jumlah</Table.ColumnHeader>
-                    <Table.ColumnHeader>Status</Table.ColumnHeader>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {data.transactions.length === 0 ? (
+                <Table.Root size="sm" striped>
+                  <Table.Header>
                     <Table.Row>
-                      <Table.Cell colSpan={6} textAlign="center">Tidak ada transaksi pada periode ini.</Table.Cell>
+                      <Table.ColumnHeader>Tanggal</Table.ColumnHeader>
+                      <Table.ColumnHeader>Tipe</Table.ColumnHeader>
+                      <Table.ColumnHeader>Kategori</Table.ColumnHeader>
+                      <Table.ColumnHeader>Deskripsi</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">Gross</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">Diskon</Table.ColumnHeader>
+                      <Table.ColumnHeader textAlign="right">Net (Received)</Table.ColumnHeader>
+                      <Table.ColumnHeader>Status</Table.ColumnHeader>
                     </Table.Row>
-                  ) : (
-                    data.transactions.map((trx: any) => (
-                      <Table.Row key={trx.id}>
-                        <Table.Cell>{new Date(trx.date).toLocaleDateString('id-ID')} {new Date(trx.date).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'})}</Table.Cell>
-                        <Table.Cell>
-                          <Badge colorPalette={trx.type === 'income' ? 'green' : 'red'}>
-                            {trx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
-                          </Badge>
-                        </Table.Cell>
-                        <Table.Cell>{trx.category}</Table.Cell>
-                        <Table.Cell>{trx.description}</Table.Cell>
-                        <Table.Cell textAlign="right" fontWeight="medium" color={trx.type === 'income' ? 'green.600' : 'red.600'}>
-                          {trx.type === 'income' ? '+' : '-'} Rp {Number(trx.amount).toLocaleString()}
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Badge variant="outline">{trx.status}</Badge>
-                        </Table.Cell>
+                  </Table.Header>
+                  <Table.Body>
+                    {data.transactions.length === 0 ? (
+                      <Table.Row>
+                        <Table.Cell colSpan={8} textAlign="center">Tidak ada transaksi pada periode ini.</Table.Cell>
                       </Table.Row>
-                    ))
-                  )}
-                </Table.Body>
-              </Table.Root>
+                    ) : (
+                      data.transactions.map((trx: any) => (
+                        <Table.Row key={trx.id}>
+                          <Table.Cell>{new Date(trx.date).toLocaleDateString('id-ID')} {new Date(trx.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={trx.type === 'income' ? 'green' : 'red'}>
+                              {trx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell>{trx.category}</Table.Cell>
+                          <Table.Cell>{trx.description}</Table.Cell>
+                          <Table.Cell textAlign="right">
+                            {trx.type === 'income' ? `Rp ${Number(trx.gross_amount).toLocaleString()}` : '-'}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right" color="red.500">
+                            {trx.type === 'income' && trx.discount_amount > 0 ? `-Rp ${Number(trx.discount_amount).toLocaleString()}` : '-'}
+                          </Table.Cell>
+                          <Table.Cell textAlign="right" fontWeight="bold" color={trx.type === 'income' ? 'green.600' : 'red.600'}>
+                            {trx.type === 'income' ? '+' : '-'} Rp {Number(trx.amount).toLocaleString()}
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Badge variant="outline">{trx.status}</Badge>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))
+                    )}
+                  </Table.Body>
+                </Table.Root>
               </Box>
             </Card.Body>
           </Card.Root>

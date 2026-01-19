@@ -10,6 +10,9 @@ interface OrderConfirmationState {
   orderId: number;
   orderNumber?: string;
   totalAmount: number;
+  discountAmount?: number;
+  grandTotal?: number;
+  couponCode?: string;
   items: CartItem[];
   formData: {
     checkout_name: string;
@@ -23,7 +26,10 @@ interface OrderConfirmationState {
 interface DisplayOrder {
   orderId: number;
   orderNumber: string;
-  totalAmount: number;
+  totalAmount: number; // This is subtotal
+  discountAmount: number;
+  grandTotal: number;
+  couponCode?: string;
   items: {
     product_name: string;
     quantity: number;
@@ -62,7 +68,10 @@ const OrderConfirmation: React.FC = () => {
         setOrder({
           orderId: state.orderId,
           orderNumber: state.orderNumber || `#${state.orderId}`,
-          totalAmount: state.totalAmount,
+          totalAmount: Number(state.totalAmount),
+          discountAmount: Number(state.discountAmount || 0),
+          grandTotal: Number(state.grandTotal || state.totalAmount),
+          couponCode: state.couponCode,
           items: state.items.map(item => ({
             product_name: item.product.name,
             quantity: item.quantity,
@@ -92,6 +101,9 @@ const OrderConfirmation: React.FC = () => {
             orderId: data.id,
             orderNumber: data.order_number,
             totalAmount: Number(data.total_amount),
+            discountAmount: Number(data.discount_amount || 0),
+            grandTotal: Number(data.grand_total || data.total_amount),
+            couponCode: data.coupon_code,
             items: data.items.map((item: any) => ({
               product_name: item.product_name, // Backend transforms this
               quantity: item.quantity,
@@ -236,10 +248,22 @@ const OrderConfirmation: React.FC = () => {
 
             <Box borderBottomWidth="1px" borderColor="#e2e8f0" />
 
-            <HStack justify="space-between">
-              <Heading size="sm" color="#000000">Total Pembayaran</Heading>
-              <Heading size="sm" color="#2c7a7b">Rp {order.totalAmount.toLocaleString('id-ID')}</Heading>
-            </HStack>
+            <VStack align="stretch" gap={1} color="#000000">
+              <HStack justify="space-between">
+                <Text>Subtotal</Text>
+                <Text>Rp {order.totalAmount.toLocaleString('id-ID')}</Text>
+              </HStack>
+              {order.discountAmount > 0 && (
+                <HStack justify="space-between" color="#2f855a">
+                  <Text>Diskon {order.couponCode ? `(${order.couponCode})` : ''}</Text>
+                  <Text>-Rp {order.discountAmount.toLocaleString('id-ID')}</Text>
+                </HStack>
+              )}
+              <HStack justify="space-between" pt={2}>
+                <Heading size="sm">Total Pembayaran</Heading>
+                <Heading size="sm" color="#2c7a7b">Rp {order.grandTotal.toLocaleString('id-ID')}</Heading>
+              </HStack>
+            </VStack>
 
             <Box bg="#f7fafc" p={3} borderRadius="md" mt={2} color="#000000">
               <Text fontWeight="bold" fontSize="sm">Metode Pembayaran: {order.paymentMethod === 'transfer' ? 'Transfer Bank' : 'Tunai'}</Text>

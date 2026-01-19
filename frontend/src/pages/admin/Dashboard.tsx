@@ -42,7 +42,7 @@ const Dashboard: React.FC = () => {
     return (
         <Box>
             <Heading mb={5}>Dashboard Overview</Heading>
-            
+
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap={5} mb={10}>
                 <StatCard label="Total Revenue" value={`Rp ${parseInt(data.stats.total_revenue.toString()).toLocaleString()}`} />
                 <StatCard label="Total Orders" value={data.stats.total_orders} />
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
                                     <Table.Row key={order.id}>
                                         <Table.Cell>{order.order_number}</Table.Cell>
                                         <Table.Cell>{order.checkout_name || order.phone_number}</Table.Cell>
-                                        <Table.Cell>Rp {parseInt(order.total_amount).toLocaleString()}</Table.Cell>
+                                        <Table.Cell>Rp {parseInt(order.grand_total || order.total_amount).toLocaleString()}</Table.Cell>
                                         <Table.Cell>
                                             <Badge colorPalette={getStatusColor(order.status)}>{order.status}</Badge>
                                         </Table.Cell>
@@ -91,11 +91,11 @@ const Dashboard: React.FC = () => {
                                 <Box key={status.status}>
                                     <Text mb={1} textTransform="capitalize">{status.status}</Text>
                                     <Box w="100%" bg="gray.100" h="2" borderRadius="full">
-                                        <Box 
-                                            bg="blue.500" 
-                                            h="2" 
-                                            borderRadius="full" 
-                                            width={`${(status.count / data.stats.total_orders) * 100}%`} 
+                                        <Box
+                                            bg="blue.500"
+                                            h="2"
+                                            borderRadius="full"
+                                            width={`${(status.count / data.stats.total_orders) * 100}%`}
                                         />
                                     </Box>
                                     <Text fontSize="xs" color="gray.500" mt={1}>{status.count} orders</Text>

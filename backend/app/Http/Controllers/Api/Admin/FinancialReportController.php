@@ -36,6 +36,8 @@ class FinancialReportController extends Controller
             ->whereDate('created_at', '<=', $endDate);
 
         $grossSales = $ordersQuery->sum('total_amount');
+        $totalDiscount = $ordersQuery->sum('discount_amount');
+        $netSales = $ordersQuery->sum('grand_total');
         $orders = $ordersQuery->get();
 
         $totalCOGS = 0;
@@ -52,7 +54,9 @@ class FinancialReportController extends Controller
                 'type' => 'income',
                 'category' => 'Sales',
                 'description' => 'Order #' . $order->order_number . ' (' . $order->checkout_name . ')',
-                'amount' => $order->total_amount,
+                'gross_amount' => $order->total_amount,
+                'discount_amount' => $order->discount_amount,
+                'amount' => $order->grand_total, // Net amount received
                 'status' => $order->status,
             ];
         }
@@ -78,8 +82,8 @@ class FinancialReportController extends Controller
             ];
         }
 
-        $grossProfit = $grossSales - $totalCOGS;
-        $netCashFlow = $grossSales - $totalVendorPayments;
+        $grossProfit = $netSales - $totalCOGS;
+        $netCashFlow = $netSales - $totalVendorPayments;
 
         $transactions = array_merge($incomeTransactions, $expenseTransactions);
 
@@ -95,6 +99,8 @@ class FinancialReportController extends Controller
             ],
             'summary' => [
                 'gross_sales' => $grossSales,
+                'total_discount' => $totalDiscount,
+                'net_sales' => $netSales,
                 'total_cogs' => $totalCOGS,
                 'gross_profit' => $grossProfit,
                 'total_vendor_payments' => $totalVendorPayments,

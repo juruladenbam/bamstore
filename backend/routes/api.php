@@ -34,6 +34,7 @@ Route::post('/history', [\App\Http\Controllers\Api\OrderHistoryController::class
 Route::get('/orders/{order}', [\App\Http\Controllers\Api\OrderController::class, 'show']);
 Route::get('/members/search', [\App\Http\Controllers\Api\MemberDataController::class, 'search']);
 Route::post('/checkout', [CheckoutController::class, 'store']);
+Route::post('/coupons/check', [\App\Http\Controllers\Api\CouponController::class, 'check']);
 Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index']);
 
 // Admin Auth

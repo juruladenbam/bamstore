@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Heading, Button, Badge, HStack, NativeSelect, Menu } from '@chakra-ui/react';
+import { Box, Heading, Button, Badge, HStack, NativeSelect, Menu, VStack, Text } from '@chakra-ui/react';
 import { FiChevronDown } from 'react-icons/fi';
 import client from '../../api/client';
 import type { Order } from '../../types';
@@ -116,7 +116,14 @@ const AdminOrderList: React.FC = () => {
     { header: 'Qobilah', accessorKey: 'qobilah' },
     {
       header: 'Total',
-      cell: (order) => `Rp ${Number(order.total_amount).toLocaleString()}`
+      cell: (order) => (
+        <VStack align="flex-end" gap={0}>
+          <Text fontWeight="bold">Rp {Number(order.grand_total || order.total_amount).toLocaleString()}</Text>
+          {Number(order.discount_amount) > 0 && (
+            <Text fontSize="2xs" color="red.500">Disc: -Rp {Number(order.discount_amount).toLocaleString()}</Text>
+          )}
+        </VStack>
+      )
     },
     {
       header: 'Status',

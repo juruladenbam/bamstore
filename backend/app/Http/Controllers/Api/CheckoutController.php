@@ -7,11 +7,19 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\ProductVariant;
 use App\Models\ProductSku;
+use App\Services\CouponService;
+use App\Exceptions\CouponException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class CheckoutController extends Controller
 {
+    protected $couponService;
+
+    public function __construct(CouponService $couponService)
+    {
+        $this->couponService = $couponService;
+    }
     /**
      * @OA\Post(
      *     path="/checkout",
@@ -69,6 +77,7 @@ class CheckoutController extends Controller
             'items.*.recipient_name' => 'required|string|max:255',
             'items.*.recipient_phone' => 'nullable|string|max:20',
             'items.*.recipient_qobilah' => 'nullable|string|max:255',
+            'coupon_code' => 'nullable|string',
         ]);
 
         try {
@@ -148,6 +157,19 @@ class CheckoutController extends Controller
                 ];
             }
 
+            $coupon = null;
+            $discountAmount = 0;
+
+            if (!empty($validated['coupon_code'])) {
+                $coupon = $this->couponService->validate(
+                    $validated['coupon_code'],
+                    $totalAmount,
+                    $validated['phone_number'],
+                    true // Lock for update
+                );
+                $discountAmount = $this->couponService->calculate($coupon, $totalAmount);
+            }
+
             $order = Order::create([
                 'checkout_name' => $validated['checkout_name'],
                 'phone_number' => $validated['phone_number'],
@@ -155,7 +177,20 @@ class CheckoutController extends Controller
                 'payment_method' => $validated['payment_method'],
                 'status' => 'new',
                 'total_amount' => $totalAmount,
+                'coupon_id' => $coupon ? $coupon->id : null,
+                'coupon_code' => $coupon ? $coupon->code : null,
+                'discount_amount' => $discountAmount,
+                'grand_total' => $totalAmount - $discountAmount,
             ]);
+
+            if ($coupon) {
+                \App\Models\CouponUsage::create([
+                    'coupon_id' => $coupon->id,
+                    'order_id' => $order->id,
+                    'user_identifier' => $validated['phone_number'],
+                    'discount_amount' => $discountAmount,
+                ]);
+            }
 
             foreach ($orderItemsToCreate as $itemData) {
                 $orderItem = $order->items()->create($itemData['data']);
@@ -194,9 +229,14 @@ class CheckoutController extends Controller
                 'message' => 'Order created successfully',
                 'order_id' => $order->id,
                 'order_number' => $order->order_number,
-                'total_amount' => $totalAmount
+                'total_amount' => $totalAmount,
+                'discount_amount' => $discountAmount,
+                'grand_total' => $order->grand_total
             ], 201);
 
+        } catch (CouponException $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Order creation failed', 'error' => $e->getMessage()], 500);

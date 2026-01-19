@@ -31,6 +31,13 @@ const Checkout: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [cashDescription, setCashDescription] = useState('Silakan bayar di Sekretariat.');
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount_amount: number;
+    final_total: number;
+  } | null>(null);
+  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
 
   useEffect(() => {
     client.get('/settings')
@@ -44,6 +51,18 @@ const Checkout: React.FC = () => {
       })
       .catch(err => console.error(err));
   }, []);
+
+  // Reset coupon if total changes
+  useEffect(() => {
+    if (appliedCoupon) {
+      removeCoupon();
+      toaster.create({
+        title: "Kupon dilepas",
+        description: "Keranjang belanja berubah, silakan masukkan kembali kode kupon jika masih ingin digunakan.",
+        type: "info",
+      });
+    }
+  }, [total]);
 
   // Auto-complete state
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -121,6 +140,46 @@ const Checkout: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  const checkCoupon = async () => {
+    if (!couponCode.trim()) return;
+
+    setIsCheckingCoupon(true);
+    try {
+      const res = await client.post('/coupons/check', {
+        code: couponCode,
+        cart_total: total,
+        phone_number: formData.phone_number
+      });
+
+      if (res.data.valid) {
+        setAppliedCoupon({
+          code: res.data.code,
+          discount_amount: res.data.discount_amount,
+          final_total: res.data.final_total
+        });
+        toaster.create({
+          title: "Berhasil",
+          description: `Kupon ${res.data.code} terpasang!`,
+          type: "success",
+        });
+      }
+    } catch (error: any) {
+      setAppliedCoupon(null);
+      toaster.create({
+        title: "Gagal pasang kupon",
+        description: error.response?.data?.message || "Terjadi kesalahan",
+        type: "error",
+      });
+    } finally {
+      setIsCheckingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+  };
+
   const handleConfirmOrder = async () => {
     setLoading(true);
     try {
@@ -134,7 +193,8 @@ const Checkout: React.FC = () => {
           recipient_name: item.recipient_name === 'Myself' ? formData.checkout_name : item.recipient_name,
           recipient_phone: (item.recipient_name === 'Myself' || item.recipient_name === formData.checkout_name) ? formData.phone_number : (item.recipient_phone || null),
           recipient_qobilah: (item.recipient_name === 'Myself' || item.recipient_name === formData.checkout_name) ? formData.qobilah : (item.recipient_qobilah || null),
-        }))
+        })),
+        coupon_code: appliedCoupon ? appliedCoupon.code : null
       };
 
       const res = await client.post('/checkout', payload);
@@ -150,6 +210,9 @@ const Checkout: React.FC = () => {
           orderId: res.data.order_id,
           orderNumber: res.data.order_number,
           totalAmount: res.data.total_amount,
+          discountAmount: res.data.discount_amount,
+          grandTotal: res.data.grand_total,
+          couponCode: appliedCoupon ? appliedCoupon.code : null,
           items: items,
           formData: formData,
           settings: {
@@ -200,7 +263,44 @@ const Checkout: React.FC = () => {
             );
           })}
           <Separator my={4} />
-          <Text fontSize="xl" fontWeight="bold" textAlign="right">Total: Rp {total.toLocaleString()}</Text>
+          {appliedCoupon && (
+            <VStack align="stretch" gap={1} mb={2}>
+              <Stack direction="row" justify="space-between">
+                <Text>Subtotal</Text>
+                <Text>Rp {total.toLocaleString()}</Text>
+              </Stack>
+              <Stack direction="row" justify="space-between" color="green.600">
+                <Box>
+                  <Text as="span">Diskon ({appliedCoupon.code})</Text>
+                  <Button size="xs" variant="ghost" colorPalette="red" ml={2} h="auto" p={0} onClick={removeCoupon}>Hapus</Button>
+                </Box>
+                <Text>-Rp {appliedCoupon.discount_amount.toLocaleString()}</Text>
+              </Stack>
+            </VStack>
+          )}
+          <Text fontSize="xl" fontWeight="bold" textAlign="right">
+            Total Bayar: Rp {(appliedCoupon ? appliedCoupon.final_total : total).toLocaleString()}
+          </Text>
+        </Box>
+
+        <Box borderWidth="1px" borderRadius="lg" p={4}>
+          <Heading size="md" mb={4}>Kupon Diskon</Heading>
+          <Stack direction="row">
+            <Input
+              placeholder="Masukkan kode kupon"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              disabled={!!appliedCoupon}
+            />
+            <Button
+              colorPalette="teal"
+              onClick={checkCoupon}
+              loading={isCheckingCoupon}
+              disabled={!!appliedCoupon || !couponCode.trim()}
+            >
+              Apply
+            </Button>
+          </Stack>
         </Box>
 
         <Box borderWidth="1px" borderRadius="lg" p={4}>
@@ -381,8 +481,20 @@ const Checkout: React.FC = () => {
                   </VStack>
                   <Separator mb={2} borderColor="gray.300" />
                   <Stack direction="row" justify="space-between">
+                    <Text>Subtotal</Text>
+                    <Text>Rp {total.toLocaleString()}</Text>
+                  </Stack>
+                  {appliedCoupon && (
+                    <Stack direction="row" justify="space-between" color="green.600" fontSize="sm">
+                      <Text>Diskon ({appliedCoupon.code})</Text>
+                      <Text>-Rp {appliedCoupon.discount_amount.toLocaleString()}</Text>
+                    </Stack>
+                  )}
+                  <Stack direction="row" justify="space-between" pt={1}>
                     <Text fontWeight="bold">Total Pembayaran</Text>
-                    <Text fontWeight="bold" color="teal.600">Rp {total.toLocaleString()}</Text>
+                    <Text fontWeight="bold" color="teal.600">
+                      Rp {(appliedCoupon ? appliedCoupon.final_total : total).toLocaleString()}
+                    </Text>
                   </Stack>
                 </Box>
 

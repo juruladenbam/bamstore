@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. Overview Stats
-        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_amount');
+        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('grand_total');
         $totalOrders = Order::count();
         $totalProducts = Product::count();
         // Count unique customers based on phone_number
@@ -29,7 +29,7 @@ class DashboardController extends Controller
         // 3. Sales Chart (Last 30 days)
         $salesData = Order::select(
                 DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_amount) as total')
+                DB::raw('SUM(grand_total) as total')
             )
             ->where('status', '!=', 'cancelled')
             ->where('created_at', '>=', Carbon::now()->subDays(30))

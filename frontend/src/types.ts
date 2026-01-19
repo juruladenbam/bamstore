@@ -86,6 +86,10 @@ export interface Order {
   payment_method: 'transfer' | 'cash';
   status: string;
   total_amount: number;
+  discount_amount?: number;
+  grand_total?: number;
+  coupon_code?: string;
+  coupon_id?: number;
   created_at: string;
   items?: OrderItem[];
 }
