@@ -124,60 +124,60 @@ const ShareActivityDrawer: React.FC<ShareActivityDrawerProps> = ({ isOpen, onClo
 
     const generateByQobilahText = (data: ExportData): string => {
         const lines: string[] = [
-            '📊 *REKAP PESANAN TERBARU*',
-            `🔗 Detail: ${activityUrl}`,
-            `📅 Per tanggal: ${data.summary.export_date}`,
+            '\u{1F4CA} *REKAP PESANAN TERBARU*',
+            `\u{1F517} Detail: ${activityUrl}`,
+            `\u{1F4C5} Per tanggal: ${data.summary.export_date}`,
             '',
-            '━━━━━━━━━━━━━━━━━━━━━━━━',
+            '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
             '',
         ];
 
         data.by_qobilah.forEach((group) => {
-            lines.push(`📌 *${group.name}* (${group.total_orders} pesanan)`);
-            lines.push('────────────────────────');
+            lines.push(`\u{1F4CC} *${group.name}* (${group.total_orders} pesanan)`);
+            lines.push('\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500');
 
             group.items.forEach((item) => {
-                const statusIcon = item.status === 'paid' ? '✅' : '⏳';
+                const statusIcon = item.status === 'paid' ? '\u2705' : '\u23F3';
                 const variantText = item.variants ? ` - ${item.variants}` : '';
-                lines.push(`• ${item.recipient_name}`);
+                lines.push(`\u2022 ${item.recipient_name}`);
                 lines.push(`  ${item.product_name}${variantText} (${item.quantity}x) ${statusIcon}`);
             });
 
             lines.push('');
         });
 
-        lines.push('━━━━━━━━━━━━━━━━━━━━━━━━');
+        lines.push('\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501');
         lines.push(`Total: ${data.summary.total_orders} pesanan`);
-        lines.push(`✅ Lunas: ${data.summary.total_paid} | ⏳ Belum Lunas: ${data.summary.total_unpaid}`);
+        lines.push(`\u2705 Lunas: ${data.summary.total_paid} | \u23F3 Belum Lunas: ${data.summary.total_unpaid}`);
 
         return lines.join('\n');
     };
 
     const generateByVariantText = (data: ExportData): string => {
         const lines: string[] = [
-            '📊 *REKAP PESANAN BY VARIAN*',
-            `🔗 Detail: ${activityUrl}`,
-            `📅 Per tanggal: ${data.summary.export_date}`,
+            '\u{1F4CA} *REKAP PESANAN BY VARIAN*',
+            `\u{1F517} Detail: ${activityUrl}`,
+            `\u{1F4C5} Per tanggal: ${data.summary.export_date}`,
             '',
-            '━━━━━━━━━━━━━━━━━━━━━━━━',
+            '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501',
             '',
         ];
 
         data.by_variant.forEach((group) => {
-            lines.push(`🏷️ *${group.sku}* (${group.total_quantity} pcs)`);
-            lines.push('────────────────────────');
+            lines.push(`\u{1F3F7}\uFE0F *${group.sku}* (${group.total_quantity} pcs)`);
+            lines.push('\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500');
 
             group.items.forEach((item) => {
-                const statusIcon = item.status === 'paid' ? '✅' : '⏳';
-                lines.push(`• ${item.recipient_name} (${item.quantity}x) ${statusIcon}`);
+                const statusIcon = item.status === 'paid' ? '\u2705' : '\u23F3';
+                lines.push(`\u2022 ${item.recipient_name} (${item.quantity}x) ${statusIcon}`);
             });
 
             lines.push('');
         });
 
-        lines.push('━━━━━━━━━━━━━━━━━━━━━━━━');
+        lines.push('\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501');
         lines.push(`Total: ${data.summary.total_quantity} pcs dari ${data.summary.total_orders} pesanan`);
-        lines.push(`✅ Lunas: ${data.summary.total_paid} | ⏳ Belum Lunas: ${data.summary.total_unpaid}`);
+        lines.push(`\u2705 Lunas: ${data.summary.total_paid} | \u23F3 Belum Lunas: ${data.summary.total_unpaid}`);
 
         return lines.join('\n');
     };
