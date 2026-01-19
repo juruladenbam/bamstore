@@ -28,6 +28,7 @@ Route::get('/user', function (Request $request) {
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/order-activity/export', [\App\Http\Controllers\Api\OrderActivityController::class, 'export']);
 Route::get('/order-activity', [\App\Http\Controllers\Api\OrderActivityController::class, 'index']);
 Route::post('/history', [\App\Http\Controllers\Api\OrderHistoryController::class, 'index']);
 Route::get('/orders/{order}', [\App\Http\Controllers\Api\OrderController::class, 'show']);

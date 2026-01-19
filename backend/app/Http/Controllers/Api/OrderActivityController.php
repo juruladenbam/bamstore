@@ -48,10 +48,107 @@ class OrderActivityController extends Controller
                 'variants' => $item->variants->pluck('name')->join(', '),
                 'quantity' => $item->quantity,
                 'date' => $item->created_at->diffForHumans(),
-                'status' => $item->order->status
+                'status' => $item->order->status,
+                'qobilah' => $item->order->qobilah,
             ];
         });
 
         return response()->json($data);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/order-activity/export",
+     *     summary="Get order activity data for sharing",
+     *     tags={"Orders"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="items", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="by_qobilah", type="object"),
+     *             @OA\Property(property="by_variant", type="object"),
+     *             @OA\Property(property="summary", type="object")
+     *         )
+     *     )
+     * )
+     */
+    public function export(Request $request)
+    {
+        $items = OrderItem::with(['product', 'variants', 'order'])
+            ->whereHas('order', function($q) {
+                $q->where('status', '!=', 'cancelled');
+            })
+            ->latest()
+            ->limit(50)
+            ->get();
+
+        // Map items to structured data
+        $mappedItems = $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'recipient_name' => $item->recipient_name,
+                'product_name' => $item->product->name,
+                'variants' => $item->variants->pluck('name')->join(', '),
+                'sku' => $item->product->name . ($item->variants->count() > 0 ? ' - ' . $item->variants->pluck('name')->join(', ') : ''),
+                'quantity' => $item->quantity,
+                'date' => $item->created_at->format('Y-m-d H:i'),
+                'status' => $item->order->status,
+                'qobilah' => $item->order->qobilah ?? 'Tidak Ada Qobilah',
+            ];
+        });
+
+        // Group by Qobilah
+        $byQobilah = $mappedItems->groupBy('qobilah')->map(function ($groupItems, $qobilahName) {
+            return [
+                'name' => $qobilahName,
+                'total_orders' => $groupItems->count(),
+                'total_paid' => $groupItems->where('status', 'paid')->count(),
+                'total_unpaid' => $groupItems->where('status', '!=', 'paid')->count(),
+                'items' => $groupItems->map(function ($item) {
+                    return [
+                        'recipient_name' => $item['recipient_name'],
+                        'product_name' => $item['product_name'],
+                        'variants' => $item['variants'],
+                        'quantity' => $item['quantity'],
+                        'status' => $item['status'],
+                    ];
+                })->values(),
+            ];
+        })->values();
+
+        // Group by Variant/SKU
+        $byVariant = $mappedItems->groupBy('sku')->map(function ($groupItems, $skuName) {
+            return [
+                'sku' => $skuName,
+                'total_quantity' => $groupItems->sum('quantity'),
+                'total_orders' => $groupItems->count(),
+                'total_paid' => $groupItems->where('status', 'paid')->count(),
+                'total_unpaid' => $groupItems->where('status', '!=', 'paid')->count(),
+                'items' => $groupItems->map(function ($item) {
+                    return [
+                        'recipient_name' => $item['recipient_name'],
+                        'quantity' => $item['quantity'],
+                        'status' => $item['status'],
+                    ];
+                })->values(),
+            ];
+        })->values();
+
+        // Calculate summary
+        $summary = [
+            'total_orders' => $mappedItems->count(),
+            'total_paid' => $mappedItems->where('status', 'paid')->count(),
+            'total_unpaid' => $mappedItems->where('status', '!=', 'paid')->count(),
+            'total_quantity' => $mappedItems->sum('quantity'),
+            'export_date' => now()->format('d F Y'),
+        ];
+
+        return response()->json([
+            'items' => $mappedItems,
+            'by_qobilah' => $byQobilah,
+            'by_variant' => $byVariant,
+            'summary' => $summary,
+        ]);
     }
 }
