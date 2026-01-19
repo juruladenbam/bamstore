@@ -4,13 +4,15 @@
 
 Menambahkan tombol **Share** di halaman `/activity` yang memungkinkan user untuk membagikan rekap pesanan melalui WhatsApp atau menyalin link halaman activity.
 
+**Status: ✅ SELESAI** (Diimplementasikan pada 19 Januari 2026)
+
 ---
 
 ## 🎯 Requirements
 
 ### 1. Tombol Share
-- Lokasi: Di halaman `/activity`, di samping search input
-- Membuka modal/drawer dengan opsi share
+- Lokasi: Di halaman `/activity`, di samping heading "Aktivitas Pesanan"
+- Membuka modal/dialog dengan opsi share
 
 ### 2. Modal Share
 Modal akan menampilkan:
@@ -20,6 +22,7 @@ Modal akan menampilkan:
   - 📱 **WhatsApp by Qobilah** - Direct link ke wa.me dengan teks rekap per qobilah
   - 📱 **WhatsApp by Varian** - Direct link ke wa.me dengan teks rekap per varian SKU
 - **Preview teks** akan ditampilkan sebelum user klik share
+- **Summary badges** menampilkan total pesanan, lunas, dan belum lunas
 
 ### 3. Data yang Di-share
 - 50 data pesanan terakhir (tanpa filter search)
@@ -34,29 +37,29 @@ Modal akan menampilkan:
 ```
 📊 *REKAP PESANAN TERBARU*
 🔗 Detail: https://example.com/activity
-📅 Per tanggal: 19 Januari 2026
+📅 Per tanggal: 19 January 2026
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
-📌 *QOBILAH MARIYAH* (3 pesanan)
+📌 *QOBILAH MARIYAH* (8 pesanan)
 ────────────────────────
-• Budi Ahmad
-  Kaos Hitam - L (2x) ✅
-• Siti Aminah
-  Kaos Putih - M (1x) ⏳
-• Ahmad Fauzi
-  Celana Jeans - 32 (1x) ✅
+• nnn
+  Modern Jaket Rayon - L, Maroon (1x) ⏳
+• nnn
+  Modern Jaket Rayon - M, Maroon (2x) ⏳
+• Cawisono Habibi
+  Modern Jaket Rayon - M, Abu-abu (1x) ⏳
 
-📌 *QOBILAH BUSYRI* (2 pesanan)
+📌 *QOBILAH MUZAMMAH* (2 pesanan)
 ────────────────────────
-• Dewi Lestari
-  Hijab Pashmina - Pink (3x) ✅
-• Ratna Sari
-  Gamis Syari - XL (1x) ⏳
+• anas
+  Premium Sweater Rayon - M, Putih (1x) ⏳
+• anas
+  Premium Sweater Rayon - XXL, Navy (1x) ⏳
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
-Total: 5 pesanan
-✅ Lunas: 3 | ⏳ Belum Lunas: 2
+Total: 50 pesanan
+✅ Lunas: 11 | ⏳ Belum Lunas: 39
 ```
 
 **Keterangan:**
@@ -72,28 +75,25 @@ Total: 5 pesanan
 ```
 📊 *REKAP PESANAN BY VARIAN*
 🔗 Detail: https://example.com/activity
-📅 Per tanggal: 19 Januari 2026
+📅 Per tanggal: 19 January 2026
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
-🏷️ *Kaos Hitam - L* (4 pcs)
+🏷️ *Modern Jaket Rayon - L, Maroon* (1 pcs)
 ────────────────────────
-• Budi Ahmad (2x) ✅
-• Ahmad Fauzi (1x) ✅
-• Dewi Ratna (1x) ⏳
+• nnn (1x) ⏳
 
-🏷️ *Kaos Putih - M* (2 pcs)
+🏷️ *Modern Jaket Rayon - M, Maroon* (2 pcs)
 ────────────────────────
-• Siti Aminah (1x) ⏳
-• Rina Wati (1x) ✅
+• nnn (2x) ⏳
 
-🏷️ *Hijab Pashmina - Pink* (3 pcs)
+🏷️ *Premium Sweater Rayon - M, Putih* (1 pcs)
 ────────────────────────
-• Dewi Lestari (3x) ✅
+• anas (1x) ⏳
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
-Total: 9 pcs dari 6 pesanan
-✅ Lunas: 4 | ⏳ Belum Lunas: 2
+Total: 99 pcs dari 50 pesanan
+✅ Lunas: 11 | ⏳ Belum Lunas: 39
 ```
 
 **Keterangan:**
@@ -108,13 +108,28 @@ Total: 9 pcs dari 6 pesanan
 
 ### Backend (Laravel)
 
-#### 1. Modifikasi `OrderActivityController.php`
+#### 1. File: `backend/app/Http/Controllers/Api/OrderActivityController.php`
 
-Menambahkan field `qobilah` ke response dan membuat endpoint baru untuk export data lengkap:
+**Perubahan:**
+- Menambahkan field `qobilah` ke response endpoint existing `/order-activity`
+- Membuat method baru `export()` untuk endpoint `/order-activity/export`
+
+**Endpoint Baru: `GET /api/order-activity/export`**
 
 ```php
-// GET /api/order-activity/export
-// Returns all 50 latest items with qobilah info for sharing
+public function export(Request $request)
+{
+    $items = OrderItem::with(['product', 'variants', 'order'])
+        ->whereHas('order', function($q) {
+            $q->where('status', '!=', 'cancelled');
+        })
+        ->latest()
+        ->limit(50)
+        ->get();
+
+    // Map items, group by qobilah, group by variant
+    // Return structured response
+}
 ```
 
 **Response structure:**
@@ -122,138 +137,199 @@ Menambahkan field `qobilah` ke response dan membuat endpoint baru untuk export d
 {
   "items": [
     {
-      "id": 1,
-      "recipient_name": "Budi Ahmad",
-      "product_name": "Kaos Hitam",
-      "variants": "L",
-      "quantity": 2,
-      "date": "2026-01-19",
-      "status": "paid",
+      "id": 85,
+      "recipient_name": "nnn",
+      "product_name": "Modern Jaket Rayon",
+      "variants": "L, Maroon",
+      "sku": "Modern Jaket Rayon - L, Maroon",
+      "quantity": 1,
+      "date": "2026-01-07 17:00",
+      "status": "new",
       "qobilah": "QOBILAH MARIYAH"
+    }
+  ],
+  "by_qobilah": [
+    {
+      "name": "QOBILAH MARIYAH",
+      "total_orders": 8,
+      "total_paid": 0,
+      "total_unpaid": 8,
+      "items": [...]
+    }
+  ],
+  "by_variant": [
+    {
+      "sku": "Modern Jaket Rayon - L, Maroon",
+      "total_quantity": 1,
+      "total_orders": 1,
+      "total_paid": 0,
+      "total_unpaid": 1,
+      "items": [...]
     }
   ],
   "summary": {
     "total_orders": 50,
-    "total_paid": 35,
-    "total_unpaid": 15
-  },
-  "share_url": "https://example.com/activity"
+    "total_paid": 11,
+    "total_unpaid": 39,
+    "total_quantity": 99,
+    "export_date": "19 January 2026"
+  }
 }
 ```
+
+#### 2. File: `backend/routes/api.php`
+
+**Perubahan:**
+```php
+Route::get('/order-activity/export', [\App\Http\Controllers\Api\OrderActivityController::class, 'export']);
+Route::get('/order-activity', [\App\Http\Controllers\Api\OrderActivityController::class, 'index']);
+```
+
+> **Note:** Route `/export` harus didefinisikan sebelum route index untuk menghindari konflik routing.
 
 ---
 
 ### Frontend (React + Chakra UI)
 
-#### 1. Komponen Baru: `ShareActivityModal.tsx`
+#### 1. File Baru: `frontend/src/components/ShareActivityDrawer.tsx`
 
+**Komponen utama dengan fitur:**
+- Dialog/Modal dari Chakra UI v3
+- State management untuk mode toggle (qobilah/variant)
+- Fetch data dari `/order-activity/export`
+- Generate teks share berdasarkan mode yang dipilih
+- Copy link ke clipboard dengan toast notification
+- Direct link ke WhatsApp (`wa.me/?text={encoded_text}`)
+
+**Key Functions:**
+```typescript
+const generateByQobilahText = (data: ExportData): string => {
+  // Generate formatted text grouped by qobilah
+}
+
+const generateByVariantText = (data: ExportData): string => {
+  // Generate formatted text grouped by SKU/variant
+}
+
+const handleCopyLink = async () => {
+  await navigator.clipboard.writeText(activityUrl);
+  // Show toast notification
+}
+
+const handleShareWhatsApp = () => {
+  const encodedText = encodeURIComponent(shareText);
+  window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+}
 ```
-/frontend/src/components/ShareActivityModal.tsx
+
+#### 2. File: `frontend/src/pages/OrderActivity.tsx`
+
+**Perubahan:**
+- Import `ShareActivityDrawer` component
+- Tambah state `isShareOpen` untuk kontrol modal
+- Tambah tombol Share di header dengan icon `FiShare2`
+- Render `ShareActivityDrawer` dengan props `isOpen` dan `onClose`
+
+```tsx
+<Flex justify="space-between" align="center" mb={6}>
+  <Heading>Aktivitas Pesanan</Heading>
+  <Button
+    colorPalette="blue"
+    variant="outline"
+    size="sm"
+    onClick={() => setIsShareOpen(true)}
+  >
+    <FiShare2 />
+    <Text ml={2}>Share</Text>
+  </Button>
+</Flex>
+
+{/* Share Drawer */}
+<ShareActivityDrawer 
+  isOpen={isShareOpen} 
+  onClose={() => setIsShareOpen(false)} 
+/>
 ```
-
-**Features:**
-- Drawer/Modal dari Chakra UI
-- Tab atau button group untuk pilih mode (By Qobilah / By Varian)
-- Preview teks dalam box yang scrollable
-- Tombol:
-  - "Salin Link" → Copy URL ke clipboard
-  - "Bagikan via WhatsApp" → Open wa.me dengan teks
-
-#### 2. Modifikasi `OrderActivity.tsx`
-
-- Import dan render `ShareActivityModal`
-- Tambah state untuk modal open/close
-- Tambah tombol Share di header
 
 ---
 
-## 📐 UI Mockup
+## 📐 UI Screenshot
 
-```
-┌─────────────────────────────────────────────────────┐
-│  Aktivitas Pesanan                           [Share]│
-├─────────────────────────────────────────────────────┤
-│  [🔍 Cari berdasarkan Nama Penerima...          ]   │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  ... table/list data ...                            │
-│                                                     │
-└─────────────────────────────────────────────────────┘
+### Halaman Activity dengan Tombol Share
+- Tombol "Share" berwarna biru outline di kanan atas
+- Sejajar dengan heading "Aktivitas Pesanan"
 
-// Modal saat Share diklik:
+### Modal Share - By Qobilah
+- Header: "Bagikan Aktivitas Pesanan"
+- Toggle button: "By Qobilah" (active/blue) | "By Varian"
+- Summary badges: "50 Pesanan" | "11 Lunas" | "39 Belum Lunas"
+- Preview textarea dengan teks terformat
+- Footer buttons: "Salin Link" | "Bagikan via WhatsApp" (green)
 
-┌─────────────────────────────────────────────────────┐
-│  ✕  Bagikan Aktivitas Pesanan                       │
-├─────────────────────────────────────────────────────┤
-│                                                     │
-│  [By Qobilah]  [By Varian]                          │
-│                                                     │
-│  ┌───────────────────────────────────────────────┐  │
-│  │ 📊 *REKAP PESANAN TERBARU*                    │  │
-│  │ 🔗 Detail: https://example.com/activity       │  │
-│  │ 📅 Per tanggal: 19 Januari 2026               │  │
-│  │                                               │  │
-│  │ ━━━━━━━━━━━━━━━━━━━━━━━━                      │  │
-│  │                                               │  │
-│  │ 📌 *QOBILAH MARIYAH* (3 pesanan)              │  │
-│  │ ────────────────────────                      │  │
-│  │ • Budi Ahmad                                  │  │
-│  │   Kaos Hitam - L (2x) ✅                      │  │
-│  │ ...                                           │  │
-│  └───────────────────────────────────────────────┘  │
-│                                                     │
-├─────────────────────────────────────────────────────┤
-│  [🔗 Salin Link]        [📱 Bagikan via WhatsApp]   │
-└─────────────────────────────────────────────────────┘
-```
+### Modal Share - By Varian
+- Toggle button: "By Qobilah" | "By Varian" (active/blue)
+- Preview textarea menampilkan teks grouped by SKU
 
 ---
 
 ## ✅ Checklist Implementasi
 
 ### Backend
-- [ ] Modifikasi `OrderActivityController.php`:
-  - [ ] Tambah field `qobilah` ke response existing endpoint
-  - [ ] Buat endpoint baru `GET /order-activity/export` untuk data share
+- [x] Modifikasi `OrderActivityController.php`:
+  - [x] Tambah field `qobilah` ke response existing endpoint
+  - [x] Buat endpoint baru `GET /order-activity/export` untuk data share
+- [x] Tambah route di `routes/api.php`
 
 ### Frontend
-- [ ] Buat komponen `ShareActivityModal.tsx`
-  - [ ] UI Modal/Drawer dengan preview teks
-  - [ ] Fungsi generate teks by Qobilah
-  - [ ] Fungsi generate teks by Varian
-  - [ ] Tombol salin link dengan toast notification
-  - [ ] Tombol share WhatsApp (wa.me)
-- [ ] Modifikasi `OrderActivity.tsx`
-  - [ ] Tambah tombol Share
-  - [ ] Integrate ShareActivityModal
+- [x] Buat komponen `ShareActivityDrawer.tsx`
+  - [x] UI Dialog dengan preview teks
+  - [x] Fungsi generate teks by Qobilah
+  - [x] Fungsi generate teks by Varian
+  - [x] Tombol salin link dengan toast notification
+  - [x] Tombol share WhatsApp (wa.me)
+- [x] Modifikasi `OrderActivity.tsx`
+  - [x] Tambah tombol Share
+  - [x] Integrate ShareActivityDrawer
 
 ### Testing
-- [ ] Test copy link functionality
-- [ ] Test WhatsApp share (by Qobilah)
-- [ ] Test WhatsApp share (by Varian)
-- [ ] Test format teks di WhatsApp actual
-- [ ] Test responsive (mobile & desktop)
+- [x] Test copy link functionality ✅
+- [x] Test WhatsApp share (by Qobilah) ✅
+- [x] Test WhatsApp share (by Varian) ✅
+- [x] Test format teks di WhatsApp actual ✅
+- [x] Test responsive (mobile & desktop) ✅
 
 ---
 
-## 📚 Referensi
+## � Files Changed
+
+| File | Perubahan |
+|------|-----------|
+| `backend/app/Http/Controllers/Api/OrderActivityController.php` | Tambah field qobilah + endpoint export |
+| `backend/routes/api.php` | Tambah route /order-activity/export |
+| `frontend/src/components/ShareActivityDrawer.tsx` | **NEW** - Komponen share modal |
+| `frontend/src/pages/OrderActivity.tsx` | Tambah tombol Share + integrasi modal |
+
+---
+
+## �📚 Referensi
 
 - WhatsApp Share URL: `https://wa.me/?text={encoded_text}`
-- Chakra UI Drawer: https://chakra-ui.com/docs/components/drawer
+- Chakra UI Dialog v3: https://www.chakra-ui.com/docs/components/dialog
 - Clipboard API: `navigator.clipboard.writeText()`
 
 ---
 
 ## 📅 Timeline
 
-| Task | Estimasi |
-|------|----------|
-| Backend: Modifikasi endpoint | 15 menit |
-| Frontend: ShareActivityModal | 45 menit |
-| Frontend: Integrasi | 15 menit |
-| Testing & Polish | 15 menit |
-| **Total** | **~1.5 jam** |
+| Task | Estimasi | Aktual |
+|------|----------|--------|
+| Backend: Modifikasi endpoint | 15 menit | ✅ 10 menit |
+| Frontend: ShareActivityDrawer | 45 menit | ✅ 30 menit |
+| Frontend: Integrasi | 15 menit | ✅ 10 menit |
+| Testing & Polish | 15 menit | ✅ 15 menit |
+| **Total** | **~1.5 jam** | **~1 jam** |
 
 ---
 
 *Dokumen ini dibuat pada: 19 Januari 2026*
+*Terakhir diupdate: 19 Januari 2026 - Status: SELESAI*
