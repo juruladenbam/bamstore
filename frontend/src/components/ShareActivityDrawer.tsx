@@ -134,13 +134,10 @@ const ShareActivityDrawer: React.FC<ShareActivityDrawerProps> = ({ isOpen, onClo
 
         data.by_qobilah.forEach((group) => {
             lines.push(`>> *${group.name}* (${group.total_orders} pesanan)`);
-            lines.push('------------------------');
 
             group.items.forEach((item) => {
-                const statusIcon = item.status === 'paid' ? '[LUNAS]' : '[BELUM]';
-                const variantText = item.variants ? ` - ${item.variants}` : '';
-                lines.push(`- ${item.recipient_name}`);
-                lines.push(`  ${item.product_name}${variantText} (${item.quantity}x) ${statusIcon}`);
+                const status = item.status === 'paid' ? 'LUNAS' : 'BELUM';
+                lines.push(`- ${item.recipient_name} [${status}]`);
             });
 
             lines.push('');
