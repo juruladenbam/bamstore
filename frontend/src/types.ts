@@ -37,6 +37,12 @@ export interface ProductImage {
   sort_order: number;
 }
 
+export interface ProductCost {
+  id: number;
+  product_id: number;
+  cost: number;
+}
+
 export interface Product {
   id: number;
   category_id: number;
@@ -52,6 +58,7 @@ export interface Product {
   vendor?: Vendor;
   variants?: ProductVariant[];
   skus?: ProductSku[];
+  cost?: ProductCost;
 }
 
 export interface CartItem {

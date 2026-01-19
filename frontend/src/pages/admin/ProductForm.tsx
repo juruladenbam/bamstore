@@ -1,21 +1,21 @@
-import React, { useEffect, useState }                                                            from 'react';
-import { useNavigate, useParams }                                                                from 'react-router-dom';
-import { Box, Heading, Input, Button, VStack, HStack, Text, Textarea, NativeSelect }             from '@chakra-ui/react';
-import client                                                                                    from '../../api/client';
-import { STORAGE_URL }                                                                           from '../../config';
-import type { Category, ProductVariant, ProductSku, Vendor }                                     from '../../types';
-import { toaster }                                                                               from '../../components/ui/toaster';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Heading, Input, Button, VStack, HStack, Text, Textarea, NativeSelect } from '@chakra-ui/react';
+import client from '../../api/client';
+import { STORAGE_URL } from '../../config';
+import type { Category, ProductVariant, ProductSku, Vendor } from '../../types';
+import { toaster } from '../../components/ui/toaster';
 
 const formatNumber = (num: number | string) => {
   if (num === '' || num === null || num === undefined) return '';
   if (num === '-') return '-';
-  
+
   const str = num.toString();
   const isNegative = str.startsWith('-');
   const clean = str.replace(/\D/g, '');
-  
+
   if (clean === '') return isNegative ? '-' : '';
-  
+
   const formatted = Number(clean).toLocaleString('id-ID');
   return isNegative ? '-' + formatted : formatted;
 };
@@ -43,6 +43,7 @@ const ProductForm: React.FC = () => {
     name: '',
     description: '',
     base_price: '' as string | number,
+    cost: '' as string | number, // New field for HPP
     stock: '' as string | number,
     simple_sku: '', // SKU for simple products
     status: 'ready',
@@ -55,7 +56,7 @@ const ProductForm: React.FC = () => {
   useEffect(() => {
     client.get('/categories').then(res => setCategories(res.data));
     client.get('/admin/vendors').then(res => setVendors(res.data));
-    
+
     if (isEdit) {
       client.get(`/admin/products/${id}`).then(res => {
         const p = res.data;
@@ -99,6 +100,7 @@ const ProductForm: React.FC = () => {
           status: p.status,
           category_id: p.category_id.toString(),
           vendor_id: p.vendor_id ? p.vendor_id.toString() : '',
+          cost: p.cost ? formatNumber(Math.floor(Number(p.cost.cost))) : '',
           variants,
           skus
         });
@@ -109,7 +111,7 @@ const ProductForm: React.FC = () => {
   const handleProductTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const type = e.target.value as 'simple' | 'variable';
     setProductType(type);
-    
+
     if (type === 'simple') {
       // Clear variants when switching to simple
       setFormData(prev => ({ ...prev, variants: [], skus: [] }));
@@ -174,7 +176,7 @@ const ProductForm: React.FC = () => {
     };
 
     const combinations = cartesian(types.map(t => variantsByType[t]));
-    
+
     const newSkus = combinations.map(indices => {
       // Check if this combination already exists (Exact Match)
       const existingSku = formData.skus.find(s => {
@@ -240,13 +242,13 @@ const ProductForm: React.FC = () => {
   const handleSkuVariantChange = (skuIndex: number, type: string, variantIndex: number) => {
     const newSkus = [...formData.skus];
     const currentIndices = newSkus[skuIndex].variant_indices;
-    
+
     // Remove existing index for this type
     const filteredIndices = currentIndices.filter(i => {
       const v = formData.variants[i];
       return (v?.type || 'General') !== type;
     });
-    
+
     // Add new index
     newSkus[skuIndex].variant_indices = [...filteredIndices, variantIndex];
     setFormData({ ...formData, skus: newSkus });
@@ -292,7 +294,7 @@ const ProductForm: React.FC = () => {
       if (validFiles.length > 0) {
         setImages(prev => [...prev, ...validFiles]);
       }
-      
+
       // Reset input so the same file can be selected again if needed
       e.target.value = '';
     }
@@ -363,7 +365,7 @@ const ProductForm: React.FC = () => {
       if (formData.variants.length === 0) {
         // If editing, try to find the existing default SKU (one with no variants)
         const existingDefaultSku = formData.skus.find(s => s.variant_indices.length === 0);
-        
+
         skusPayload = [{
           id: existingDefaultSku?.id,
           variant_indices: [],
@@ -378,6 +380,7 @@ const ProductForm: React.FC = () => {
         category_id: Number(formData.category_id),
         vendor_id: formData.vendor_id ? Number(formData.vendor_id) : null,
         base_price: parseNumber(formData.base_price.toString()),
+        cost: formData.cost ? parseNumber(formData.cost.toString()) : null,
         variants: formData.variants.map(v => ({
           ...v,
           type: v.type || 'General',
@@ -388,11 +391,11 @@ const ProductForm: React.FC = () => {
 
       const formDataObj = new FormData();
       formDataObj.append('payload', JSON.stringify(payload));
-      
+
       images.forEach((file) => {
         formDataObj.append('images[]', file);
       });
-      
+
       deletedImages.forEach((id) => {
         formDataObj.append('deleted_images[]', id.toString());
       });
@@ -434,7 +437,7 @@ const ProductForm: React.FC = () => {
         if (err.response.data.errors) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const rawErrors = Object.values(err.response.data.errors as any).flat() as string[];
-          
+
           const formattedErrors = rawErrors.map(msg => {
             let newMsg = msg;
 
@@ -455,7 +458,7 @@ const ProductForm: React.FC = () => {
               newMsg = newMsg.replace(/^The (.*?) field/, '$1').replace(/\.\d+/, '');
               newMsg = newMsg.charAt(0).toUpperCase() + newMsg.slice(1);
             }
-            
+
             return newMsg;
           });
 
@@ -477,16 +480,16 @@ const ProductForm: React.FC = () => {
   return (
     <Box bg="white" p={6} borderRadius="lg" shadow="sm">
       <Heading mb={6}>{isEdit ? 'Ubah Produk' : 'Produk Baru'}</Heading>
-      
+
       <VStack gap={4} align="stretch">
         <Box>
           <Text mb={1}>Nama <Text as="span" color="red.500">*</Text></Text>
-          <Input 
-            value={formData.name} 
+          <Input
+            value={formData.name}
             onChange={e => {
-              setFormData({...formData, name: e.target.value});
-              if (errors.name) setErrors(prev => ({...prev, name: false}));
-            }} 
+              setFormData({ ...formData, name: e.target.value });
+              if (errors.name) setErrors(prev => ({ ...prev, name: false }));
+            }}
             borderColor={errors.name ? "red.500" : undefined}
           />
         </Box>
@@ -496,11 +499,11 @@ const ProductForm: React.FC = () => {
             <Text mb={1}>Kategori <Text as="span" color="red.500">*</Text></Text>
             <NativeSelect.Root>
               <NativeSelect.Field
-                placeholder="Pilih Kategori" 
-                value={formData.category_id} 
+                placeholder="Pilih Kategori"
+                value={formData.category_id}
                 onChange={e => {
-                  setFormData({...formData, category_id: e.target.value});
-                  if (errors.category_id) setErrors(prev => ({...prev, category_id: false}));
+                  setFormData({ ...formData, category_id: e.target.value });
+                  if (errors.category_id) setErrors(prev => ({ ...prev, category_id: false }));
                 }}
               >
                 {categories.map(c => (
@@ -513,9 +516,9 @@ const ProductForm: React.FC = () => {
             <Text mb={1}>Vendor (Opsional)</Text>
             <NativeSelect.Root>
               <NativeSelect.Field
-                placeholder="Pilih Vendor" 
-                value={formData.vendor_id} 
-                onChange={e => setFormData({...formData, vendor_id: e.target.value})}
+                placeholder="Pilih Vendor"
+                value={formData.vendor_id}
+                onChange={e => setFormData({ ...formData, vendor_id: e.target.value })}
               >
                 {vendors.map(v => (
                   <option key={v.id} value={v.id}>{v.name}</option>
@@ -542,7 +545,7 @@ const ProductForm: React.FC = () => {
           <NativeSelect.Root>
             <NativeSelect.Field
               value={formData.status}
-              onChange={e => setFormData({...formData, status: e.target.value})}
+              onChange={e => setFormData({ ...formData, status: e.target.value })}
             >
               <option value="ready">Stok Tersedia</option>
               <option value="pre_order">Pre-Order</option>
@@ -552,65 +555,76 @@ const ProductForm: React.FC = () => {
 
         <Box>
           <Text mb={1}>Harga Dasar <Text as="span" color="red.500">*</Text></Text>
-          <Input 
-            value={formData.base_price} 
+          <Input
+            value={formData.base_price}
             onChange={e => {
-              setFormData({...formData, base_price: formatNumber(e.target.value)});
-              if (errors.base_price) setErrors(prev => ({...prev, base_price: false}));
-            }} 
+              setFormData({ ...formData, base_price: formatNumber(e.target.value) });
+              if (errors.base_price) setErrors(prev => ({ ...prev, base_price: false }));
+            }}
             borderColor={errors.base_price ? "red.500" : undefined}
           />
         </Box>
 
-        {productType === 'simple' && (
-          <HStack gap={4} align="start">
-            <Box flex={1}>
-              <Text mb={1}>{formData.status === 'pre_order' ? 'Kuota' : 'Stok'} <Text as="span" color="red.500">*</Text></Text>
-              <Input
-                type="number"
-                value={formData.stock}
-                onChange={e => {
-                  setFormData({...formData, stock: e.target.value});
-                  if (errors.stock) setErrors(prev => ({...prev, stock: false}));
-                }}
-                placeholder={formData.status === 'pre_order' ? "Kuota Tersedia" : "Stok Tersedia"}
-                borderColor={errors.stock ? "red.500" : undefined}
-              />
-            </Box>
-            <Box flex={1}>
-              <Text mb={1}>SKU (Opsional)</Text>
-              <Input
-                value={formData.simple_sku}
-                onChange={e => setFormData({...formData, simple_sku: e.target.value})}
-                placeholder="contoh: PROD-001"
-              />
-            </Box>
-          </HStack>
-        )}
+        <Box>
+          <Text mb={1}>Harga Modal (HPP / Biaya Produksi)</Text>
+          <Input
+            value={formData.cost}
+            onChange={e => setFormData({ ...formData, cost: formatNumber(e.target.value) })}
+            placeholder="Opsional"
+          />
+        </Box>
+
+        {
+          productType === 'simple' && (
+            <HStack gap={4} align="start">
+              <Box flex={1}>
+                <Text mb={1}>{formData.status === 'pre_order' ? 'Kuota' : 'Stok'} <Text as="span" color="red.500">*</Text></Text>
+                <Input
+                  type="number"
+                  value={formData.stock}
+                  onChange={e => {
+                    setFormData({ ...formData, stock: e.target.value });
+                    if (errors.stock) setErrors(prev => ({ ...prev, stock: false }));
+                  }}
+                  placeholder={formData.status === 'pre_order' ? "Kuota Tersedia" : "Stok Tersedia"}
+                  borderColor={errors.stock ? "red.500" : undefined}
+                />
+              </Box>
+              <Box flex={1}>
+                <Text mb={1}>SKU (Opsional)</Text>
+                <Input
+                  value={formData.simple_sku}
+                  onChange={e => setFormData({ ...formData, simple_sku: e.target.value })}
+                  placeholder="contoh: PROD-001"
+                />
+              </Box>
+            </HStack>
+          )
+        }
 
         <Box>
           <Text mb={1}>Deskripsi</Text>
-          <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+          <Textarea value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
         </Box>
 
         <Box borderWidth="1px" p={4} borderRadius="md">
           <Heading size="sm" mb={4}>Gambar</Heading>
           <Input type="file" multiple accept="image/*" onChange={handleImageChange} mb={4} />
-          
+
           <HStack wrap="wrap" gap={4}>
             {existingImages.map((img) => (
               <Box key={img.id} position="relative" width="100px" height="100px">
-                <img 
-                  src={img.image_path.startsWith('http') ? img.image_path : `${STORAGE_URL}/${img.image_path}`} 
-                  alt="Product" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} 
+                <img
+                  src={img.image_path.startsWith('http') ? img.image_path : `${STORAGE_URL}/${img.image_path}`}
+                  alt="Product"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
                 />
-                <Button 
-                  size="xs" 
-                  colorPalette="red" 
-                  position="absolute" 
-                  top="-8px" 
-                  right="-8px" 
+                <Button
+                  size="xs"
+                  colorPalette="red"
+                  position="absolute"
+                  top="-8px"
+                  right="-8px"
                   onClick={() => removeExistingImage(img.id)}
                   borderRadius="full"
                 >X</Button>
@@ -619,12 +633,12 @@ const ProductForm: React.FC = () => {
             {images.map((file, index) => (
               <Box key={index} position="relative" width="100px" height="100px">
                 <img src={URL.createObjectURL(file)} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
-                <Button 
-                  size="xs" 
-                  colorPalette="red" 
-                  position="absolute" 
-                  top="-8px" 
-                  right="-8px" 
+                <Button
+                  size="xs"
+                  colorPalette="red"
+                  position="absolute"
+                  top="-8px"
+                  right="-8px"
                   onClick={() => removeImage(index)}
                   borderRadius="full"
                 >X</Button>
@@ -633,47 +647,50 @@ const ProductForm: React.FC = () => {
           </HStack>
         </Box>
 
-        {productType === 'variable' && (
-          <Box borderWidth="1px" p={4} borderRadius="md">
-            <HStack justify="space-between" mb={4}>
-              <Heading size="sm">Varian</Heading>
-              <Button size="xs" onClick={addVariant}>Tambah Varian</Button>
-            </HStack>
-            
-            <VStack gap={3}>
-              {formData.variants.map((variant, index) => (
-                <HStack key={index} w="full" align="end">
-                  <Box flex={1}>
-                    <Text fontSize="xs">Tipe</Text>
-                    <Input value={variant.type} onChange={e => handleVariantChange(index, 'type', e.target.value)} placeholder="Ukuran/Warna" />
-                  </Box>
-                  <Box flex={2}>
-                    <Text fontSize="xs">Nama</Text>
-                    <Input value={variant.name} onChange={e => handleVariantChange(index, 'name', e.target.value)} placeholder="S, M, Merah..." />
-                  </Box>
-                  <Box flex={1}>
-                    <Text fontSize="xs">Penyesuaian Harga</Text>
-                    <Input value={variant.price_adjustment} onChange={e => handleVariantChange(index, 'price_adjustment', formatNumber(e.target.value))} />
-                  </Box>
-                  <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeVariant(index)}>X</Button>
-                </HStack>
-              ))}
-            </VStack>
-          </Box>
-        )}
-
-        {productType === 'variable' && (
-          <Box borderWidth="1px" p={4} borderRadius="md">
-            <HStack justify="space-between" mb={4}>
-              <Heading size="sm">Inventaris / SKU</Heading>
-              <HStack>
-                <Button size="xs" onClick={addSku}>Tambah SKU</Button>
-                <Button size="xs" onClick={generateSkus}>Generate Semua</Button>
+        {
+          productType === 'variable' && (
+            <Box borderWidth="1px" p={4} borderRadius="md">
+              <HStack justify="space-between" mb={4}>
+                <Heading size="sm">Varian</Heading>
+                <Button size="xs" onClick={addVariant}>Tambah Varian</Button>
               </HStack>
-            </HStack>
 
-            <HStack mb={4} align="end" gap={4}>
-               <Box>
+              <VStack gap={3}>
+                {formData.variants.map((variant, index) => (
+                  <HStack key={index} w="full" align="end">
+                    <Box flex={1}>
+                      <Text fontSize="xs">Tipe</Text>
+                      <Input value={variant.type} onChange={e => handleVariantChange(index, 'type', e.target.value)} placeholder="Ukuran/Warna" />
+                    </Box>
+                    <Box flex={2}>
+                      <Text fontSize="xs">Nama</Text>
+                      <Input value={variant.name} onChange={e => handleVariantChange(index, 'name', e.target.value)} placeholder="S, M, Merah..." />
+                    </Box>
+                    <Box flex={1}>
+                      <Text fontSize="xs">Penyesuaian Harga</Text>
+                      <Input value={variant.price_adjustment} onChange={e => handleVariantChange(index, 'price_adjustment', formatNumber(e.target.value))} />
+                    </Box>
+                    <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeVariant(index)}>X</Button>
+                  </HStack>
+                ))}
+              </VStack>
+            </Box>
+          )
+        }
+
+        {
+          productType === 'variable' && (
+            <Box borderWidth="1px" p={4} borderRadius="md">
+              <HStack justify="space-between" mb={4}>
+                <Heading size="sm">Inventaris / SKU</Heading>
+                <HStack>
+                  <Button size="xs" onClick={addSku}>Tambah SKU</Button>
+                  <Button size="xs" onClick={generateSkus}>Generate Semua</Button>
+                </HStack>
+              </HStack>
+
+              <HStack mb={4} align="end" gap={4}>
+                <Box>
                   <Text fontSize="xs" mb={1}>Stok Massal (Opsional)</Text>
                   <Input
                     size="sm"
@@ -682,76 +699,77 @@ const ProductForm: React.FC = () => {
                     value={bulkStock}
                     onChange={(e) => setBulkStock(e.target.value)}
                   />
-               </Box>
-               <Button size="sm" variant="outline" onClick={applyBulkStock}>Terapkan ke SKU yang Ada</Button>
-            </HStack>
+                </Box>
+                <Button size="sm" variant="outline" onClick={applyBulkStock}>Terapkan ke SKU yang Ada</Button>
+              </HStack>
 
-            <Text fontSize="sm" color="gray.500" mb={4}>
-              Generate SKU untuk mengelola Stok (untuk Siap) atau Kuota (untuk Pre-Order) untuk setiap kombinasi.
-            </Text>
-            
-            <VStack gap={3}>
-              {formData.skus.map((sku, index) => {
-                // Group variants by type to show dropdowns
-                const variantsByType: { [key: string]: number[] } = {};
-                formData.variants.forEach((v, i) => {
-                  const type = v.type || 'General';
-                  if (!variantsByType[type]) variantsByType[type] = [];
-                  variantsByType[type].push(i);
-                });
+              <Text fontSize="sm" color="gray.500" mb={4}>
+                Generate SKU untuk mengelola Stok (untuk Siap) atau Kuota (untuk Pre-Order) untuk setiap kombinasi.
+              </Text>
 
-                return (
-                  <HStack key={index} w="full" align="end" borderWidth="1px" p={2} borderRadius="md" wrap="wrap">
-                    <Box flex={3} minW="200px">
-                      <Text fontSize="xs" fontWeight="bold" mb={1}>Kombinasi</Text>
-                      <HStack wrap="wrap">
-                        {Object.keys(variantsByType).map(type => {
-                          const selectedIndex = sku.variant_indices.find(i => {
-                            const v = formData.variants[i];
-                            return (v?.type || 'General') === type;
-                          });
+              <VStack gap={3}>
+                {formData.skus.map((sku, index) => {
+                  // Group variants by type to show dropdowns
+                  const variantsByType: { [key: string]: number[] } = {};
+                  formData.variants.forEach((v, i) => {
+                    const type = v.type || 'General';
+                    if (!variantsByType[type]) variantsByType[type] = [];
+                    variantsByType[type].push(i);
+                  });
 
-                          return (
-                            <Box key={type}>
-                              <Text fontSize="xs" color="gray.500">{type}</Text>
-                              <NativeSelect.Root size="sm">
-                                <NativeSelect.Field
-                                  placeholder="Pilih..." 
-                                  value={selectedIndex !== undefined ? selectedIndex : ''}
-                                  onChange={e => handleSkuVariantChange(index, type, Number(e.target.value))}
-                                >
-                                  {variantsByType[type].map(vIndex => (
-                                    <option key={vIndex} value={vIndex}>{formData.variants[vIndex].name}</option>
-                                  ))}
-                                </NativeSelect.Field>
-                              </NativeSelect.Root>
-                            </Box>
-                          );
-                        })}
-                      </HStack>
-                    </Box>
-                    <Box flex={1} minW="100px">
-                      <Text fontSize="xs">Harga (Override)</Text>
-                      <Input 
-                        value={parseNumber(sku.price.toString()) > 0 ? sku.price : formatNumber(calculateSkuPrice(sku.variant_indices))} 
-                        onChange={e => handleSkuChange(index, 'price', formatNumber(e.target.value))} 
-                      />
-                    </Box>
-                    <Box flex={1} minW="100px">
-                      <Text fontSize="xs">{formData.status === 'pre_order' ? 'Kuota' : 'Stok'}</Text>
-                      <Input type="number" value={sku.stock} onChange={e => handleSkuChange(index, 'stock', e.target.value)} />
-                    </Box>
-                    <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeSku(index)}>X</Button>
-                  </HStack>
-                );
-              })}
-            </VStack>
-          </Box>
-        )}
+                  return (
+                    <HStack key={index} w="full" align="end" borderWidth="1px" p={2} borderRadius="md" wrap="wrap">
+                      <Box flex={3} minW="200px">
+                        <Text fontSize="xs" fontWeight="bold" mb={1}>Kombinasi</Text>
+                        <HStack wrap="wrap">
+                          {Object.keys(variantsByType).map(type => {
+                            const selectedIndex = sku.variant_indices.find(i => {
+                              const v = formData.variants[i];
+                              return (v?.type || 'General') === type;
+                            });
+
+                            return (
+                              <Box key={type}>
+                                <Text fontSize="xs" color="gray.500">{type}</Text>
+                                <NativeSelect.Root size="sm">
+                                  <NativeSelect.Field
+                                    placeholder="Pilih..."
+                                    value={selectedIndex !== undefined ? selectedIndex : ''}
+                                    onChange={e => handleSkuVariantChange(index, type, Number(e.target.value))}
+                                  >
+                                    {variantsByType[type].map(vIndex => (
+                                      <option key={vIndex} value={vIndex}>{formData.variants[vIndex].name}</option>
+                                    ))}
+                                  </NativeSelect.Field>
+                                </NativeSelect.Root>
+                              </Box>
+                            );
+                          })}
+                        </HStack>
+                      </Box>
+                      <Box flex={1} minW="100px">
+                        <Text fontSize="xs">Harga (Override)</Text>
+                        <Input
+                          value={parseNumber(sku.price.toString()) > 0 ? sku.price : formatNumber(calculateSkuPrice(sku.variant_indices))}
+                          onChange={e => handleSkuChange(index, 'price', formatNumber(e.target.value))}
+                        />
+                      </Box>
+                      <Box flex={1} minW="100px">
+                        <Text fontSize="xs">{formData.status === 'pre_order' ? 'Kuota' : 'Stok'}</Text>
+                        <Input type="number" value={sku.stock} onChange={e => handleSkuChange(index, 'stock', e.target.value)} />
+                      </Box>
+                      <Button size="sm" colorPalette="red" variant="ghost" onClick={() => removeSku(index)}>X</Button>
+                    </HStack>
+                  );
+                })}
+              </VStack>
+            </Box>
+          )
+        }
 
         <Button colorPalette="teal" onClick={handleSubmit}>Simpan Produk</Button>
-      </VStack>
-    </Box>
+      </VStack >
+    </Box >
   );
 };
 

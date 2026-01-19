@@ -25,7 +25,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return response()->json(Product::with(['category', 'vendor', 'variants', 'skus', 'images'])->get());
+        return response()->json(Product::with(['category', 'vendor', 'variants', 'skus', 'images', 'cost'])->get());
     }
 
     /**
@@ -79,6 +79,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'status' => 'required|in:ready,pre_order',
             'base_price' => 'required|numeric|min:0',
+            'cost' => 'nullable|numeric|min:0', // New field for HPP
             'image_url' => 'nullable|string',
             'variants' => 'array',
             'variants.*.name' => 'required|string',
@@ -96,6 +97,10 @@ class ProductController extends Controller
             DB::beginTransaction();
 
             $product = Product::create($validated);
+
+            if (isset($validated['cost'])) {
+                $product->cost()->create(['cost' => $validated['cost']]);
+            }
 
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $index => $file) {
@@ -176,7 +181,7 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        return response()->json($product->load(['category', 'vendor', 'variants', 'skus', 'images']));
+        return response()->json($product->load(['category', 'vendor', 'variants', 'skus', 'images', 'cost']));
     }
 
     /**
@@ -242,6 +247,7 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'status' => 'sometimes|in:ready,pre_order',
             'base_price' => 'sometimes|numeric|min:0',
+            'cost' => 'nullable|numeric|min:0', // New field for HPP
             'image_url' => 'nullable|string',
             'variants' => 'array',
             'variants.*.id' => 'nullable|exists:product_variants,id',
@@ -264,6 +270,10 @@ class ProductController extends Controller
             DB::beginTransaction();
 
             $product->update($validated);
+
+            if ($request->has('cost')) {
+                $product->cost()->updateOrCreate([], ['cost' => $request->input('cost')]);
+            }
 
             if ($request->hasFile('images')) {
                 $currentCount = $product->images()->count();
