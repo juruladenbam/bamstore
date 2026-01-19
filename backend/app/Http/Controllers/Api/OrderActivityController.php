@@ -38,7 +38,7 @@ class OrderActivityController extends Controller
             $query->where('recipient_name', 'like', "%{$search}%");
         }
 
-        $items = $query->latest()->limit(50)->get();
+        $items = $query->latest()->get();
 
         $data = $items->map(function ($item) {
             return [
@@ -87,7 +87,6 @@ class OrderActivityController extends Controller
                 $q->where('status', '!=', 'cancelled');
             })
             ->latest()
-            ->limit(50)
             ->get();
 
         // Map items to structured data
