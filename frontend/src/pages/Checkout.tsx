@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Container, Heading, Text, VStack, Input, NativeSelect, Button, RadioGroup, Stack, Separator } from '@chakra-ui/react';
+import { Box, Container, Heading, Text, VStack, Input, NativeSelect, Button, RadioGroup, Stack, Separator, HStack } from '@chakra-ui/react';
 import { useCart } from '../context/CartContext';
 import client from '../api/client';
 import { useNavigate } from 'react-router-dom';
@@ -307,7 +307,24 @@ const Checkout: React.FC = () => {
           <Heading size="md" mb={4}>Detail Anda</Heading>
           <VStack gap={4}>
             <Box w="full" position="relative">
-              <Text mb={1}>Nama <Text as="span" color="red.500">*</Text></Text>
+              <HStack justify="space-between" mb={1}>
+                <Text>Nama <Text as="span" color="red.500">*</Text></Text>
+                {items.length > 0 && (
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    colorPalette="blue"
+                    onClick={() => {
+                      const firstRecipient = items[0].recipient_name;
+                      if (firstRecipient && firstRecipient !== 'Myself') {
+                        setFormData(prev => ({ ...prev, checkout_name: firstRecipient }));
+                      }
+                    }}
+                  >
+                    Sama dengan Penerima
+                  </Button>
+                )}
+              </HStack>
               <Input
                 value={formData.checkout_name}
                 onChange={handleNameChange}

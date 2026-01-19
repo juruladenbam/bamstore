@@ -402,10 +402,47 @@ const ProductDetail: React.FC = () => {
 
                 {/* Recipient Selection */}
                 <Box w="full">
+                  {recipients.length > 1 && (
+                    <Button
+                      size="xs"
+                      variant="surface"
+                      colorPalette="blue"
+                      mb={2}
+                      onClick={() => {
+                        const firstRecipient = recipients[0].name;
+                        if (!firstRecipient) {
+                          toaster.create({
+                            title: "Nama pertama kosong",
+                            description: "Silakan isi nama Penerima #1 terlebih dahulu.",
+                            type: "warning",
+                          });
+                          return;
+                        }
+                        setRecipients(recipients.map(() => ({ name: firstRecipient })));
+                      }}
+                    >
+                      Sama dengan Penerima #1
+                    </Button>
+                  )}
                   <VStack gap={4} align="stretch" mt={2}>
                     {recipients.map((recipient, index) => (
                       <Box key={index} borderWidth="1px" borderRadius="md" p={3} bg="gray.50">
-                        <Text fontWeight="bold" mb={2} fontSize="sm">Penerima #{index + 1}</Text>
+                        <HStack justify="space-between" mb={2}>
+                          <Text fontWeight="bold" fontSize="sm">Penerima #{index + 1}</Text>
+                          {index > 0 && (
+                            <Button
+                              size="xs"
+                              variant="ghost"
+                              onClick={() => {
+                                const newRecipients = [...recipients];
+                                newRecipients[index] = { name: recipients[0].name };
+                                setRecipients(newRecipients);
+                              }}
+                            >
+                              Sama dengan #1
+                            </Button>
+                          )}
+                        </HStack>
                         <VStack gap={2}>
                           <Box w="full" position="relative">
                             <Input
