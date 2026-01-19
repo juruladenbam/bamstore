@@ -124,11 +124,20 @@ class OrderActivityController extends Controller
             ];
         });
 
-        // Sort by predefined qobilah order
-        $byQobilah = collect($qobilahOrder)
-            ->filter(fn($q) => $groupedByQobilah->has($q))
-            ->map(fn($q) => $groupedByQobilah->get($q))
-            ->values();
+        // Build by_qobilah with all predefined qobilahs (including empty ones)
+        $byQobilah = collect($qobilahOrder)->map(function ($qobilahName) use ($groupedByQobilah) {
+            if ($groupedByQobilah->has($qobilahName)) {
+                return $groupedByQobilah->get($qobilahName);
+            }
+            // Return empty entry for qobilah with no orders
+            return [
+                'name' => $qobilahName,
+                'total_orders' => 0,
+                'total_paid' => 0,
+                'total_unpaid' => 0,
+                'items' => [],
+            ];
+        });
         
         // Add any qobilah not in the predefined order at the end
         $unknownQobilahs = $groupedByQobilah->filter(fn($group) => !in_array($group['name'], $qobilahOrder))->values();
