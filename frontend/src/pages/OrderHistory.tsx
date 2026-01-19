@@ -20,6 +20,9 @@ interface Order {
   created_at: string;
   status: string;
   total_amount: number;
+  discount_amount?: number;
+  grand_total?: number;
+  coupon_code?: string;
   items: OrderItem[];
   checkout_name?: string;
   phone_number?: string;
@@ -117,10 +120,24 @@ const OrderHistory: React.FC = () => {
                 </Table.Body>
               </Table.Root>
 
-              <Box display="flex" justifyContent="space-between" borderTopWidth="1px" pt={2} mb={4}>
-                <Text fontWeight="bold">Total</Text>
-                <Text fontWeight="bold">Rp {Number(order.total_amount).toLocaleString('id-ID')}</Text>
-              </Box>
+              <VStack align="stretch" gap={1} borderTopWidth="1px" pt={2} mb={4}>
+                <Box display="flex" justifyContent="space-between">
+                  <Text color="gray.600">Subtotal</Text>
+                  <Text>Rp {Number(order.total_amount).toLocaleString('id-ID')}</Text>
+                </Box>
+                {Number(order.discount_amount) > 0 && (
+                  <Box display="flex" justifyContent="space-between">
+                    <Text color="red.500">Diskon {order.coupon_code ? `(${order.coupon_code})` : ''}</Text>
+                    <Text color="red.500">-Rp {Number(order.discount_amount).toLocaleString('id-ID')}</Text>
+                  </Box>
+                )}
+                <Box display="flex" justifyContent="space-between" mt={1}>
+                  <Text fontWeight="bold">Total Akhir</Text>
+                  <Text fontWeight="bold" fontSize="lg" color="teal.600">
+                    Rp {Number(order.grand_total || order.total_amount).toLocaleString('id-ID')}
+                  </Text>
+                </Box>
+              </VStack>
 
               <Button
                 asChild

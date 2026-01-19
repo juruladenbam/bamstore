@@ -120,7 +120,9 @@ const AdminOrderList: React.FC = () => {
         <VStack align="flex-end" gap={0}>
           <Text fontWeight="bold">Rp {Number(order.grand_total || order.total_amount).toLocaleString()}</Text>
           {Number(order.discount_amount) > 0 && (
-            <Text fontSize="2xs" color="red.500">Disc: -Rp {Number(order.discount_amount).toLocaleString()}</Text>
+            <Text fontSize="2xs" color="red.500">
+              {order.coupon_code ? `[${order.coupon_code}] ` : ''}-Rp {Number(order.discount_amount).toLocaleString()}
+            </Text>
           )}
         </VStack>
       )
