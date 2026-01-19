@@ -75,6 +75,13 @@ class OrderActivityController extends Controller
      */
     public function export(Request $request)
     {
+        // Define the qobilah order
+        $qobilahOrder = [
+            "QOBILAH MARIYAH", "QOBILAH BUSYRI", "QOBILAH MUZAMMAH", "QOBILAH SULHAN",
+            "QOBILAH SHOLIHATUN", "QOBILAH NURSIYAM", "QOBILAH NI'MAH", "QOBILAH ABD MAJID",
+            "QOBILAH SAIDAH", "QOBILAH THOHIR AL ALY", "NYAI NIHAYA (NGAGLIK)"
+        ];
+
         $items = OrderItem::with(['product', 'variants', 'order'])
             ->whereHas('order', function($q) {
                 $q->where('status', '!=', 'cancelled');
@@ -99,7 +106,7 @@ class OrderActivityController extends Controller
         });
 
         // Group by Qobilah
-        $byQobilah = $mappedItems->groupBy('qobilah')->map(function ($groupItems, $qobilahName) {
+        $groupedByQobilah = $mappedItems->groupBy('qobilah')->map(function ($groupItems, $qobilahName) {
             return [
                 'name' => $qobilahName,
                 'total_orders' => $groupItems->count(),
@@ -115,7 +122,17 @@ class OrderActivityController extends Controller
                     ];
                 })->values(),
             ];
-        })->values();
+        });
+
+        // Sort by predefined qobilah order
+        $byQobilah = collect($qobilahOrder)
+            ->filter(fn($q) => $groupedByQobilah->has($q))
+            ->map(fn($q) => $groupedByQobilah->get($q))
+            ->values();
+        
+        // Add any qobilah not in the predefined order at the end
+        $unknownQobilahs = $groupedByQobilah->filter(fn($group) => !in_array($group['name'], $qobilahOrder))->values();
+        $byQobilah = $byQobilah->concat($unknownQobilahs);
 
         // Group by Variant/SKU
         $byVariant = $mappedItems->groupBy('sku')->map(function ($groupItems, $skuName) {
