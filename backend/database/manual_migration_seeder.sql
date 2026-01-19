@@ -49,8 +49,8 @@ ALTER TABLE orders ADD COLUMN IF NOT EXISTS grand_total DECIMAL(15, 2) NULL;
 
 INSERT INTO coupons (code, description, type, value, max_discount_amount, min_purchase, start_date, end_date, usage_limit, usage_limit_per_user, is_active, created_at, updated_at)
 VALUES 
-('JURULADENBAM2026', 'Diskon 50% Khusus Event 2026', 'percent', 50.00, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 12, 1, 1, NOW(), NOW()),
-('SDRNPL', 'Diskon 50% Khusus SDRNPL', 'percent', 50.00, NULL, 0, NOW(), DATE_ADD(NOW(), INTERVAL 1 YEAR), 2, 1, 1, NOW(), NOW());
+('JURULADENBAM2026', 'Diskon 50% Khusus Event 2026', 'percent', 50.00, NULL, 0, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_ADD(NOW(), INTERVAL 1 YEAR), 12, 1, 1, NOW(), NOW()),
+('SDRNPL', 'Diskon 50% Khusus SDRNPL', 'percent', 50.00, NULL, 0, DATE_SUB(NOW(), INTERVAL 1 HOUR), DATE_ADD(NOW(), INTERVAL 1 YEAR), 2, 1, 1, NOW(), NOW());
 
 -- ==========================================
 -- 3. DATA SYNC: UPDATE ORDER LAMA
