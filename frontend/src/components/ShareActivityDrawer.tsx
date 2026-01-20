@@ -26,9 +26,11 @@ import client from '../api/client';
 
 interface ShareItem {
     recipient_name: string;
-    product_name: string;
-    variants: string;
-    quantity: number;
+    total_quantity?: number;
+    // Optional because byVariant uses VariantItem
+    product_name?: string;
+    variants?: string;
+    quantity?: number;
     status: string;
 }
 
@@ -137,7 +139,8 @@ const ShareActivityDrawer: React.FC<ShareActivityDrawerProps> = ({ isOpen, onClo
 
             group.items.forEach((item) => {
                 const status = item.status === 'paid' ? 'LUNAS' : 'BELUM';
-                lines.push(`- ${item.recipient_name} [${status}]`);
+                const qtyText = item.total_quantity ? ` (${item.total_quantity}x)` : '';
+                lines.push(`- ${item.recipient_name}${qtyText} [${status}]`);
             });
 
             lines.push('');

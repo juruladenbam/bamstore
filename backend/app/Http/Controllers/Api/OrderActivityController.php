@@ -106,20 +106,23 @@ class OrderActivityController extends Controller
 
         // Group by Qobilah
         $groupedByQobilah = $mappedItems->groupBy('qobilah')->map(function ($groupItems, $qobilahName) {
+            // Group by recipient name and status to handle multiple orders from same person
+            $summarizedItems = $groupItems->groupBy(function($item) {
+                return $item['recipient_name'] . '|' . $item['status'];
+            })->map(function ($items, $key) {
+                return [
+                    'recipient_name' => $items->first()['recipient_name'],
+                    'total_quantity' => $items->sum('quantity'),
+                    'status' => $items->first()['status'],
+                ];
+            })->values();
+
             return [
                 'name' => $qobilahName,
                 'total_orders' => $groupItems->count(),
                 'total_paid' => $groupItems->where('status', 'paid')->count(),
                 'total_unpaid' => $groupItems->where('status', '!=', 'paid')->count(),
-                'items' => $groupItems->map(function ($item) {
-                    return [
-                        'recipient_name' => $item['recipient_name'],
-                        'product_name' => $item['product_name'],
-                        'variants' => $item['variants'],
-                        'quantity' => $item['quantity'],
-                        'status' => $item['status'],
-                    ];
-                })->values(),
+                'items' => $summarizedItems,
             ];
         });
 
