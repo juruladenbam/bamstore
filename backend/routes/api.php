@@ -51,8 +51,19 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
     Route::get('/orders', [AdminOrderController::class, 'index']);
     Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
+    Route::put('/orders/{id}', [AdminOrderController::class, 'update']);
     Route::put('/orders/{id}/status', [AdminOrderController::class, 'updateStatus']);
     Route::delete('/orders/{id}', [AdminOrderController::class, 'destroy']);
+
+    // Order Item Management
+    Route::post('/orders/{id}/items', [AdminOrderController::class, 'addItem']);
+    Route::put('/orders/{id}/items/{itemId}', [AdminOrderController::class, 'updateItem']);
+    Route::delete('/orders/{id}/items/{itemId}', [AdminOrderController::class, 'removeItem']);
+
+    // Order Edit History & Adjustments
+    Route::get('/orders/{id}/history', [AdminOrderController::class, 'getHistory']);
+    Route::post('/orders/{id}/resolve-adjustment', [AdminOrderController::class, 'resolveAdjustment']);
+    Route::post('/orders/check-stock', [AdminOrderController::class, 'checkStock']);
 
     Route::get('/dashboard', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'index']);
 

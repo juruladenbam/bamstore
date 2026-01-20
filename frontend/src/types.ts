@@ -99,6 +99,32 @@ export interface Order {
   coupon_id?: number;
   created_at: string;
   items?: OrderItem[];
+  // Edit tracking fields
+  price_adjustment_status?: 'none' | 'overpaid' | 'underpaid';
+  price_adjustment_amount?: number;
+  last_edited_at?: string;
+  last_edited_by?: number;
+  last_editor?: User;
+  coupon?: {
+    id: number;
+    code: string;
+    type: 'fixed' | 'percent';
+    value: number;
+  };
+}
+
+export interface OrderEditLog {
+  id: number;
+  order_id: number;
+  user_id: number;
+  user?: User;
+  action: 'update_info' | 'add_item' | 'remove_item' | 'update_item' | 'update_status' | 'recalculate_discount' | 'adjustment_resolved';
+  field_name: string | null;
+  old_value: string | null;
+  new_value: string | null;
+  metadata: Record<string, any> | null;
+  description?: string;
+  created_at: string;
 }
 
 export interface Notification {
