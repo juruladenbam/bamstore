@@ -27,7 +27,7 @@ class FinancialReportController extends Controller
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
 
-        $paidStatuses = ['paid', 'processed', 'completed', 'ready_pickup', 'shipped', 'delivered'];
+        $paidStatuses = ['paid', 'processed', 'ready_pickup', 'completed', 'shipped', 'delivered'];
 
         // Orders (Income)
         $ordersQuery = Order::with(['items.product.cost'])
@@ -49,20 +49,26 @@ class FinancialReportController extends Controller
         $incomeTransactions = [];
 
         foreach ($orders as $order) {
-            foreach ($order->items as $item) {
+            $orderCOGS = 0;
+            $itemsSummary = $order->items->map(function ($item) use (&$orderCOGS) {
                 $cost = $item->product->cost->cost ?? 0;
-                $totalCOGS += $item->quantity * $cost;
-            }
+                $orderCOGS += ($item->quantity * $cost);
+                return $item->product->name . ' (x' . $item->quantity . ')';
+            })->join(', ');
+
+            $totalCOGS += $orderCOGS;
+
             $incomeTransactions[] = [
                 'id' => 'ORD-' . $order->id,
                 'date' => $order->created_at->toDateTimeString(),
                 'type' => 'income',
                 'category' => 'Sales',
-                'description' => 'Order #' . $order->order_number . ' (' . $order->checkout_name . ')',
+                'description' => 'Order #' . $order->order_number . ' [' . $order->checkout_name . ']: ' . $itemsSummary,
                 'gross_amount' => $order->total_amount,
                 'discount_amount' => $order->discount_amount,
                 'amount' => $order->grand_total, // Net amount received
                 'payment_method' => $order->payment_method,
+                'cogs' => $orderCOGS,
                 'status' => $order->status,
             ];
         }

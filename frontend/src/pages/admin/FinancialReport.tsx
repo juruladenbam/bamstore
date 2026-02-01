@@ -27,10 +27,13 @@ const FinancialReport: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Default to current month
+  // Default to last 30 days
   const today = new Date();
-  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-  const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+
+  const firstDay = thirtyDaysAgo.toISOString().split('T')[0];
+  const lastDay = today.toISOString().split('T')[0];
 
   const [startDate, setStartDate] = useState(firstDay);
   const [endDate, setEndDate] = useState(lastDay);
@@ -177,19 +180,26 @@ const FinancialReport: React.FC = () => {
                   <Table.Body>
                     {data.transactions.length === 0 ? (
                       <Table.Row>
-                        <Table.Cell colSpan={8} textAlign="center">Tidak ada transaksi pada periode ini.</Table.Cell>
+                        <Table.Cell colSpan={9} textAlign="center">Tidak ada transaksi pada periode ini.</Table.Cell>
                       </Table.Row>
                     ) : (
                       data.transactions.map((trx: any) => (
                         <Table.Row key={trx.id}>
-                          <Table.Cell>{new Date(trx.date).toLocaleDateString('id-ID')} {new Date(trx.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Table.Cell>
+                          <Table.Cell whiteSpace="nowrap">{new Date(trx.date).toLocaleDateString('id-ID')} {new Date(trx.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Table.Cell>
                           <Table.Cell>
                             <Badge colorPalette={trx.type === 'income' ? 'green' : 'red'}>
                               {trx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
                             </Badge>
                           </Table.Cell>
                           <Table.Cell>{trx.category}</Table.Cell>
-                          <Table.Cell>{trx.description}</Table.Cell>
+                          <Table.Cell maxW="300px">
+                            <Text fontSize="sm" fontWeight="medium">{trx.description.split(': ')[0]}</Text>
+                            {trx.description.includes(': ') && (
+                              <Text fontSize="xs" color="gray.500">
+                                {trx.description.split(': ')[1]}
+                              </Text>
+                            )}
+                          </Table.Cell>
                           <Table.Cell>
                             {trx.payment_method ? (
                               <Badge variant="subtle" colorPalette={trx.payment_method === 'cash' ? 'blue' : 'purple'}>
