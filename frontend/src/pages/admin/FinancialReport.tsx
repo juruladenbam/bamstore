@@ -183,44 +183,68 @@ const FinancialReport: React.FC = () => {
                         <Table.Cell colSpan={9} textAlign="center">Tidak ada transaksi pada periode ini.</Table.Cell>
                       </Table.Row>
                     ) : (
-                      data.transactions.map((trx: any) => (
-                        <Table.Row key={trx.id}>
-                          <Table.Cell whiteSpace="nowrap">{new Date(trx.date).toLocaleDateString('id-ID')} {new Date(trx.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Table.Cell>
-                          <Table.Cell>
-                            <Badge colorPalette={trx.type === 'income' ? 'green' : 'red'}>
-                              {trx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
-                            </Badge>
+                      <>
+                        {/* Row Total (Top) */}
+                        <Table.Row bg="gray.100" fontWeight="bold">
+                          <Table.Cell colSpan={5}>TOTAL (PERIODE INI)</Table.Cell>
+                          <Table.Cell textAlign="right">Rp {Number(data.summary.gross_sales).toLocaleString()}</Table.Cell>
+                          <Table.Cell textAlign="right" color="red.500">-Rp {Number(data.summary.total_discount).toLocaleString()}</Table.Cell>
+                          <Table.Cell textAlign="right" color={data.summary.net_cash_flow >= 0 ? "blue.600" : "red.600"}>
+                            Rp {Number(data.summary.net_cash_flow).toLocaleString()}
                           </Table.Cell>
-                          <Table.Cell>{trx.category}</Table.Cell>
-                          <Table.Cell maxW="300px">
-                            <Text fontSize="sm" fontWeight="medium">{trx.description.split(': ')[0]}</Text>
-                            {trx.description.includes(': ') && (
-                              <Text fontSize="xs" color="gray.500">
-                                {trx.description.split(': ')[1]}
-                              </Text>
-                            )}
-                          </Table.Cell>
-                          <Table.Cell>
-                            {trx.payment_method ? (
-                              <Badge variant="subtle" colorPalette={trx.payment_method === 'cash' ? 'blue' : 'purple'}>
-                                {trx.payment_method.toUpperCase()}
-                              </Badge>
-                            ) : '-'}
-                          </Table.Cell>
-                          <Table.Cell textAlign="right">
-                            {trx.type === 'income' ? `Rp ${Number(trx.gross_amount).toLocaleString()}` : '-'}
-                          </Table.Cell>
-                          <Table.Cell textAlign="right" color="red.500">
-                            {trx.type === 'income' && trx.discount_amount > 0 ? `-Rp ${Number(trx.discount_amount).toLocaleString()}` : '-'}
-                          </Table.Cell>
-                          <Table.Cell textAlign="right" fontWeight="bold" color={trx.type === 'income' ? 'green.600' : 'red.600'}>
-                            {trx.type === 'income' ? '+' : '-'} Rp {Number(trx.amount).toLocaleString()}
-                          </Table.Cell>
-                          <Table.Cell>
-                            <Badge variant="outline">{trx.status}</Badge>
-                          </Table.Cell>
+                          <Table.Cell></Table.Cell>
                         </Table.Row>
-                      ))
+
+                        {data.transactions.map((trx: any) => (
+                          <Table.Row key={trx.id}>
+                            <Table.Cell whiteSpace="nowrap">{new Date(trx.date).toLocaleDateString('id-ID')} {new Date(trx.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</Table.Cell>
+                            <Table.Cell>
+                              <Badge colorPalette={trx.type === 'income' ? 'green' : 'red'}>
+                                {trx.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}
+                              </Badge>
+                            </Table.Cell>
+                            <Table.Cell>{trx.category}</Table.Cell>
+                            <Table.Cell maxW="300px">
+                              <Text fontSize="sm" fontWeight="medium">{trx.description.split(': ')[0]}</Text>
+                              {trx.description.includes(': ') && (
+                                <Text fontSize="xs" color="gray.500">
+                                  {trx.description.split(': ')[1]}
+                                </Text>
+                              )}
+                            </Table.Cell>
+                            <Table.Cell>
+                              {trx.payment_method ? (
+                                <Badge variant="subtle" colorPalette={trx.payment_method === 'cash' ? 'blue' : 'purple'}>
+                                  {trx.payment_method.toUpperCase()}
+                                </Badge>
+                              ) : '-'}
+                            </Table.Cell>
+                            <Table.Cell textAlign="right">
+                              {trx.type === 'income' ? `Rp ${Number(trx.gross_amount).toLocaleString()}` : '-'}
+                            </Table.Cell>
+                            <Table.Cell textAlign="right" color="red.500">
+                              {trx.type === 'income' && trx.discount_amount > 0 ? `-Rp ${Number(trx.discount_amount).toLocaleString()}` : '-'}
+                            </Table.Cell>
+                            <Table.Cell textAlign="right" fontWeight="bold" color={trx.type === 'income' ? 'green.600' : 'red.600'}>
+                              {trx.type === 'income' ? '+' : '-'} Rp {Number(trx.amount).toLocaleString()}
+                            </Table.Cell>
+                            <Table.Cell>
+                              <Badge variant="outline">{trx.status}</Badge>
+                            </Table.Cell>
+                          </Table.Row>
+                        ))}
+
+                        {/* Row Total (Bottom) */}
+                        <Table.Row bg="gray.100" fontWeight="bold">
+                          <Table.Cell colSpan={5}>TOTAL (PERIODE INI)</Table.Cell>
+                          <Table.Cell textAlign="right">Rp {Number(data.summary.gross_sales).toLocaleString()}</Table.Cell>
+                          <Table.Cell textAlign="right" color="red.500">-Rp {Number(data.summary.total_discount).toLocaleString()}</Table.Cell>
+                          <Table.Cell textAlign="right" color={data.summary.net_cash_flow >= 0 ? "blue.600" : "red.600"}>
+                            Rp {Number(data.summary.net_cash_flow).toLocaleString()}
+                          </Table.Cell>
+                          <Table.Cell></Table.Cell>
+                        </Table.Row>
+                      </>
                     )}
                   </Table.Body>
                 </Table.Root>
