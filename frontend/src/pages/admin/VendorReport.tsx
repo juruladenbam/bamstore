@@ -1,7 +1,7 @@
-import React, { useEffect, useState }                                                            from 'react';
-import { Box, Container, Heading, Table, Button, HStack, NativeSelect, Text, VStack } from '@chakra-ui/react';
-import client                                                                                    from '../../api/client';
-import { toaster }                                                                               from '../../components/ui/toaster';
+import React, { useEffect, useState } from 'react';
+import { Box, Container, Heading, Table, Button, HStack, NativeSelect, Text, VStack, Input } from '@chakra-ui/react';
+import client from '../../api/client';
+import { toaster } from '../../components/ui/toaster';
 
 // --- Helper Functions ---
 
@@ -39,20 +39,20 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
             <Box mb={8} breakInside="avoid">
                 <Heading size="sm" mb={2}>{productName} ({vendorName})</Heading>
                 <Box overflowX="auto">
-                <Table.Root size="sm" variant="outline">
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.ColumnHeader>Produk</Table.ColumnHeader>
-                            <Table.ColumnHeader textAlign="right">Total Jumlah</Table.ColumnHeader>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        <Table.Row>
-                            <Table.Cell>{productName}</Table.Cell>
-                            <Table.Cell textAlign="right" fontWeight="bold">{total}</Table.Cell>
-                        </Table.Row>
-                    </Table.Body>
-                </Table.Root>
+                    <Table.Root size="sm" variant="outline">
+                        <Table.Header>
+                            <Table.Row>
+                                <Table.ColumnHeader>Produk</Table.ColumnHeader>
+                                <Table.ColumnHeader textAlign="right">Total Jumlah</Table.ColumnHeader>
+                            </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                            <Table.Row>
+                                <Table.Cell>{productName}</Table.Cell>
+                                <Table.Cell textAlign="right" fontWeight="bold">{total}</Table.Cell>
+                            </Table.Row>
+                        </Table.Body>
+                    </Table.Root>
                 </Box>
             </Box>
         );
@@ -89,7 +89,7 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
     });
 
     const sortedRowValues = Array.from(rowValues).sort(sortSizes);
-    
+
     // Sort columns: This is tricky. We sort by the first part, then second...
     const sortedColKeys = Array.from(colCombinations.keys()).sort((a, b) => {
         const partsA = colCombinations.get(a)!.parts;
@@ -105,13 +105,13 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
     data.forEach(item => {
         const rowVar = item.variants.find((v: any) => v.type === rowDim);
         const rowVal = rowVar ? rowVar.name : 'N/A';
-        
+
         const colParts = colDims.map(dim => {
             const v = item.variants.find((varItem: any) => varItem.type === dim);
             return v ? v.name : 'N/A';
         });
         const colKey = colParts.join('|');
-        
+
         const key = `${rowVal}|${colKey}`;
         quantityMap.set(key, (quantityMap.get(key) || 0) + item.total_quantity);
     });
@@ -206,95 +206,133 @@ const ProductReportTable: React.FC<ProductReportTableProps> = ({ productName, ve
 };
 
 const VendorReport: React.FC = () => {
-  const [reportData, setReportData] = useState<any[]>([]);
-  const [vendors, setVendors] = useState<any[]>([]);
-  const [selectedVendor, setSelectedVendor] = useState('');
-  const [loading, setLoading] = useState(true);
+    const today = new Date();
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(today.getDate() - 30);
 
-  useEffect(() => {
-    fetchVendors();
-    fetchReport();
-  }, []);
+    const [startDate, setStartDate] = useState(thirtyDaysAgo.toISOString().split('T')[0]);
+    const [endDate, setEndDate] = useState(today.toISOString().split('T')[0]);
+    const [reportData, setReportData] = useState<any[]>([]);
+    const [vendors, setVendors] = useState<any[]>([]);
+    const [selectedVendor, setSelectedVendor] = useState('');
+    const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchReport();
-  }, [selectedVendor]);
+    useEffect(() => {
+        fetchVendors();
+        fetchReport();
+    }, []);
 
-  const fetchVendors = () => {
-    client.get('/admin/vendors')
-      .then(res => setVendors(res.data))
-      .catch(err => console.error(err));
-  };
+    useEffect(() => {
+        fetchReport();
+    }, [selectedVendor, startDate, endDate]);
 
-  const fetchReport = () => {
-    setLoading(true);
-    const url = selectedVendor ? `/admin/reports/recap?vendor_id=${selectedVendor}` : '/admin/reports/recap';
-    client.get(url)
-      .then(res => {
-        setReportData(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-        toaster.create({ title: "Gagal memuat laporan", type: "error" });
-      });
-  };
+    const fetchVendors = () => {
+        client.get('/admin/vendors')
+            .then(res => setVendors(res.data))
+            .catch(err => console.error(err));
+    };
 
-  const handlePrint = () => {
-    window.print();
-  };
+    const fetchReport = () => {
+        setLoading(true);
+        const params: any = {
+            vendor_id: selectedVendor,
+            start_date: startDate,
+            end_date: endDate
+        };
+        client.get('/admin/reports/recap', { params })
+            .then(res => {
+                setReportData(res.data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error(err);
+                setLoading(false);
+                toaster.create({ title: "Gagal memuat laporan", type: "error" });
+            });
+    };
 
-  // Group data by Product
-  const groupedByProduct = reportData.reduce((acc, item) => {
-      if (!acc[item.product_id]) {
-          acc[item.product_id] = {
-              productId: item.product_id,
-              productName: item.product_name,
-              vendorName: item.vendor_name,
-              items: []
-          };
-      }
-      acc[item.product_id].items.push(item);
-      return acc;
-  }, {} as Record<string, { productId: number, productName: string, vendorName: string, items: any[] }>);
+    const handlePrint = () => {
+        window.print();
+    };
 
-  return (
-    <>
-      <Container maxW="container.xl" py={10} id="printable-area">
-        <HStack justify="space-between" mb={6} className="no-print">
-          <Heading>Laporan Rekapitulasi Vendor</Heading>
-          <Button onClick={handlePrint} colorPalette="blue">Cetak / PDF</Button>
-        </HStack>
+    // Group data by Product
+    const groupedByProduct = reportData.reduce((acc, item) => {
+        if (!acc[item.product_id]) {
+            acc[item.product_id] = {
+                productId: item.product_id,
+                productName: item.product_name,
+                vendorName: item.vendor_name,
+                items: []
+            };
+        }
+        acc[item.product_id].items.push(item);
+        return acc;
+    }, {} as Record<string, { productId: number, productName: string, vendorName: string, items: any[] }>);
 
-        <Box mb={6} className="no-print" maxW="300px">
-          <NativeSelect.Root>
-              <NativeSelect.Field value={selectedVendor} onChange={(e) => setSelectedVendor(e.target.value)}>
-                  <option value="">Semua Vendor</option>
-                  {vendors.map(v => (
-                      <option key={v.id} value={v.id}>{v.name}</option>
-                  ))}
-              </NativeSelect.Field>
-          </NativeSelect.Root>
-        </Box>
+    return (
+        <>
+            <Container maxW="container.xl" py={10} id="printable-area">
+                <HStack justify="space-between" mb={6} className="no-print">
+                    <Heading>Laporan Rekapitulasi Vendor</Heading>
+                    <Button onClick={handlePrint} colorPalette="blue">Cetak / PDF</Button>
+                </HStack>
 
-        <VStack align="stretch" gap={8}>
-          {Object.values(groupedByProduct).map((group: any) => (
-              <ProductReportTable 
-                  key={group.productId} 
-                  productName={group.productName} 
-                  vendorName={group.vendorName} 
-                  data={group.items} 
-              />
-          ))}
-          
-          {reportData.length === 0 && !loading && (
-              <Text textAlign="center" color="gray.500">Tidak ada data</Text>
-          )}
-        </VStack>
-      </Container>
-      
-      <style>{`
+                <HStack mb={6} className="no-print" gap={4} wrap="wrap">
+                    <Box minW="200px">
+                        <Text mb={1} fontSize="xs" fontWeight="bold">Vendor</Text>
+                        <NativeSelect.Root>
+                            <NativeSelect.Field value={selectedVendor} onChange={(e) => setSelectedVendor(e.target.value)}>
+                                <option value="">Semua Vendor</option>
+                                {vendors.map(v => (
+                                    <option key={v.id} value={v.id}>{v.name}</option>
+                                ))}
+                            </NativeSelect.Field>
+                        </NativeSelect.Root>
+                    </Box>
+                    <Box>
+                        <Text mb={1} fontSize="xs" fontWeight="bold">Dari Tanggal</Text>
+                        <Input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                        />
+                    </Box>
+                    <Box>
+                        <Text mb={1} fontSize="xs" fontWeight="bold">Sampai Tanggal</Text>
+                        <Input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                        />
+                    </Box>
+                    <Box alignSelf="flex-end">
+                        <Button onClick={fetchReport} colorPalette="teal">Refresh</Button>
+                    </Box>
+                </HStack>
+
+                <Box mb={4} display="none" _print={{ display: "block" }}>
+                    <Text fontSize="sm" color="gray.600">
+                        Periode: {new Date(startDate).toLocaleDateString('id-ID')} - {new Date(endDate).toLocaleDateString('id-ID')}
+                    </Text>
+                </Box>
+
+                <VStack align="stretch" gap={8}>
+                    {Object.values(groupedByProduct).map((group: any) => (
+                        <ProductReportTable
+                            key={group.productId}
+                            productName={group.productName}
+                            vendorName={group.vendorName}
+                            data={group.items}
+                        />
+                    ))}
+
+                    {reportData.length === 0 && !loading && (
+                        <Text textAlign="center" color="gray.500">Tidak ada data</Text>
+                    )}
+                </VStack>
+            </Container>
+
+            <style>{`
         @media print {
           body * {
             visibility: hidden;
@@ -317,8 +355,8 @@ const VendorReport: React.FC = () => {
           body { -webkit-print-color-adjust: exact; }
         }
       `}</style>
-    </>
-  );
+        </>
+    );
 };
 
 export default VendorReport;
