@@ -35,6 +35,10 @@ class FinancialReportController extends Controller
             ->whereDate('created_at', '>=', $startDate)
             ->whereDate('created_at', '<=', $endDate);
 
+        if ($request->has('payment_method') && !empty($request->payment_method)) {
+            $ordersQuery->where('payment_method', $request->payment_method);
+        }
+
         $grossSales = $ordersQuery->sum('total_amount');
         $totalDiscount = $ordersQuery->sum('discount_amount');
         $netSales = $ordersQuery->sum('grand_total');

@@ -19,13 +19,16 @@ import {
 const AdminOrderList: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterPaymentMethod, setFilterPaymentMethod] = useState('');
   const [loading, setLoading] = useState(true);
   const [deleteIds, setDeleteIds] = useState<any[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const fetchOrders = () => {
     setLoading(true);
-    const params = filterStatus ? { status: filterStatus } : {};
+    const params: any = {};
+    if (filterStatus) params.status = filterStatus;
+    if (filterPaymentMethod) params.payment_method = filterPaymentMethod;
     client.get('/admin/orders', { params })
       .then(res => {
         setOrders(res.data);
@@ -39,8 +42,8 @@ const AdminOrderList: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterStatus]);
+    // eslint-disable-next-line react-hooks/exhaustive-disable
+  }, [filterStatus, filterPaymentMethod]);
 
   const updateStatus = async (id: number, newStatus: string) => {
     try {
@@ -214,23 +217,38 @@ const AdminOrderList: React.FC = () => {
     <Box>
       <HStack justify="space-between" mb={6}>
         <Heading>Pesanan</Heading>
-        <Box w="200px">
-          <NativeSelect.Root>
-            <NativeSelect.Field
-              placeholder="Filter Status"
-              value={filterStatus}
-              onChange={e => setFilterStatus(e.target.value)}
-            >
-              <option value="">Semua</option>
-              <option value="new">Baru</option>
-              <option value="paid">Dibayar</option>
-              <option value="processed">Diproses</option>
-              <option value="ready_pickup">Siap Ambil</option>
-              <option value="completed">Selesai</option>
-              <option value="cancelled">Dibatalkan</option>
-            </NativeSelect.Field>
-          </NativeSelect.Root>
-        </Box>
+        <HStack gap={2}>
+          <Box w="180px">
+            <NativeSelect.Root>
+              <NativeSelect.Field
+                placeholder="Metode"
+                value={filterPaymentMethod}
+                onChange={e => setFilterPaymentMethod(e.target.value)}
+              >
+                <option value="">Semua Metode</option>
+                <option value="cash">CASH</option>
+                <option value="transfer">TRANSFER</option>
+              </NativeSelect.Field>
+            </NativeSelect.Root>
+          </Box>
+          <Box w="180px">
+            <NativeSelect.Root>
+              <NativeSelect.Field
+                placeholder="Status"
+                value={filterStatus}
+                onChange={e => setFilterStatus(e.target.value)}
+              >
+                <option value="">Semua Status</option>
+                <option value="new">Baru</option>
+                <option value="paid">Dibayar</option>
+                <option value="processed">Diproses</option>
+                <option value="ready_pickup">Siap Ambil</option>
+                <option value="completed">Selesai</option>
+                <option value="cancelled">Dibatalkan</option>
+              </NativeSelect.Field>
+            </NativeSelect.Root>
+          </Box>
+        </HStack>
       </HStack>
 
       <DataTable

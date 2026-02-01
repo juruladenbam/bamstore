@@ -55,6 +55,10 @@ class OrderController extends Controller
             $query->where('qobilah', $request->qobilah);
         }
 
+        if ($request->has('payment_method') && !empty($request->payment_method)) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
         return response()->json($query->latest()->get());
     }
 

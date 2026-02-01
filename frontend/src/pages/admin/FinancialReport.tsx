@@ -10,6 +10,7 @@ import {
   HStack,
   Input,
   Button,
+  NativeSelect,
   Card
 } from '@chakra-ui/react';
 import client from '../../api/client';
@@ -37,11 +38,16 @@ const FinancialReport: React.FC = () => {
 
   const [startDate, setStartDate] = useState(firstDay);
   const [endDate, setEndDate] = useState(lastDay);
+  const [filterPaymentMethod, setFilterPaymentMethod] = useState('');
 
   const fetchData = () => {
     setLoading(true);
     client.get('/admin/reports/finance', {
-      params: { start_date: startDate, end_date: endDate }
+      params: {
+        start_date: startDate,
+        end_date: endDate,
+        payment_method: filterPaymentMethod
+      }
     })
       .then(res => {
         setData(res.data);
@@ -83,6 +89,18 @@ const FinancialReport: React.FC = () => {
             w={{ base: "full", md: "auto" }}
           />
           <Button onClick={handleFilter} colorPalette="blue" w={{ base: "full", md: "auto" }}>Filter</Button>
+          <Box w={{ base: "full", md: "200px" }}>
+            <NativeSelect.Root>
+              <NativeSelect.Field
+                value={filterPaymentMethod}
+                onChange={(e) => setFilterPaymentMethod(e.target.value)}
+              >
+                <option value="">Semua Metode</option>
+                <option value="cash">CASH</option>
+                <option value="transfer">TRANSFER</option>
+              </NativeSelect.Field>
+            </NativeSelect.Root>
+          </Box>
         </HStack>
       </HStack>
 
