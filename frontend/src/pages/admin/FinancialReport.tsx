@@ -39,6 +39,7 @@ const FinancialReport: React.FC = () => {
   const [startDate, setStartDate] = useState(firstDay);
   const [endDate, setEndDate] = useState(lastDay);
   const [filterPaymentMethod, setFilterPaymentMethod] = useState('');
+  const [filterType, setFilterType] = useState('');
 
   const fetchData = () => {
     setLoading(true);
@@ -46,7 +47,8 @@ const FinancialReport: React.FC = () => {
       params: {
         start_date: startDate,
         end_date: endDate,
-        payment_method: filterPaymentMethod
+        payment_method: filterPaymentMethod,
+        type: filterType
       }
     })
       .then(res => {
@@ -88,7 +90,6 @@ const FinancialReport: React.FC = () => {
             onChange={(e) => setEndDate(e.target.value)}
             w={{ base: "full", md: "auto" }}
           />
-          <Button onClick={handleFilter} colorPalette="blue" w={{ base: "full", md: "auto" }}>Filter</Button>
           <Box w={{ base: "full", md: "200px" }}>
             <NativeSelect.Root>
               <NativeSelect.Field
@@ -101,6 +102,19 @@ const FinancialReport: React.FC = () => {
               </NativeSelect.Field>
             </NativeSelect.Root>
           </Box>
+          <Box w={{ base: "full", md: "180px" }}>
+            <NativeSelect.Root>
+              <NativeSelect.Field
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="">Semua Tipe</option>
+                <option value="income">Pemasukan</option>
+                <option value="expense">Pengeluaran</option>
+              </NativeSelect.Field>
+            </NativeSelect.Root>
+          </Box>
+          <Button onClick={handleFilter} colorPalette="blue" w={{ base: "full", md: "auto" }}>Filter</Button>
         </HStack>
       </HStack>
 

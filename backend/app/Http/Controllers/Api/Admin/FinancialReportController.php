@@ -103,6 +103,15 @@ class FinancialReportController extends Controller
 
         $transactions = array_merge($incomeTransactions, $expenseTransactions);
 
+        // Filter by type if requested
+        if ($request->has('type') && in_array($request->type, ['income', 'expense'])) {
+            $transactions = array_filter($transactions, function ($trx) use ($request) {
+                return $trx['type'] === $request->type;
+            });
+            // Re-index array after filtering
+            $transactions = array_values($transactions);
+        }
+
         // Sort by date desc
         usort($transactions, function ($a, $b) {
             return strtotime($b['date']) - strtotime($a['date']);
