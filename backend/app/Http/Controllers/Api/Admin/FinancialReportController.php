@@ -27,7 +27,7 @@ class FinancialReportController extends Controller
         $startDate = $request->input('start_date', Carbon::now()->startOfMonth()->toDateString());
         $endDate = $request->input('end_date', Carbon::now()->endOfMonth()->toDateString());
 
-        $paidStatuses = ['paid', 'processed', 'completed', 'ready_for_pickup', 'shipped', 'delivered'];
+        $paidStatuses = ['paid', 'processed', 'completed', 'ready_pickup', 'shipped', 'delivered'];
 
         // Orders (Income)
         $ordersQuery = Order::with(['items.product.cost'])
@@ -38,6 +38,11 @@ class FinancialReportController extends Controller
         $grossSales = $ordersQuery->sum('total_amount');
         $totalDiscount = $ordersQuery->sum('discount_amount');
         $netSales = $ordersQuery->sum('grand_total');
+
+        // Payment Method Breakdown
+        $cashSales = (clone $ordersQuery)->where('payment_method', 'cash')->sum('grand_total');
+        $transferSales = (clone $ordersQuery)->where('payment_method', 'transfer')->sum('grand_total');
+
         $orders = $ordersQuery->get();
 
         $totalCOGS = 0;
@@ -57,6 +62,7 @@ class FinancialReportController extends Controller
                 'gross_amount' => $order->total_amount,
                 'discount_amount' => $order->discount_amount,
                 'amount' => $order->grand_total, // Net amount received
+                'payment_method' => $order->payment_method,
                 'status' => $order->status,
             ];
         }
@@ -101,6 +107,8 @@ class FinancialReportController extends Controller
                 'gross_sales' => $grossSales,
                 'total_discount' => $totalDiscount,
                 'net_sales' => $netSales,
+                'cash_sales' => $cashSales,
+                'transfer_sales' => $transferSales,
                 'total_cogs' => $totalCOGS,
                 'gross_profit' => $grossProfit,
                 'total_vendor_payments' => $totalVendorPayments,

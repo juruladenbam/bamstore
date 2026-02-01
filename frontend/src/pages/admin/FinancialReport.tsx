@@ -112,6 +112,27 @@ const FinancialReport: React.FC = () => {
             />
           </SimpleGrid>
 
+          <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} mb={8}>
+            <StatCard
+              label="Penjualan Tunai (Cash)"
+              value={data.summary.cash_sales}
+              color="blue.500"
+              helpText="Total pembayaran tunai"
+            />
+            <StatCard
+              label="Penjualan Transfer"
+              value={data.summary.transfer_sales}
+              color="purple.500"
+              helpText="Total pembayaran melalui transfer"
+            />
+            <StatCard
+              label="Total Arus Kas Masuk"
+              value={data.summary.net_sales}
+              color="teal.600"
+              helpText="Cash + Transfer"
+            />
+          </SimpleGrid>
+
           <SimpleGrid columns={{ base: 1, md: 3 }} gap={6} mb={10}>
             <StatCard
               label="Total HPP (COGS)"
@@ -129,7 +150,7 @@ const FinancialReport: React.FC = () => {
               label="Arus Kas Bersih"
               value={data.summary.net_cash_flow}
               color={data.summary.net_cash_flow >= 0 ? "blue.600" : "red.600"}
-              helpText="Penjualan Bersih - Bayar Vendor"
+              helpText="Total Masuk - Total Keluar"
             />
           </SimpleGrid>
 
@@ -146,6 +167,7 @@ const FinancialReport: React.FC = () => {
                       <Table.ColumnHeader>Tipe</Table.ColumnHeader>
                       <Table.ColumnHeader>Kategori</Table.ColumnHeader>
                       <Table.ColumnHeader>Deskripsi</Table.ColumnHeader>
+                      <Table.ColumnHeader>Metode</Table.ColumnHeader>
                       <Table.ColumnHeader textAlign="right">Gross</Table.ColumnHeader>
                       <Table.ColumnHeader textAlign="right">Diskon</Table.ColumnHeader>
                       <Table.ColumnHeader textAlign="right">Net (Received)</Table.ColumnHeader>
@@ -168,6 +190,13 @@ const FinancialReport: React.FC = () => {
                           </Table.Cell>
                           <Table.Cell>{trx.category}</Table.Cell>
                           <Table.Cell>{trx.description}</Table.Cell>
+                          <Table.Cell>
+                            {trx.payment_method ? (
+                              <Badge variant="subtle" colorPalette={trx.payment_method === 'cash' ? 'blue' : 'purple'}>
+                                {trx.payment_method.toUpperCase()}
+                              </Badge>
+                            ) : '-'}
+                          </Table.Cell>
                           <Table.Cell textAlign="right">
                             {trx.type === 'income' ? `Rp ${Number(trx.gross_amount).toLocaleString()}` : '-'}
                           </Table.Cell>
