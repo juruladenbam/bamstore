@@ -4,7 +4,8 @@ import {
   Box, Heading, Text, Table, Badge, Button, VStack, HStack, Container,
   Input, NativeSelect, RadioGroup, Stack, Separator, IconButton, Collapsible
 } from '@chakra-ui/react';
-import { FiEdit2, FiX, FiSave, FiTrash2, FiPlus, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiEdit2, FiX, FiSave, FiTrash2, FiPlus, FiChevronDown, FiChevronUp, FiPrinter } from 'react-icons/fi';
+import PrintContainer from '../../components/admin/order-print/PrintContainer';
 import client from '../../api/client';
 import type { Order, OrderItem, OrderEditLog } from '../../types';
 import { toaster } from '../../components/ui/toaster';
@@ -59,6 +60,17 @@ const AdminOrderDetail: React.FC = () => {
 
   // Product selector modal
   const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
+
+  // Print state
+  const [isPrinting, setIsPrinting] = useState(false);
+
+  const handlePrint = () => {
+    setIsPrinting(true);
+  };
+
+  const handlePrintComplete = () => {
+    setIsPrinting(false);
+  };
 
   const fetchOrder = useCallback(() => {
     setLoading(true);
@@ -365,6 +377,11 @@ const AdminOrderDetail: React.FC = () => {
             )}
           </HStack>
           <HStack>
+            {!isEditMode && (
+              <Button size="sm" colorPalette="blue" variant="outline" onClick={handlePrint} loading={isPrinting}>
+                <FiPrinter /> Cetak
+              </Button>
+            )}
             {isEditMode ? (
               <>
                 <Button size="sm" colorPalette="green" onClick={saveOrderInfo} loading={saving}>
@@ -690,6 +707,15 @@ const AdminOrderDetail: React.FC = () => {
         onClose={() => setIsProductSelectorOpen(false)}
         onAddItem={addItem}
       />
+
+      {/* Print Container */}
+      {isPrinting && order && (
+        <PrintContainer
+          orders={[order]}
+          title={`Pesanan ${order.order_number || '#' + order.id}`}
+          onPrintComplete={handlePrintComplete}
+        />
+      )}
     </Container>
   );
 };

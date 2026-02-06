@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Box, Heading, Button, Badge, HStack, NativeSelect, Menu, VStack, Text } from '@chakra-ui/react';
-import { FiChevronDown } from 'react-icons/fi';
+import { Box, Heading, Button, Badge, HStack, NativeSelect, Menu, VStack, Text, Input } from '@chakra-ui/react';
+import { FiChevronDown, FiPrinter } from 'react-icons/fi';
 import client from '../../api/client';
 import type { Order } from '../../types';
 import { toaster } from '../../components/ui/toaster';
 import DataTable, { type Column } from '../../components/DataTable';
+import PrintDialog from '../../components/admin/order-print/PrintDialog';
 import {
   DialogBody,
   DialogActionTrigger,
@@ -23,12 +24,34 @@ const AdminOrderList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [deleteIds, setDeleteIds] = useState<any[]>([]);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
+  // Date range filter (default: 50 days ago to today)
+  const getDefaultDateRange = () => {
+    const today = new Date();
+    const fiftyDaysAgo = new Date();
+    fiftyDaysAgo.setDate(today.getDate() - 50);
+    
+    const formatDate = (date: Date) => date.toISOString().split('T')[0];
+    
+    return {
+      startDate: formatDate(fiftyDaysAgo),
+      endDate: formatDate(today),
+    };
+  };
+  
+  const [dateRange, setDateRange] = useState(getDefaultDateRange());
+  
+  // Print dialog state
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState<any[]>([]);
 
   const fetchOrders = () => {
     setLoading(true);
     const params: any = {};
     if (filterStatus) params.status = filterStatus;
     if (filterPaymentMethod) params.payment_method = filterPaymentMethod;
+    if (dateRange.startDate) params.start_date = dateRange.startDate;
+    if (dateRange.endDate) params.end_date = dateRange.endDate;
     client.get('/admin/orders', { params })
       .then(res => {
         setOrders(res.data);
@@ -43,7 +66,7 @@ const AdminOrderList: React.FC = () => {
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-disable
-  }, [filterStatus, filterPaymentMethod]);
+  }, [filterStatus, filterPaymentMethod, dateRange.startDate, dateRange.endDate]);
 
   const updateStatus = async (id: number, newStatus: string) => {
     try {
@@ -174,12 +197,21 @@ const AdminOrderList: React.FC = () => {
   ];
 
   const renderBulkActions = (selectedIds: any[]) => {
-    const selectedOrders = orders.filter(o => selectedIds.includes(o.id));
-    const firstStatus = selectedOrders[0]?.status;
-    const allSameStatus = selectedOrders.every(o => o.status === firstStatus);
+    setSelectedOrderIds(selectedIds);
+    const selectedOrdersData = orders.filter(o => selectedIds.includes(o.id));
+    const firstStatus = selectedOrdersData[0]?.status;
+    const allSameStatus = selectedOrdersData.every(o => o.status === firstStatus);
 
     return (
       <HStack>
+        <Button 
+          size="sm" 
+          colorPalette="blue" 
+          variant="outline"
+          onClick={() => setIsPrintDialogOpen(true)}
+        >
+          <FiPrinter /> Cetak
+        </Button>
         {!allSameStatus ? (
           <Button size="sm" variant="outline" disabled colorPalette="gray" title="Status harus sama untuk semua item yang dipilih">
             Ubah Status (Status Berbeda)
@@ -215,40 +247,72 @@ const AdminOrderList: React.FC = () => {
 
   return (
     <Box>
-      <HStack justify="space-between" mb={6}>
+      <HStack justify="space-between" mb={4}>
         <Heading>Pesanan</Heading>
-        <HStack gap={2}>
-          <Box w="180px">
-            <NativeSelect.Root>
-              <NativeSelect.Field
-                placeholder="Metode"
-                value={filterPaymentMethod}
-                onChange={e => setFilterPaymentMethod(e.target.value)}
-              >
-                <option value="">Semua Metode</option>
-                <option value="cash">CASH</option>
-                <option value="transfer">TRANSFER</option>
-              </NativeSelect.Field>
-            </NativeSelect.Root>
-          </Box>
-          <Box w="180px">
-            <NativeSelect.Root>
-              <NativeSelect.Field
-                placeholder="Status"
-                value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value)}
-              >
-                <option value="">Semua Status</option>
-                <option value="new">Baru</option>
-                <option value="paid">Dibayar</option>
-                <option value="processed">Diproses</option>
-                <option value="ready_pickup">Siap Ambil</option>
-                <option value="completed">Selesai</option>
-                <option value="cancelled">Dibatalkan</option>
-              </NativeSelect.Field>
-            </NativeSelect.Root>
-          </Box>
-        </HStack>
+      </HStack>
+      
+      {/* Filter Section */}
+      <HStack gap={3} mb={6} flexWrap="wrap">
+        <Box w="160px">
+          <Text fontSize="xs" mb={1} color="gray.600">Dari Tanggal</Text>
+          <Input
+            type="date"
+            size="sm"
+            value={dateRange.startDate}
+            onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
+          />
+        </Box>
+        <Box w="160px">
+          <Text fontSize="xs" mb={1} color="gray.600">Sampai Tanggal</Text>
+          <Input
+            type="date"
+            size="sm"
+            value={dateRange.endDate}
+            onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
+          />
+        </Box>
+        <Box w="140px">
+          <Text fontSize="xs" mb={1} color="gray.600">Metode</Text>
+          <NativeSelect.Root size="sm">
+            <NativeSelect.Field
+              placeholder="Metode"
+              value={filterPaymentMethod}
+              onChange={e => setFilterPaymentMethod(e.target.value)}
+            >
+              <option value="">Semua</option>
+              <option value="cash">CASH</option>
+              <option value="transfer">TRANSFER</option>
+            </NativeSelect.Field>
+          </NativeSelect.Root>
+        </Box>
+        <Box w="140px">
+          <Text fontSize="xs" mb={1} color="gray.600">Status</Text>
+          <NativeSelect.Root size="sm">
+            <NativeSelect.Field
+              placeholder="Status"
+              value={filterStatus}
+              onChange={e => setFilterStatus(e.target.value)}
+            >
+              <option value="">Semua</option>
+              <option value="new">Baru</option>
+              <option value="paid">Dibayar</option>
+              <option value="processed">Diproses</option>
+              <option value="ready_pickup">Siap Ambil</option>
+              <option value="completed">Selesai</option>
+              <option value="cancelled">Dibatalkan</option>
+            </NativeSelect.Field>
+          </NativeSelect.Root>
+        </Box>
+        <Box alignSelf="flex-end">
+          <Button 
+            size="sm" 
+            colorPalette="blue" 
+            variant="outline"
+            onClick={() => setIsPrintDialogOpen(true)}
+          >
+            <FiPrinter /> Cetak
+          </Button>
+        </Box>
       </HStack>
 
       <DataTable
@@ -277,6 +341,15 @@ const AdminOrderList: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </DialogRoot>
+
+      <PrintDialog
+        isOpen={isPrintDialogOpen}
+        onClose={() => setIsPrintDialogOpen(false)}
+        selectedOrders={orders.filter(o => selectedOrderIds.includes(o.id))}
+        allOrders={orders}
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+      />
     </Box>
   );
 };

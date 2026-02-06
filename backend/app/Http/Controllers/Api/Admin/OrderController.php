@@ -37,6 +37,27 @@ class OrderController extends Controller
      *         required=false,
      *         @OA\Schema(type="string")
      *     ),
+     *     @OA\Parameter(
+     *         name="payment_method",
+     *         in="query",
+     *         description="Filter by payment method",
+     *         required=false,
+     *         @OA\Schema(type="string", enum={"cash", "transfer"})
+     *     ),
+     *     @OA\Parameter(
+     *         name="start_date",
+     *         in="query",
+     *         description="Filter orders from this date (Y-m-d format)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
+     *     @OA\Parameter(
+     *         name="end_date",
+     *         in="query",
+     *         description="Filter orders until this date (Y-m-d format)",
+     *         required=false,
+     *         @OA\Schema(type="string", format="date")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation"
@@ -57,6 +78,14 @@ class OrderController extends Controller
 
         if ($request->has('payment_method') && !empty($request->payment_method)) {
             $query->where('payment_method', $request->payment_method);
+        }
+
+        if ($request->has('start_date') && !empty($request->start_date)) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+
+        if ($request->has('end_date') && !empty($request->end_date)) {
+            $query->whereDate('created_at', '<=', $request->end_date);
         }
 
         return response()->json($query->latest()->get());
