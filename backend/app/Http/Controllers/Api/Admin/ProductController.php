@@ -148,6 +148,7 @@ class ProductController extends Controller
             }
 
             DB::commit();
+            \Illuminate\Support\Facades\Cache::flush();
             return response()->json($product->load(['variants', 'skus', 'images']), 201);
 
         } catch (\Exception $e) {
@@ -365,6 +366,7 @@ class ProductController extends Controller
             }
 
             DB::commit();
+            \Illuminate\Support\Facades\Cache::flush();
             return response()->json($product->load(['variants', 'skus', 'images']));
 
         } catch (\Exception $e) {
@@ -399,6 +401,7 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+        \Illuminate\Support\Facades\Cache::flush();
         return response()->json(null, 204);
     }
 }

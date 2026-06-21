@@ -52,6 +52,8 @@ class CategoryController extends Controller
         ]);
 
         $category = Category::create($validated);
+        \Illuminate\Support\Facades\Cache::forget('categories_all');
+        \Illuminate\Support\Facades\Cache::flush();
         return response()->json($category, 201);
     }
 
@@ -113,6 +115,8 @@ class CategoryController extends Controller
         ]);
 
         $category->update($validated);
+        \Illuminate\Support\Facades\Cache::forget('categories_all');
+        \Illuminate\Support\Facades\Cache::flush();
         return response()->json($category);
     }
 
@@ -138,6 +142,8 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+        \Illuminate\Support\Facades\Cache::forget('categories_all');
+        \Illuminate\Support\Facades\Cache::flush();
         return response()->json(null, 204);
     }
 }

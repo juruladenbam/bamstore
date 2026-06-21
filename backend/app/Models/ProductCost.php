@@ -8,6 +8,8 @@ class ProductCost extends Model
 {
     use \Illuminate\Database\Eloquent\Factories\HasFactory;
 
+    protected $touches = ['product'];
+
     protected $fillable = ['product_id', 'cost'];
 
     public function product()

@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductSku extends Model
 {
+    protected $touches = ['product'];
+
     protected $fillable = [
         'product_id',
         'sku',

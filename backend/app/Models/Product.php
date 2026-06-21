@@ -44,6 +44,14 @@ class Product extends Model
                 $product->slug = $slug;
             }
         });
+
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
     }
 
     public function getRouteKeyName()

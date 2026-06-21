@@ -34,6 +34,16 @@ class Category extends Model
                 $category->slug = $slug;
             }
         });
+
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('categories_all');
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('categories_all');
+            \Illuminate\Support\Facades\Cache::flush();
+        });
     }
 
     public function getRouteKeyName()
